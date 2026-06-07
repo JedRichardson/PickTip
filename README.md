@@ -1,7 +1,24 @@
 # PickTip
 Assistant for the Gym and Food Choices
 
-If you ever have had a problem with picking a workout to do and you decide to give up and not do it? Or have you had 
-a difficult time deciding what you wanted to cook for dinner? We have made it easier, let PickTip decide for you. 
+PickTip is a mobile app designed to help users make quick decisions about workouts and meals.
 
-All you have to do is open the app and PickTip will decide your workout and meal. All you have to do is click. 
+Sometimes choosing a workout can be frustrating, especially when there are too many options. 
+The same thing can happen when trying to decide what to cook for dinner. 
+PickTip makes that process easier by giving users simple workout and food recommendations with just a few clicks.
+
+Instead of spending time trying to decide what to do, users can open the app, select an option, and let PickTip 
+suggest a workout and meal idea.
+
+#Purpose
+The goal of PickTip is to make healthy choices easier. The app helps save time, reduce decision fatigue, 
+and stay motivated by providing quick fitness and food suggestions
+
+#Features
+Choose workout categories
+Reveive workout recommendations
+View workout difficulty levels
+Get food and nutrition suggestions
+Save recommendations
+Start over and receive new options
+Simple mobile friendly design
