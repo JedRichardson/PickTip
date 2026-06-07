@@ -17,14 +17,22 @@ and stay motivated by providing quick fitness and food suggestions
 
 # Features
 Choose workout categories
+
 Reveive workout recommendations
+
 View workout difficulty levels
+
 Get food and nutrition suggestions
+
 Save recommendations
+
 Start over and receive new options
+
 Simple mobile friendly design
+
 Development Setup
 
+# Setup
 To set up and run PickTip, a new developer should:
 
 ```bash
