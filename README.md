@@ -1,56 +1,44 @@
-# Welcome to your Expo app 👋
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+# PickTip
+Assistant for the Gym and Food Choices
 
-## Get started
+PickTip is a mobile app designed to help users make quick decisions about workouts and meals.
 
-1. Install dependencies
+Sometimes choosing a workout can be frustrating, especially when there are too many options.
+The same thing can happen when trying to decide what to cook for dinner.
+PickTip makes that process easier by giving users simple workout and food recommendations with just a few clicks.
 
-   ```bash
-   npm install
-   ```
+Instead of spending time trying to decide what to do, users can open the app, select an option, and let PickTip
+suggest a workout and meal idea.
 
-2. Start the app
+# Purpose
+The goal of PickTip is to make healthy choices easier. The app helps save time, reduce decision fatigue,
+and stay motivated by providing quick fitness and food suggestions
 
-   ```bash
-   npx expo start
-   ```
+# Features
+Choose workout categories
+Reveive workout recommendations
+View workout difficulty levels
+Get food and nutrition suggestions
+Save recommendations
+Start over and receive new options
+Simple mobile friendly design
+Development Setup
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+To set up and run PickTip, a new developer should:
 
 ```bash
-npm run reset-project
+1. Install Node.js and npm.
+2. Install Git.
+3. Install Android Studio.
+4. Create an Android emulator in Android Studio.
+5. Clone the PickTip repository.
+6. Install dependencies:
+  npm install
+7. Start the Expo development server:
+  npx expo start
+8. Press a in the terminal to open the app in the Android emulator.
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
 
-### Other setup steps
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
