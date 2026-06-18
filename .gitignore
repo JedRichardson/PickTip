@@ -41,6 +41,7 @@ yarn-error.*
 /android
 
 # IDE / editor folders
+.vs/
 .idea/
 .vscode/
 
