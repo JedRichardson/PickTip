@@ -1,17 +1,30 @@
 import { Stack } from 'expo-router';
-import { SavedNutritionProvider } from '../context/SavedNutritionContext';
-import { MealLogProvider } from '../context/MealLogContext';
+import { StyleSheet, View } from 'react-native';
+
+import BottomNav from '../components/navigation/bottom_nav';
 
 export default function RootLayout() {
     return (
-        <MealLogProvider>
-            <SavedNutritionProvider>
+        <View style={styles.container}>
+            <View style={styles.content}>
                 <Stack
                     screenOptions={{
                         headerShown: false,
                     }}
                 />
-            </SavedNutritionProvider>
-        </MealLogProvider>
+            </View>
+
+            <BottomNav />
+        </View>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
+
+    content: {
+        flex: 1,
+    },
+});
