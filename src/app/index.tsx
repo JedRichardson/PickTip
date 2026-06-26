@@ -33,7 +33,22 @@ export default function HomeScreen() {
                 <Text style={styles.buttonText}>Get Started →</Text>
             </TouchableOpacity>
 
+            <TouchableOpacity
+                style={styles.savedLink}
+                onPress={() => router.push('/dashboard')}
+            >
+                <Text style={styles.savedLinkText}>View My Nutrition Dashboard</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+                style={styles.savedLink}
+                onPress={() => router.push('/saved')}
+            >
+                <Text style={styles.savedLinkText}>View My Saved Meals</Text>
+            </TouchableOpacity>
+
             <Text style={styles.learnMore}>Learn More</Text>
+
         </SafeAreaView>
     );
 }
@@ -100,5 +115,15 @@ const styles = StyleSheet.create({
         marginTop: 25,
         color: '#fff',
         textDecorationLine: 'underline',
+    },
+
+    savedLink: {
+        marginTop: 20,
+    },
+
+    savedLinkText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '600',
     },
 });
