@@ -4,6 +4,7 @@ import {
     StyleSheet,
     Text,
     TouchableOpacity,
+
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -44,7 +45,7 @@ export default function CategoryScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F5F5F5',
+        backgroundColor: '#4D7A20',
         padding: 24,
     },
 
@@ -52,12 +53,13 @@ const styles = StyleSheet.create({
         marginTop: 40,
         fontSize: 32,
         fontWeight: '700',
+
     },
 
     subheading: {
         marginBottom: 30,
         marginTop: 10,
-        color: '#666',
+       
     },
 
     card: {
