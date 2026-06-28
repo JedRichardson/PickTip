@@ -109,6 +109,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         padding: 24,
+        backgroundColor: '#4D7A20',
     },
 
     backButton: {
@@ -117,12 +118,14 @@ const styles = StyleSheet.create({
         left: 24,
         paddingVertical: 10,
         paddingHorizontal: 14,
+        
     },
 
     backButtonText: {
-        color: '#4D7A20',
+        
         fontSize: 16,
         fontWeight: '700',
+        color: '#fff',
     },
 
     card: {
@@ -150,6 +153,7 @@ const styles = StyleSheet.create({
 
     rerollButton: {
         borderColor: '#4D7A20',
+        backgroundColor: '#fff',
         borderWidth: 2,
         padding: 18,
         borderRadius: 16,
@@ -157,7 +161,7 @@ const styles = StyleSheet.create({
     },
 
     rerollButtonText: {
-        color: '#4D7A20',
+      
         textAlign: 'center',
         fontWeight: '700',
     },
@@ -170,8 +174,11 @@ const styles = StyleSheet.create({
     },
 
     buttonText: {
-        color: '#fff',
+        backgroundColor: '#fff',
         textAlign: 'center',
         fontWeight: '700',
+        padding: 13,
+        borderRadius: 16,
+        
     },
 });

@@ -69,6 +69,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         padding: 24,
+        backgroundColor: '#4D7A20',
     },
 
     backButton: {
@@ -77,10 +78,11 @@ const styles = StyleSheet.create({
         left: 24,
         paddingVertical: 10,
         paddingHorizontal: 14,
+
     },
 
     backButtonText: {
-        color: '#4D7A20',
+        color: '#fff',
         fontSize: 16,
         fontWeight: '700',
     },

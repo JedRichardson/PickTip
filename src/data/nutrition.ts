@@ -5,6 +5,7 @@ export const nutritionRecommendations = {
         hydration: '32 oz Water',
     },
 
+
     Medium: {
         protein: 'Greek Yogurt',
         carbs: 'Sweet Potato',
