@@ -1,9 +1,11 @@
 import { useMemo } from 'react';
 import { foodItems, Food } from '../data/nutrition';
 import { useMealLog } from '../context/MealLogContext';
+import { useUser } from '../context/UserContext';
 
 export const useSmartFoodSuggestions = () => {
     const { dailyTotals } = useMealLog();
+    const { profile } = useUser();
 
     return useMemo(() => {
         const hour = new Date().getHours();
@@ -14,15 +16,22 @@ export const useSmartFoodSuggestions = () => {
         else if (hour >= 15 && hour < 22) targetMealType = 'Dinner';
         else targetMealType = 'Snack';
 
-        // Filter by meal type first
-        let suggestions = foodItems.filter(item => item.mealType === targetMealType);
+        // Filter by dietary preference first
+        let suggestions = foodItems;
+        if (profile.dietaryPreference !== 'None') {
+            suggestions = suggestions.filter(item =>
+                item.dietaryLabels.includes(profile.dietaryPreference)
+            );
+        }
+
+        // Filter by meal type
+        suggestions = suggestions.filter(item => item.mealType === targetMealType);
 
         // If we are low on protein, prioritize high protein foods
-        const PROTEIN_GOAL = 150; // Should ideally come from settings
-        if (dailyTotals.protein < PROTEIN_GOAL * 0.5) {
+        if (dailyTotals.protein < profile.goals.protein * 0.5) {
             suggestions.sort((a, b) => b.protein - a.protein);
         }
 
         return suggestions.slice(0, 3); // Return top 3
-    }, [dailyTotals]);
+    }, [dailyTotals, profile]);
 };

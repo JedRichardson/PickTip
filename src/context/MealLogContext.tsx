@@ -23,19 +23,24 @@ interface MealLogContextType {
         protein: number;
         carbs: number;
         fat: number;
+        water: number;
     };
+    logWater: (amount: number) => Promise<void>;
     refreshLogs: () => Promise<void>;
 }
 
 const MealLogContext = createContext<MealLogContextType | undefined>(undefined);
 
 const STORAGE_KEY = '@meal_logs';
+const WATER_STORAGE_KEY = '@water_logs';
 
 export const MealLogProvider = ({ children }: { children: ReactNode }) => {
     const [mealLogs, setMealLogs] = useState<LoggedMeal[]>([]);
+    const [waterLogs, setWaterLogs] = useState<{timestamp: number, amount: number}[]>([]);
 
     useEffect(() => {
         loadLogs();
+        loadWater();
     }, []);
 
     const loadLogs = async () => {
@@ -49,11 +54,30 @@ export const MealLogProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
+    const loadWater = async () => {
+        try {
+            const stored = await AsyncStorage.getItem(WATER_STORAGE_KEY);
+            if (stored) {
+                setWaterLogs(JSON.parse(stored));
+            }
+        } catch (e) {
+            console.error('Failed to load water logs', e);
+        }
+    };
+
     const saveLogs = async (logs: LoggedMeal[]) => {
         try {
             await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
         } catch (e) {
             console.error('Failed to save logs', e);
+        }
+    };
+
+    const saveWater = async (logs: {timestamp: number, amount: number}[]) => {
+        try {
+            await AsyncStorage.setItem(WATER_STORAGE_KEY, JSON.stringify(logs));
+        } catch (e) {
+            console.error('Failed to save water logs', e);
         }
     };
 
@@ -75,6 +99,13 @@ export const MealLogProvider = ({ children }: { children: ReactNode }) => {
         await saveLogs(updatedLogs);
     };
 
+    const logWater = async (amount: number) => {
+        const newLog = { timestamp: Date.now(), amount };
+        const updated = [...waterLogs, newLog];
+        setWaterLogs(updated);
+        await saveWater(updated);
+    };
+
     const removeLog = async (logId: string) => {
         const updatedLogs = mealLogs.filter(log => log.logId !== logId);
         setMealLogs(updatedLogs);
@@ -84,15 +115,19 @@ export const MealLogProvider = ({ children }: { children: ReactNode }) => {
     const getDailyTotals = () => {
         const today = new Date().setHours(0, 0, 0, 0);
         const todayLogs = mealLogs.filter(log => new Date(log.timestamp).setHours(0, 0, 0, 0) === today);
+        const todayWater = waterLogs
+            .filter(log => new Date(log.timestamp).setHours(0, 0, 0, 0) === today)
+            .reduce((sum, curr) => sum + curr.amount, 0);
 
         return todayLogs.reduce(
             (acc, curr) => ({
+                ...acc,
                 calories: acc.calories + curr.calories,
                 protein: acc.protein + curr.protein,
                 carbs: acc.carbs + curr.carbs,
                 fat: acc.fat + curr.fat,
             }),
-            { calories: 0, protein: 0, carbs: 0, fat: 0 }
+            { calories: 0, protein: 0, carbs: 0, fat: 0, water: todayWater }
         );
     };
 
@@ -102,6 +137,7 @@ export const MealLogProvider = ({ children }: { children: ReactNode }) => {
                 mealLogs,
                 logMeal,
                 removeLog,
+                logWater,
                 dailyTotals: getDailyTotals(),
                 refreshLogs: loadLogs
             }}

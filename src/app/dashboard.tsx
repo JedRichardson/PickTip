@@ -11,25 +11,26 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useMealLog } from '../context/MealLogContext';
 import { useSmartFoodSuggestions } from '../hooks/useSmartFoodSuggestions';
+import { useUser } from '../context/UserContext';
 import { FoodSuggestionCard } from '../components/food-suggestion-card';
 import { Alert } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
-const GOALS = {
-    calories: 2500,
-    protein: 150,
-    carbs: 250,
-    fat: 80,
-};
-
 export default function NutritionDashboard() {
-    const { mealLogs, dailyTotals, removeLog, logMeal } = useMealLog();
+    const { mealLogs, dailyTotals, removeLog, logMeal, logWater } = useMealLog();
+    const { profile } = useUser();
     const smartSuggestions = useSmartFoodSuggestions();
+
+    const WATER_GOAL = 2500; // ml
 
     const handleQuickLog = (food: any) => {
         logMeal(food);
         Alert.alert('Logged', `${food.name} added to your daily log.`);
+    };
+
+    const handleAddWater = (amount: number) => {
+        logWater(amount);
     };
 
     const renderProgressBar = (label: string, value: number, goal: number, color: string) => {
@@ -38,7 +39,7 @@ export default function NutritionDashboard() {
             <View style={styles.progressItem}>
                 <View style={styles.progressLabels}>
                     <Text style={styles.progressLabel}>{label}</Text>
-                    <Text style={styles.progressValue}>{value} / {goal}</Text>
+                    <Text style={styles.progressValue}>{Math.round(value)} / {goal}</Text>
                 </View>
                 <View style={styles.progressBarBg}>
                     <View style={[styles.progressBarFill, { width: `${percentage}%`, backgroundColor: color }]} />
@@ -50,19 +51,42 @@ export default function NutritionDashboard() {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()}>
-                    <Text style={styles.backButton}>← Back</Text>
-                </TouchableOpacity>
+                <View style={styles.headerTop}>
+                    <TouchableOpacity onPress={() => router.back()}>
+                        <Text style={styles.backButton}>← Back</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => router.push('/settings')}>
+                        <Text style={styles.settingsButton}>⚙️ Settings</Text>
+                    </TouchableOpacity>
+                </View>
                 <Text style={styles.title}>Nutrition Tracker</Text>
             </View>
 
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 <View style={styles.summaryCard}>
                     <Text style={styles.cardTitle}>Daily Progress</Text>
-                    {renderProgressBar('Calories', Math.round(dailyTotals.calories), GOALS.calories, '#4D7A20')}
-                    {renderProgressBar('Protein (g)', Math.round(dailyTotals.protein), GOALS.protein, '#2196F3')}
-                    {renderProgressBar('Carbs (g)', Math.round(dailyTotals.carbs), GOALS.carbs, '#FF9800')}
-                    {renderProgressBar('Fat (g)', Math.round(dailyTotals.fat), GOALS.fat, '#E91E63')}
+                    {renderProgressBar('Calories', dailyTotals.calories, profile.goals.calories, '#4D7A20')}
+                    {renderProgressBar('Protein (g)', dailyTotals.protein, profile.goals.protein, '#2196F3')}
+                    {renderProgressBar('Carbs (g)', dailyTotals.carbs, profile.goals.carbs, '#FF9800')}
+                    {renderProgressBar('Fat (g)', dailyTotals.fat, profile.goals.fat, '#E91E63')}
+                </View>
+
+                <View style={styles.waterCard}>
+                    <View style={styles.waterHeader}>
+                        <Text style={styles.cardTitle}>Hydration</Text>
+                        <Text style={styles.waterValue}>{dailyTotals.water} / {WATER_GOAL} ml</Text>
+                    </View>
+                    <View style={styles.waterProgressBg}>
+                        <View style={[styles.waterProgressFill, { width: `${Math.min((dailyTotals.water / WATER_GOAL) * 100, 100)}%` }]} />
+                    </View>
+                    <View style={styles.waterButtons}>
+                        <TouchableOpacity style={styles.waterButton} onPress={() => handleAddWater(250)}>
+                            <Text style={styles.waterButtonText}>+250ml</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.waterButton} onPress={() => handleAddWater(500)}>
+                            <Text style={styles.waterButtonText}>+500ml</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
 
                 <View style={styles.suggestionsSection}>
@@ -131,11 +155,20 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: '#e0e0e0',
     },
+    headerTop: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
     backButton: {
         color: '#4D7A20',
         fontSize: 16,
         fontWeight: '600',
-        marginBottom: 8,
+    },
+    settingsButton: {
+        fontSize: 16,
+        color: '#444',
     },
     title: {
         fontSize: 24,
@@ -149,12 +182,62 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         borderRadius: 20,
         padding: 20,
+        marginBottom: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 4,
+    },
+    waterCard: {
+        backgroundColor: '#fff',
+        borderRadius: 20,
+        padding: 20,
         marginBottom: 20,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 8,
         elevation: 4,
+    },
+    waterHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 12,
+    },
+    waterValue: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: '#2196F3',
+    },
+    waterProgressBg: {
+        height: 12,
+        backgroundColor: '#E3F2FD',
+        borderRadius: 6,
+        overflow: 'hidden',
+        marginBottom: 16,
+    },
+    waterProgressFill: {
+        height: '100%',
+        backgroundColor: '#2196F3',
+        borderRadius: 6,
+    },
+    waterButtons: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+    },
+    waterButton: {
+        backgroundColor: '#E3F2FD',
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#BBDEFB',
+    },
+    waterButtonText: {
+        color: '#1976D2',
+        fontWeight: '700',
     },
     cardTitle: {
         fontSize: 18,

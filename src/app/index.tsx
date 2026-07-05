@@ -1,14 +1,16 @@
 ﻿import { router } from 'expo-router';
 import {
-    // SafeAreaView, // Remove deprecated import
     StyleSheet,
     Text,
     TouchableOpacity,
     View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context'; // Use the recommended package
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useUser } from '../context/UserContext';
 
 export default function HomeScreen() {
+    const { profile } = useUser();
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.logoCircle}>
@@ -18,12 +20,11 @@ export default function HomeScreen() {
             <Text style={styles.title}>PickTip</Text>
 
             <Text style={styles.subtitle}>
-                Your healthy lifestyle companion
+                Welcome back, {profile.name}!
             </Text>
 
             <Text style={styles.description}>
-                Get personalized workout recommendations and nutrition tips to fuel your
-                fitness journey
+                Ready to reach your {profile.goals.calories} kcal goal today?
             </Text>
 
             <TouchableOpacity
