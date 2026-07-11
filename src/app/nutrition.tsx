@@ -15,17 +15,52 @@ import { Food } from '../data/nutrition';
 import { useFoodSuggestions } from '../hooks/useFoodSuggestions';
 import { useSavedNutrition } from '../context/SavedNutritionContext';
 import { useMealLog } from '../context/MealLogContext';
+import { useUser } from '../context/UserContext';
+import { fetchRecommendations, SpoonacularRecipe } from '../services/spoonacular';
+import { RecipeCard } from '../components/recipe-card';
 
 export default function NutritionScreen() {
     const { intensity, category } = useLocalSearchParams();
+    const { profile } = useUser();
     const [selectedMealType, setSelectedMealType] = useState<string | undefined>(undefined);
     const suggestions = useFoodSuggestions({ intensity, category, mealType: selectedMealType });
     const { saveFood, isSaved, removeFood } = useSavedNutrition();
     const { logMeal } = useMealLog();
 
     const [searchQuery, setSearchQuery] = useState('');
+    const [globalRecipes, setGlobalRecipes] = useState<SpoonacularRecipe[]>([]);
+    const [isLoadingRecipes, setIsLoadingRecipes] = useState(false);
 
     const mealTypes = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
+
+    useEffect(() => {
+        loadGlobalRecipes();
+    }, [intensity, selectedMealType, profile.dietaryPreference]);
+
+    const loadGlobalRecipes = async () => {
+        setIsLoadingRecipes(true);
+        // Map intensity to macros
+        let minProtein = 10;
+        let maxCalories = 800;
+
+        if (intensity === 'High') {
+            minProtein = 30;
+            maxCalories = 1000;
+        } else if (intensity === 'Low') {
+            minProtein = 5;
+            maxCalories = 400;
+        }
+
+        const recipes = await fetchRecommendations({
+            diet: profile.dietaryPreference,
+            minProtein,
+            maxCalories,
+            type: selectedMealType?.toLowerCase(),
+            number: 10
+        });
+        setGlobalRecipes(recipes);
+        setIsLoadingRecipes(false);
+    };
 
     const filteredSuggestions = useMemo(() => {
         if (!searchQuery) return suggestions;
@@ -146,6 +181,29 @@ export default function NutritionScreen() {
                 renderItem={renderFoodItem}
                 keyExtractor={item => item.id}
                 contentContainerStyle={styles.listContent}
+                ListHeaderComponent={
+                    globalRecipes.length > 0 ? (
+                        <View style={styles.globalSection}>
+                            <Text style={styles.sectionTitle}>Global Recipe Discoveries</Text>
+                            <Text style={styles.sectionSubtitle}>Powered by Spoonacular</Text>
+                            <FlatList
+                                horizontal
+                                data={globalRecipes}
+                                renderItem={({ item }) => (
+                                    <RecipeCard
+                                        recipe={item}
+                                        onPress={() => Alert.alert(item.title, 'Recipe details integration coming soon!')}
+                                    />
+                                )}
+                                keyExtractor={item => item.id.toString()}
+                                showsHorizontalScrollIndicator={false}
+                                contentContainerStyle={styles.horizontalList}
+                            />
+                            <View style={styles.divider} />
+                            <Text style={styles.sectionTitle}>Hand-picked Suggestions</Text>
+                        </View>
+                    ) : null
+                }
                 ListEmptyComponent={
                     <Text style={styles.emptyText}>
                         {searchQuery ? 'No foods match your search.' : 'No specific recommendations found for this intensity.'}
@@ -394,5 +452,29 @@ const styles = StyleSheet.create({
         marginTop: 40,
         color: '#888',
         fontSize: 16,
+    },
+    globalSection: {
+        marginBottom: 24,
+    },
+    sectionTitle: {
+        fontSize: 20,
+        fontWeight: '700',
+        color: '#1a1a1a',
+        marginBottom: 4,
+    },
+    sectionSubtitle: {
+        fontSize: 12,
+        color: '#888',
+        marginBottom: 12,
+        textTransform: 'uppercase',
+        letterSpacing: 1,
+    },
+    horizontalList: {
+        paddingBottom: 8,
+    },
+    divider: {
+        height: 1,
+        backgroundColor: '#eee',
+        marginVertical: 20,
     }
 });

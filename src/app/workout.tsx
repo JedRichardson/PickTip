@@ -10,8 +10,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { workouts } from '../data/workouts';
 
+import { useWorkoutLog } from '../context/WorkoutLogContext';
+
 export default function WorkoutScreen() {
     const { category } = useLocalSearchParams();
+    const { logWorkout } = useWorkoutLog();
     const [workout, setWorkout] = useState<(typeof workouts)[number] | null>(null);
 
     const categoryParam = Array.isArray(category) ? category[0] : category;
@@ -33,6 +36,20 @@ export default function WorkoutScreen() {
     useEffect(() => {
         pickRandomWorkout();
     }, [categoryParam]);
+
+    const handleFinishWorkout = async () => {
+        if (workout) {
+            await logWorkout({
+                name: workout.name,
+                duration: workout.duration,
+                intensity: workout.intensity,
+                calories: parseInt(workout.calories),
+            });
+            router.push(
+                `/nutrition?intensity=${encodeURIComponent(workout.intensity)}&category=${encodeURIComponent(workout.category)}`
+            );
+        }
+    };
 
     if (!workout) {
         return (
@@ -90,14 +107,10 @@ export default function WorkoutScreen() {
 
             <TouchableOpacity
                 style={styles.button}
-                onPress={() =>
-                    router.push(
-                        `/nutrition?intensity=${encodeURIComponent(workout.intensity)}`
-                    )
-                }
+                onPress={handleFinishWorkout}
             >
                 <Text style={styles.buttonText}>
-                    View Nutrition Tips
+                    Finish & View Nutrition Tips
                 </Text>
             </TouchableOpacity>
         </SafeAreaView>
