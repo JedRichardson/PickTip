@@ -12,6 +12,7 @@ import { router } from 'expo-router';
 import { useMealLog } from '../context/MealLogContext';
 import { useSmartFoodSuggestions } from '../hooks/useSmartFoodSuggestions';
 import { useUser } from '../context/UserContext';
+import { useWorkoutLog, LoggedWorkout } from '../context/WorkoutLogContext';
 import { FoodSuggestionCard } from '../components/food-suggestion-card';
 import { Alert } from 'react-native';
 
@@ -20,9 +21,12 @@ const { width } = Dimensions.get('window');
 export default function NutritionDashboard() {
     const { mealLogs, dailyTotals, removeLog, logMeal, logWater } = useMealLog();
     const { profile } = useUser();
+    const { workouts, dailyTotalCalories, removeWorkout } = useWorkoutLog();
     const smartSuggestions = useSmartFoodSuggestions();
 
     const WATER_GOAL = 2500; // ml
+    const CALORIE_BUDGET = profile.goals.calories + dailyTotalCalories;
+    const REMAINING = CALORIE_BUDGET - dailyTotals.calories;
 
     const handleQuickLog = (food: any) => {
         logMeal(food);
@@ -63,9 +67,33 @@ export default function NutritionDashboard() {
             </View>
 
             <ScrollView contentContainerStyle={styles.scrollContent}>
+                <View style={styles.netCalorieCard}>
+                    <View style={styles.netCalorieRow}>
+                        <View style={styles.netCalorieItem}>
+                            <Text style={styles.netCalorieValue}>{profile.goals.calories}</Text>
+                            <Text style={styles.netCalorieLabel}>Goal</Text>
+                        </View>
+                        <Text style={styles.netCalorieOp}>+</Text>
+                        <View style={styles.netCalorieItem}>
+                            <Text style={styles.netCalorieValue}>{dailyTotalCalories}</Text>
+                            <Text style={styles.netCalorieLabel}>Exercise</Text>
+                        </View>
+                        <Text style={styles.netCalorieOp}>-</Text>
+                        <View style={styles.netCalorieItem}>
+                            <Text style={styles.netCalorieValue}>{Math.round(dailyTotals.calories)}</Text>
+                            <Text style={styles.netCalorieLabel}>Food</Text>
+                        </View>
+                        <Text style={styles.netCalorieOp}>=</Text>
+                        <View style={styles.netCalorieItem}>
+                            <Text style={[styles.netCalorieValue, { color: '#4D7A20' }]}>{Math.round(REMAINING)}</Text>
+                            <Text style={styles.netCalorieLabel}>Remaining</Text>
+                        </View>
+                    </View>
+                </View>
+
                 <View style={styles.summaryCard}>
                     <Text style={styles.cardTitle}>Daily Progress</Text>
-                    {renderProgressBar('Calories', dailyTotals.calories, profile.goals.calories, '#4D7A20')}
+                    {renderProgressBar('Calories', dailyTotals.calories, CALORIE_BUDGET, '#4D7A20')}
                     {renderProgressBar('Protein (g)', dailyTotals.protein, profile.goals.protein, '#2196F3')}
                     {renderProgressBar('Carbs (g)', dailyTotals.carbs, profile.goals.carbs, '#FF9800')}
                     {renderProgressBar('Fat (g)', dailyTotals.fat, profile.goals.fat, '#E91E63')}
@@ -103,6 +131,33 @@ export default function NutritionDashboard() {
                             </View>
                         ))}
                     </ScrollView>
+                </View>
+
+                <View style={styles.logsSection}>
+                    <Text style={styles.sectionTitle}>Today's Workouts</Text>
+                    {workouts.filter(w => new Date(w.timestamp).setHours(0,0,0,0) === new Date().setHours(0,0,0,0)).length === 0 ? (
+                        <View style={styles.emptyLogs}>
+                            <Text style={styles.emptyText}>No workouts logged today.</Text>
+                        </View>
+                    ) : (
+                        workouts.filter(w => new Date(w.timestamp).setHours(0,0,0,0) === new Date().setHours(0,0,0,0)).map((w) => (
+                            <View key={w.id} style={styles.logCard}>
+                                <View style={styles.logInfo}>
+                                    <Text style={styles.logName}>{w.name}</Text>
+                                    <Text style={styles.logTime}>{w.duration} • {w.intensity}</Text>
+                                </View>
+                                <View style={styles.logMacros}>
+                                    <Text style={[styles.macroText, { color: '#E91E63' }]}>-{w.calories} kcal</Text>
+                                    <TouchableOpacity
+                                        onPress={() => removeWorkout(w.id)}
+                                        style={styles.deleteButton}
+                                    >
+                                        <Text style={styles.deleteButtonText}>✕</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        ))
+                    )}
                 </View>
 
                 <View style={styles.logsSection}>
@@ -177,6 +232,42 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         padding: 16,
+    },
+    netCalorieCard: {
+        backgroundColor: '#fff',
+        borderRadius: 20,
+        padding: 20,
+        marginBottom: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 4,
+    },
+    netCalorieRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    netCalorieItem: {
+        alignItems: 'center',
+        flex: 1,
+    },
+    netCalorieValue: {
+        fontSize: 18,
+        fontWeight: '800',
+        color: '#333',
+    },
+    netCalorieLabel: {
+        fontSize: 10,
+        color: '#888',
+        textTransform: 'uppercase',
+        marginTop: 4,
+    },
+    netCalorieOp: {
+        fontSize: 18,
+        color: '#bbb',
+        paddingHorizontal: 4,
     },
     summaryCard: {
         backgroundColor: '#fff',
