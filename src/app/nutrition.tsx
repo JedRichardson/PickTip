@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useLocalSearchParams, router } from 'expo-router';
 import {
     StyleSheet,
@@ -8,6 +8,7 @@ import {
     FlatList,
     TextInput,
     Alert,
+    ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
