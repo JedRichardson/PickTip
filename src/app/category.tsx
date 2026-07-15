@@ -4,6 +4,7 @@ import {
     Text,
     TouchableOpacity,
     ScrollView,
+
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -55,18 +56,21 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#F5F5F5',
         paddingHorizontal: 24,
+        backgroundColor: '#4D7A20',
+        padding: 24,
     },
 
     heading: {
         marginTop: 40,
         fontSize: 32,
         fontWeight: '700',
+
     },
 
     subheading: {
         marginBottom: 30,
         marginTop: 10,
-        color: '#666',
+       
     },
 
     card: {

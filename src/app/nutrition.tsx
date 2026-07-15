@@ -249,6 +249,22 @@ const styles = StyleSheet.create({
     },
     backButton: {
         color: '#4D7A20',
+        justifyContent: 'center',
+        padding: 24,
+        backgroundColor: '#4D7A20',
+    },
+
+    backButton: {
+        position: 'absolute',
+        top: 60,
+        left: 24,
+        paddingVertical: 10,
+        paddingHorizontal: 14,
+
+    },
+
+    backButtonText: {
+        color: '#fff',
         fontSize: 16,
         fontWeight: '600',
     },

@@ -275,6 +275,8 @@ export const nutritionRecommendations = {
         carbs: 'Brown Rice',
         hydration: '32 oz Water',
     },
+
+
     Medium: {
         protein: 'Greek Yogurt',
         carbs: 'Sweet Potato',

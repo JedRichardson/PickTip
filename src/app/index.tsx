@@ -50,6 +50,13 @@ export default function HomeScreen() {
 
             <Text style={styles.learnMore}>Learn More</Text>
 
+
+            <TouchableOpacity
+                onPress={() => router.push('/learnmore')}
+                >
+                <Text style={styles.learnMore}>Learn More</Text>
+               
+            </TouchableOpacity>
         </SafeAreaView>
     );
 }
