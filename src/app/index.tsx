@@ -1,14 +1,16 @@
 ﻿import { router } from 'expo-router';
 import {
-    // SafeAreaView, // Remove deprecated import
     StyleSheet,
     Text,
     TouchableOpacity,
     View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context'; // Use the recommended package
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useUser } from '../context/UserContext';
 
 export default function HomeScreen() {
+    const { profile } = useUser();
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.logoCircle}>
@@ -18,12 +20,11 @@ export default function HomeScreen() {
             <Text style={styles.title}>PickTip</Text>
 
             <Text style={styles.subtitle}>
-                Your healthy lifestyle companion
+                Welcome back, {profile.name}!
             </Text>
 
             <Text style={styles.description}>
-                Get personalized workout recommendations and nutrition tips to fuel your
-                fitness journey
+                Ready to reach your {profile.goals.calories} kcal goal today?
             </Text>
 
             <TouchableOpacity
@@ -32,6 +33,22 @@ export default function HomeScreen() {
             >
                 <Text style={styles.buttonText}>Get Started →</Text>
             </TouchableOpacity>
+
+            <TouchableOpacity
+                style={styles.savedLink}
+                onPress={() => router.push('/dashboard')}
+            >
+                <Text style={styles.savedLinkText}>View My Nutrition Dashboard</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+                style={styles.savedLink}
+                onPress={() => router.push('/saved')}
+            >
+                <Text style={styles.savedLinkText}>View My Saved Meals</Text>
+            </TouchableOpacity>
+
+            <Text style={styles.learnMore}>Learn More</Text>
 
 
             <TouchableOpacity
@@ -106,5 +123,15 @@ const styles = StyleSheet.create({
         marginTop: 25,
         color: '#fff',
         textDecorationLine: 'underline',
+    },
+
+    savedLink: {
+        marginTop: 20,
+    },
+
+    savedLinkText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '600',
     },
 });
