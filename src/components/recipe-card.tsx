@@ -1,76 +1,398 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
-import { SpoonacularRecipe } from '../services/spoonacular';
+
+
+import {
+    StyleSheet,
+    Text,
+    View,
+    TouchableOpacity,
+    Image,
+} from 'react-native';
+
+
+import {
+    SpoonacularRecipe
+} from '../services/spoonacular';
+
+
+
+
+
+
 
 interface RecipeCardProps {
+
     recipe: SpoonacularRecipe;
+
     onPress: () => void;
+
 }
 
-export const RecipeCard = ({ recipe, onPress }: RecipeCardProps) => {
+
+
+
+
+
+
+
+export const RecipeCard = ({
+
+    recipe,
+
+    onPress
+
+}: RecipeCardProps) => {
+
+
     return (
-        <TouchableOpacity style={styles.container} onPress={onPress}>
-            <Image source={{ uri: recipe.image }} style={styles.image} />
+
+
+        <TouchableOpacity
+
+
+            style={styles.container}
+
+
+            onPress={onPress}
+
+
+            activeOpacity={0.85}
+
+
+        >
+
+
+
+
+
+            {/* ==========================================
+                CHANGED:
+                Rounded image section to match
+                PickTip card styling.
+            ========================================== */}
+
+            <Image
+
+                source={{
+                    uri: recipe.image
+                }}
+
+                style={styles.image}
+
+            />
+
+
+
+
+
+
             <View style={styles.content}>
-                <Text style={styles.title} numberOfLines={2}>{recipe.title}</Text>
+
+
+                <Text
+
+                    style={styles.title}
+
+                    numberOfLines={2}
+
+                >
+
+                    {recipe.title}
+
+                </Text>
+
+
+
+
+
+
+                {/* ==========================================
+                    CHANGED:
+                    Nutrition stats redesigned to match
+                    dashboard components.
+                ========================================== */}
 
                 <View style={styles.macroRow}>
+
+
                     <View style={styles.macro}>
-                        <Text style={styles.macroValue}>{Math.round(recipe.calories || 0)}</Text>
-                        <Text style={styles.macroLabel}>kcal</Text>
+
+
+                        <Text style={styles.macroValue}>
+
+                            {Math.round(recipe.calories || 0)}
+
+                        </Text>
+
+
+
+                        <Text style={styles.macroLabel}>
+
+                            kcal
+
+                        </Text>
+
+
+
                     </View>
+
+
+
+
+
+
+
                     <View style={styles.macro}>
-                        <Text style={styles.macroValue}>{recipe.protein}</Text>
-                        <Text style={styles.macroLabel}>Prot</Text>
+
+
+                        <Text style={styles.macroValue}>
+
+                            {recipe.protein}
+
+                        </Text>
+
+
+
+                        <Text style={styles.macroLabel}>
+
+                            Protein
+
+                        </Text>
+
+
+
                     </View>
+
+
+
                 </View>
+
+
+
+
+
             </View>
+
+
+
         </TouchableOpacity>
+
+
     );
+
 };
 
+
+
+
+
+
+
+
+
 const styles = StyleSheet.create({
+
+
+
+    // ==========================================
+    // CHANGED:
+    // Premium PickTip recipe card.
+    // ==========================================
+
     container: {
-        width: 200,
-        backgroundColor: '#fff',
-        borderRadius: 16,
+
+
+        width: 220,
+
+
+        backgroundColor: '#FFFFFF',
+
+
+        borderRadius: 24,
+
+
         marginRight: 16,
+
+
+
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
+
+
+        shadowOffset: {
+
+
+            width: 0,
+
+
+            height: 7,
+
+
+        },
+
+
+        shadowOpacity: .15,
+
+
+        shadowRadius: 12,
+
+
+        elevation: 6,
+
+
         overflow: 'hidden',
+
+
     },
+
+
+
+
+
+
+
+
     image: {
+
+
         width: '100%',
-        height: 120,
+
+
+        height: 140,
+
+
     },
+
+
+
+
+
+
+
+
     content: {
-        padding: 12,
+
+
+        padding: 16,
+
+
     },
+
+
+
+
+
+
+
+
     title: {
-        fontSize: 14,
-        fontWeight: '700',
-        color: '#1a1a1a',
-        height: 40,
-        marginBottom: 8,
+
+
+        fontSize: 16,
+
+
+        fontWeight: '800',
+
+
+        color: '#355817',
+
+
+        lineHeight: 22,
+
+
+        height: 46,
+
+
+        marginBottom: 12,
+
+
     },
+
+
+
+
+
+
+
+
     macroRow: {
+
+
         flexDirection: 'row',
-        justifyContent: 'space-between',
+
+
+        justifyContent: 'space-around',
+
+
+        backgroundColor: '#F4F8F0',
+
+
+        paddingVertical: 10,
+
+
+        borderRadius: 16,
+
+
     },
+
+
+
+
+
+
+
+
     macro: {
+
+
         alignItems: 'center',
+
+
     },
+
+
+
+
+
+
+
+
     macroValue: {
-        fontSize: 12,
-        fontWeight: '700',
+
+
+        fontSize: 16,
+
+
+        fontWeight: '800',
+
+
         color: '#4D7A20',
+
+
     },
+
+
+
+
+
+
+
+
     macroLabel: {
-        fontSize: 9,
-        color: '#888',
+
+
+        fontSize: 10,
+
+
+        color: '#777',
+
+
+        marginTop: 3,
+
+
         textTransform: 'uppercase',
+
+
     },
+
+
 });

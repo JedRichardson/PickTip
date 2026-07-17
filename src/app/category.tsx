@@ -1,111 +1,347 @@
 import { router } from 'expo-router';
+
 import {
     StyleSheet,
     Text,
     TouchableOpacity,
     ScrollView,
-
+    View,
 } from 'react-native';
+
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+
+// ==========================================
+// ADDED:
+// Gradient background to match HomeScreen
+// and LearnMoreScreen.
+// Install:
+// npx expo install expo-linear-gradient
+// ==========================================
+import { LinearGradient } from 'expo-linear-gradient';
+
 
 import { categories } from '../data/categories';
 
+
 export default function CategoryScreen() {
     return (
-        <SafeAreaView style={styles.container}>
-            <ScrollView showsVerticalScrollIndicator={false}>
-                <Text style={styles.heading}>
-                    Choose Your Focus
-                </Text>
 
-                <Text style={styles.subheading}>
-                    Select a workout category to get started
-                </Text>
+        // ==========================================
+        // CHANGED:
+        // Replaced flat background with PickTip
+        // gradient theme.
+        // ==========================================
+        <LinearGradient
+            colors={['#78B63C', '#4D7A20', '#355817']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.gradient}
+        >
 
-                {categories.map(category => (
-                    <TouchableOpacity
-                        key={category.id}
-                        style={styles.card}
-                        onPress={() =>
-                            router.push(`/workout?category=${category.id}`)
-                        }
-                    >
-                        <Text style={styles.cardTitle}>
-                            {category.name}
-                        </Text>
+            <SafeAreaView style={styles.container}>
 
-                        <Text style={styles.cardDescription}>
-                            {category.description}
-                        </Text>
-                    </TouchableOpacity>
-                ))}
 
-                <TouchableOpacity
-                    style={styles.nutritionLink}
-                    onPress={() => router.push('/nutrition')}
+                {/* ==========================================
+                    ADDED:
+                    ScrollView keeps categories responsive
+                    on smaller devices.
+                ========================================== */}
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={styles.scrollContent}
                 >
-                    <Text style={styles.nutritionLinkText}>Skip to Nutrition Suggestions</Text>
-                </TouchableOpacity>
-            </ScrollView>
-        </SafeAreaView>
+
+
+
+                    {/* ==========================================
+                        CHANGED:
+                        Added stronger title hierarchy.
+                    ========================================== */}
+                    <Text style={styles.heading}>
+                        Choose Your Focus
+                    </Text>
+
+
+
+                    <Text style={styles.subheading}>
+                        Select a workout category to get started
+                    </Text>
+
+
+
+
+
+                    {categories.map(category => (
+
+                        <TouchableOpacity
+
+                            key={category.id}
+
+                            // ==========================================
+                            // CHANGED:
+                            // Updated card styling for a more modern UI.
+                            // ==========================================
+                            style={styles.card}
+
+                            onPress={() =>
+                                router.push(`/workout?category=${category.id}`)
+                            }
+
+                            activeOpacity={0.85}
+
+                        >
+
+                            <Text style={styles.cardTitle}>
+                                {category.name}
+                            </Text>
+
+
+
+                            <Text style={styles.cardDescription}>
+                                {category.description}
+                            </Text>
+
+
+                        </TouchableOpacity>
+
+                    ))}
+
+
+
+
+
+                    <TouchableOpacity
+
+                        style={styles.nutritionLink}
+
+                        onPress={() => router.push('/nutrition')}
+
+                        activeOpacity={0.8}
+
+                    >
+
+                        <Text style={styles.nutritionLinkText}>
+                            Skip to Nutrition Suggestions
+                        </Text>
+
+
+                    </TouchableOpacity>
+
+
+
+                </ScrollView>
+
+
+            </SafeAreaView>
+
+
+        </LinearGradient>
+
     );
 }
 
+
+
 const styles = StyleSheet.create({
-    container: {
+
+
+    // ==========================================
+    // ADDED:
+    // Full screen gradient wrapper.
+    // ==========================================
+    gradient: {
+
         flex: 1,
-        backgroundColor: '#F5F5F5',
-        paddingHorizontal: 24,
-        backgroundColor: '#4D7A20',
-        padding: 24,
+
     },
+
+
+
+    container: {
+
+        flex: 1,
+
+    },
+
+
+
+    // ==========================================
+    // ADDED:
+    // Controls ScrollView spacing.
+    // ==========================================
+    scrollContent: {
+
+        paddingHorizontal: 24,
+
+        paddingVertical: 30,
+
+    },
+
+
 
     heading: {
-        marginTop: 40,
-        fontSize: 32,
-        fontWeight: '700',
+
+        // ==========================================
+        // CHANGED:
+        // Added stronger visual hierarchy.
+        // ==========================================
+        color: '#FFFFFF',
+
+        marginTop: 20,
+
+        fontSize: 38,
+
+        fontWeight: '800',
+
+        letterSpacing: 0.5,
 
     },
+
+
 
     subheading: {
+
+        // ==========================================
+        // CHANGED:
+        // Improved readability on gradient.
+        // ==========================================
+        color: '#FFFFFF',
+
+        fontSize: 17,
+
+        marginTop: 12,
+
         marginBottom: 30,
-        marginTop: 10,
-       
+
+        opacity: 0.9,
+
     },
+
+
 
     card: {
-        backgroundColor: '#fff',
-        borderRadius: 20,
+
+
+        backgroundColor: '#FFFFFF',
+
+
+        borderRadius: 24,
+
+
         padding: 24,
-        marginBottom: 16,
+
+
+        marginBottom: 18,
+
+
+
+        // ==========================================
+        // ADDED:
+        // Floating card effect.
+        // ==========================================
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 2,
+
+        shadowOffset: {
+
+            width: 0,
+
+            height: 8,
+
+        },
+
+
+        shadowOpacity: 0.18,
+
+
+        shadowRadius: 12,
+
+
+        elevation: 8,
+
     },
+
+
 
     cardTitle: {
-        fontSize: 20,
-        fontWeight: '700',
+
+
+        // ==========================================
+        // CHANGED:
+        // Stronger category titles.
+        // ==========================================
+        color: '#355817',
+
+        fontSize: 22,
+
+        fontWeight: '800',
+
     },
+
+
 
     cardDescription: {
-        marginTop: 8,
-        color: '#666',
+
+
+        marginTop: 10,
+
+
+        color: '#555555',
+
+
+        fontSize: 15,
+
+
+        lineHeight: 22,
+
+
     },
+
+
 
     nutritionLink: {
+
+
+        // ==========================================
+        // CHANGED:
+        // Better spacing from cards.
+        // ==========================================
         marginTop: 10,
+
+
         marginBottom: 30,
-        padding: 16,
+
+
+        padding: 18,
+
+
         alignItems: 'center',
+
+
     },
 
+
+
     nutritionLinkText: {
-        color: '#4D7A20',
-        fontWeight: '600',
+
+
+        // ==========================================
+        // CHANGED:
+        // White text works better with gradient.
+        // ==========================================
+        color: '#FFFFFF',
+
+
+        fontWeight: '700',
+
+
         fontSize: 16,
+
+
         textDecorationLine: 'underline',
+
+
     },
+
+
 });

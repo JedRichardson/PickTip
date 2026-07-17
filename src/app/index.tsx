@@ -1,137 +1,347 @@
 ﻿import { router } from 'expo-router';
+
+// ==============================
+// ADDED: Import React hooks
+// ==============================
+import { useEffect, useRef } from 'react';
+
+// ==============================
+// ADDED: Linear Gradient
+// Run:
+// npx expo install expo-linear-gradient
+// ==============================
+import { LinearGradient } from 'expo-linear-gradient';
+
 import {
+    // ==============================
+    // ADDED: Import Animated
+    // ==============================
+    Animated,
     StyleSheet,
     Text,
     TouchableOpacity,
     View,
 } from 'react-native';
+
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useUser } from '../context/UserContext';
 
 export default function HomeScreen() {
     const { profile } = useUser();
 
+    // ==========================================
+    // ADDED: Animated value for floating effect
+    // ==========================================
+    const bounceAnim = useRef(new Animated.Value(0)).current;
+
+    // ==========================================
+    // ADDED: Runs once when the screen loads and
+    // continuously loops the floating animation.
+    // ==========================================
+    useEffect(() => {
+        Animated.loop(
+            Animated.sequence([
+                Animated.timing(bounceAnim, {
+                    // ==========================================
+                    // CHANGED:
+                    // Increased travel distance and slightly
+                    // increased speed for a more lively effect.
+                    // ==========================================
+                    toValue: -25,
+                    duration: 425,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(bounceAnim, {
+                    toValue: 0,
+                    duration: 450,
+                    useNativeDriver: true,
+                }),
+            ])
+        ).start();
+    }, []);
+
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.logoCircle}>
-                <Text style={styles.logo}>🌿</Text>
-            </View>
+        // ==========================================
+        // CHANGED:
+        // Replaced flat background with a modern
+        // green gradient.
+        // ==========================================
+        <LinearGradient
+            colors={['#78B63C', '#4D7A20', '#355817']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.gradient}
+        >
+            <SafeAreaView style={styles.container}>
 
-            <Text style={styles.title}>PickTip</Text>
-
-            <Text style={styles.subtitle}>
-                Welcome back, {profile.name}!
-            </Text>
-
-            <Text style={styles.description}>
-                Ready to reach your {profile.goals.calories} kcal goal today?
-            </Text>
-
-            <TouchableOpacity
-                style={styles.button}
-                onPress={() => router.push('/category')}
-            >
-                <Text style={styles.buttonText}>Get Started →</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-                style={styles.savedLink}
-                onPress={() => router.push('/dashboard')}
-            >
-                <Text style={styles.savedLinkText}>View My Nutrition Dashboard</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-                style={styles.savedLink}
-                onPress={() => router.push('/saved')}
-            >
-                <Text style={styles.savedLinkText}>View My Saved Meals</Text>
-            </TouchableOpacity>
-
-            <Text style={styles.learnMore}>Learn More</Text>
-
-
-            <TouchableOpacity
-                onPress={() => router.push('/learnmore')}
+                {/* ==========================================
+                    CHANGED:
+                    View -> Animated.View
+                    Applies the floating animation to the logo.
+                ========================================== */}
+                <Animated.View
+                    style={[
+                        styles.logoCircle,
+                        {
+                            transform: [{ translateY: bounceAnim }],
+                        },
+                    ]}
                 >
-                <Text style={styles.learnMore}>Learn More</Text>
-               
-            </TouchableOpacity>
-        </SafeAreaView>
+                    <Text style={styles.logo}>🌿</Text>
+                </Animated.View>
+
+                <Text style={styles.title}>
+                    PickTip
+                </Text>
+
+                <Text style={styles.subtitle}>
+                    Welcome back, {profile.name}!
+                </Text>
+
+                <Text style={styles.description}>
+                    Ready to reach your {profile.goals.calories} kcal goal today?
+                </Text>
+
+                <TouchableOpacity
+                    activeOpacity={0.85}
+                    style={styles.button}
+                    onPress={() => router.push('/category')}
+                >
+                    <Text style={styles.buttonText}>
+                        Get Started →
+                    </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    activeOpacity={0.8}
+                    style={styles.savedLink}
+                    onPress={() => router.push('/dashboard')}
+                >
+                    <Text style={styles.savedLinkText}>
+                        📊 View My Nutrition Dashboard
+                    </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    activeOpacity={0.8}
+                    style={styles.savedLink}
+                    onPress={() => router.push('/saved')}
+                >
+                    <Text style={styles.savedLinkText}>
+                        ❤️ View My Saved Meals
+                    </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={() => router.push('/learnmore')}
+                >
+                    <Text style={styles.learnMore}>
+                        Learn More
+                    </Text>
+                </TouchableOpacity>
+
+            </SafeAreaView>
+        </LinearGradient>
     );
 }
 
 const styles = StyleSheet.create({
+    // ==========================================
+    // ADDED:
+    // Wrapper style for LinearGradient.
+    // Handles the full screen background.
+    // ==========================================
+    gradient: {
+        flex: 1,
+    },
+
     container: {
         flex: 1,
-        backgroundColor: '#4D7A20',
+
+        // ==========================================
+        // CHANGED:
+        // Removed backgroundColor because the
+        // LinearGradient now controls the background.
+        // ==========================================
         justifyContent: 'center',
         alignItems: 'center',
-        padding: 24,
+
+        paddingHorizontal: 28,
     },
 
     logoCircle: {
-        width: 140,
-        height: 140,
-        borderRadius: 70,
-        backgroundColor: '#fff',
+        // ==========================================
+        // CHANGED:
+        // Increased logo size for stronger branding.
+        // ==========================================
+        width: 165,
+        height: 165,
+
+        borderRadius: 82.5,
+
+        backgroundColor: '#FFFFFF',
+
         justifyContent: 'center',
         alignItems: 'center',
+
+        // ==========================================
+        // ADDED:
+        // Creates floating depth around the logo.
+        // ==========================================
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 10,
+        },
+        shadowOpacity: 0.18,
+        shadowRadius: 18,
+
+        elevation: 12,
     },
 
     logo: {
-        fontSize: 70,
+        // ==========================================
+        // CHANGED:
+        // Larger emoji/logo presence.
+        // ==========================================
+        fontSize: 84,
     },
 
     title: {
-        color: '#fff',
-        fontSize: 52,
-        fontWeight: '700',
-        marginTop: 24,
+        color: '#FFFFFF',
+
+        // ==========================================
+        // CHANGED:
+        // Stronger brand hierarchy.
+        // ==========================================
+        fontSize: 60,
+        fontWeight: '800',
+
+        letterSpacing: 1,
+
+        marginTop: 30,
     },
 
     subtitle: {
-        color: '#fff',
-        fontSize: 20,
-        marginTop: 10,
+        color: '#FFFFFF',
+
+        // ==========================================
+        // CHANGED:
+        // More welcoming appearance.
+        // ==========================================
+        fontSize: 23,
+        fontWeight: '600',
+
+        marginTop: 14,
+
+        opacity: 0.95,
     },
 
     description: {
-        color: '#fff',
+        color: '#FFFFFF',
+
         textAlign: 'center',
-        fontSize: 16,
-        marginTop: 20,
-        lineHeight: 24,
-        maxWidth: 320,
+
+        // ==========================================
+        // CHANGED:
+        // Better readability and spacing.
+        // ==========================================
+        fontSize: 17,
+
+        lineHeight: 28,
+
+        marginTop: 24,
+
+        maxWidth: 330,
+
+        opacity: 0.88,
     },
 
     button: {
-        marginTop: 40,
-        backgroundColor: '#fff',
-        paddingHorizontal: 50,
-        paddingVertical: 18,
-        borderRadius: 18,
+        // ==========================================
+        // CHANGED:
+        // Larger call-to-action button.
+        // ==========================================
+        marginTop: 45,
+
+        backgroundColor: '#FFFFFF',
+
+        paddingHorizontal: 58,
+
+        paddingVertical: 20,
+
+        borderRadius: 28,
+
+        // ==========================================
+        // ADDED:
+        // Elevated button effect.
+        // ==========================================
+        shadowColor: '#000',
+
+        shadowOffset: {
+            width: 0,
+            height: 6,
+        },
+
+        shadowOpacity: 0.22,
+
+        shadowRadius: 12,
+
+        elevation: 8,
     },
 
     buttonText: {
-        color: '#4D7A20',
-        fontSize: 18,
-        fontWeight: '700',
-    },
+        // ==========================================
+        // CHANGED:
+        // Better contrast with new palette.
+        // ==========================================
+        color: '#355817',
 
-    learnMore: {
-        marginTop: 25,
-        color: '#fff',
-        textDecorationLine: 'underline',
+        fontSize: 19,
+
+        fontWeight: '800',
+
+        letterSpacing: 0.5,
     },
 
     savedLink: {
-        marginTop: 20,
+        // ==========================================
+        // CHANGED:
+        // Improved spacing between actions.
+        // ==========================================
+        marginTop: 22,
     },
 
     savedLinkText: {
-        color: '#fff',
-        fontSize: 16,
+        color: '#FFFFFF',
+
+        // ==========================================
+        // CHANGED:
+        // More readable navigation text.
+        // ==========================================
+        fontSize: 17,
+
         fontWeight: '600',
+
+        opacity: 0.92,
+    },
+
+    learnMore: {
+        // ==========================================
+        // CHANGED:
+        // Better separation from other links.
+        // ==========================================
+        marginTop: 34,
+
+        color: '#FFFFFF',
+
+        fontSize: 16,
+
+        fontWeight: '600',
+
+        textDecorationLine: 'underline',
+
+        opacity: 0.9,
     },
 });
