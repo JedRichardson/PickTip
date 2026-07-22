@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
-import { useLocalSearchParams, router } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
 import {
+    ActivityIndicator,
     StyleSheet,
     Text,
     TouchableOpacity,
@@ -8,48 +9,113 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { workouts } from '../data/workouts';
+import {
+    Exercise,
+    getExercises,
+} from '../api/picktipApi';
 
-import { useWorkoutLog } from '../context/WorkoutLogContext';
+const categoryMuscles = {
+    legs: ['quadriceps', 'hamstrings', 'glutes', 'calves'],
+    arms: ['biceps', 'triceps', 'forearms'],
+    core: ['abdominals', 'lower_back'],
+    fullBody: [
+        'quadriceps',
+        'hamstrings',
+        'glutes',
+        'chest',
+        'lats',
+        'biceps',
+        'triceps',
+        'abdominals',
+    ],
+} as const;
+
+type WorkoutCategory = keyof typeof categoryMuscles;
 
 export default function WorkoutScreen() {
-    const { category } = useLocalSearchParams();
-    const { logWorkout } = useWorkoutLog();
-    const [workout, setWorkout] = useState<(typeof workouts)[number] | null>(null);
+    const { category } = useLocalSearchParams<{
+        category?: string | string[];
+    }>();
 
-    const categoryParam = Array.isArray(category) ? category[0] : category;
+    const [workout, setWorkout] = useState<Exercise | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState('');
 
-    const filtered = workouts.filter(
-        item => item.category === categoryParam
-    );
+    const categoryParam = Array.isArray(category)
+        ? category[0]
+        : category;
 
-    function pickRandomWorkout() {
-        if (filtered.length === 0) {
+    const pickRandomWorkout = useCallback(async () => {
+        if (
+            !categoryParam ||
+            !(categoryParam in categoryMuscles)
+        ) {
             setWorkout(null);
+            setError('That workout category was not found.');
+            setIsLoading(false);
             return;
         }
 
-        const randomIndex = Math.floor(Math.random() * filtered.length);
-        setWorkout(filtered[randomIndex]);
-    }
+        try {
+            setIsLoading(true);
+            setError('');
+
+            const selectedCategory =
+                categoryParam as WorkoutCategory;
+
+            const muscles = categoryMuscles[selectedCategory];
+
+            const randomMuscle =
+                muscles[
+                    Math.floor(Math.random() * muscles.length)
+                ];
+
+            const exercises = await getExercises(randomMuscle);
+
+            if (exercises.length === 0) {
+                setWorkout(null);
+                setError('No exercises were found. Please try again.');
+                return;
+            }
+
+            const randomIndex = Math.floor(
+                Math.random() * exercises.length
+            );
+
+            setWorkout(exercises[randomIndex]);
+        } catch (requestError) {
+            console.error(requestError);
+            setWorkout(null);
+            setError('Could not load a workout.');
+        } finally {
+            setIsLoading(false);
+        }
+    }, [categoryParam]);
 
     useEffect(() => {
         pickRandomWorkout();
-    }, [categoryParam]);
+    }, [pickRandomWorkout]);
 
-    const handleFinishWorkout = async () => {
-        if (workout) {
-            await logWorkout({
-                name: workout.name,
-                duration: workout.duration,
-                intensity: workout.intensity,
-                calories: parseInt(workout.calories),
-            });
-            router.push(
-                `/nutrition?intensity=${encodeURIComponent(workout.intensity)}&category=${encodeURIComponent(workout.category)}`
-            );
-        }
-    };
+    if (isLoading) {
+        return (
+            <SafeAreaView style={styles.container}>
+                <TouchableOpacity
+                    style={styles.backButton}
+                    onPress={() => router.back()}
+                >
+                    <Text style={styles.backButtonText}>
+                        ← Back
+                    </Text>
+                </TouchableOpacity>
+
+                <ActivityIndicator size="large" />
+
+                <Text style={styles.loadingText}>
+                    Picking a workout...
+                </Text>
+            </SafeAreaView>
+        );
+    }
 
     if (!workout) {
         return (
@@ -58,13 +124,28 @@ export default function WorkoutScreen() {
                     style={styles.backButton}
                     onPress={() => router.back()}
                 >
-                    <Text style={styles.backButtonText}>← Back</Text>
+                    <Text style={styles.backButtonText}>
+                        ← Back
+                    </Text>
                 </TouchableOpacity>
 
-                <Text style={styles.title}>No workouts found.</Text>
-                <Text style={styles.description}>
-                    Please go back and choose another category.
+                <Text style={styles.title}>
+                    No workout found
                 </Text>
+
+                <Text style={styles.description}>
+                    {error ||
+                        'Please go back and choose another category.'}
+                </Text>
+
+                <TouchableOpacity
+                    style={styles.rerollButton}
+                    onPress={pickRandomWorkout}
+                >
+                    <Text style={styles.rerollButtonText}>
+                        Try Again
+                    </Text>
+                </TouchableOpacity>
             </SafeAreaView>
         );
     }
@@ -75,7 +156,9 @@ export default function WorkoutScreen() {
                 style={styles.backButton}
                 onPress={() => router.back()}
             >
-                <Text style={styles.backButtonText}>← Back</Text>
+                <Text style={styles.backButtonText}>
+                    ← Back
+                </Text>
             </TouchableOpacity>
 
             <View style={styles.card}>
@@ -84,21 +167,30 @@ export default function WorkoutScreen() {
                 </Text>
 
                 <Text style={styles.detail}>
-                    Duration: {workout.duration}
+                    Muscle: {workout.muscle}
                 </Text>
 
                 <Text style={styles.detail}>
-                    Intensity: {workout.intensity}
+                    Type: {workout.type}
+                </Text>
+
+                <Text style={styles.detail}>
+                    Equipment: {workout.equipment}
+                </Text>
+
+                <Text style={styles.detail}>
+                    Difficulty: {workout.difficulty}
                 </Text>
 
                 <Text style={styles.description}>
-                    {workout.description}
+                    {workout.instructions}
                 </Text>
             </View>
 
             <TouchableOpacity
                 style={styles.rerollButton}
                 onPress={pickRandomWorkout}
+                disabled={isLoading}
             >
                 <Text style={styles.rerollButtonText}>
                     Reroll Workout
@@ -107,10 +199,16 @@ export default function WorkoutScreen() {
 
             <TouchableOpacity
                 style={styles.button}
-                onPress={handleFinishWorkout}
+                onPress={() =>
+                    router.push(
+                        `/nutrition?intensity=${encodeURIComponent(
+                            workout.difficulty
+                        )}`
+                    )
+                }
             >
                 <Text style={styles.buttonText}>
-                    Finish & View Nutrition Tips
+                    View Nutrition Tips
                 </Text>
             </TouchableOpacity>
         </SafeAreaView>
@@ -122,7 +220,6 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         padding: 24,
-        backgroundColor: '#4D7A20',
     },
 
     backButton: {
@@ -131,14 +228,12 @@ const styles = StyleSheet.create({
         left: 24,
         paddingVertical: 10,
         paddingHorizontal: 14,
-        
     },
 
     backButtonText: {
-        
+        color: '#4D7A20',
         fontSize: 16,
         fontWeight: '700',
-        color: '#fff',
     },
 
     card: {
@@ -166,7 +261,6 @@ const styles = StyleSheet.create({
 
     rerollButton: {
         borderColor: '#4D7A20',
-        backgroundColor: '#fff',
         borderWidth: 2,
         padding: 18,
         borderRadius: 16,
@@ -174,7 +268,7 @@ const styles = StyleSheet.create({
     },
 
     rerollButtonText: {
-      
+        color: '#4D7A20',
         textAlign: 'center',
         fontWeight: '700',
     },
@@ -187,11 +281,14 @@ const styles = StyleSheet.create({
     },
 
     buttonText: {
-        backgroundColor: '#fff',
+        color: '#fff',
         textAlign: 'center',
         fontWeight: '700',
-        padding: 13,
-        borderRadius: 16,
-        
+    },
+
+    loadingText: {
+        fontSize: 16,
+        textAlign: 'center',
+        marginTop: 16,
     },
 });

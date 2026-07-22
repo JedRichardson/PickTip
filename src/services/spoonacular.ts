@@ -1,10 +1,13 @@
-const API_KEY = 'd57e0c0d4cc04530bc651135d558ef93';
-const BASE_URL = 'https://api.spoonacular.com/recipes';
+import { SPOONACULAR_API_KEY, SPOONACULAR_BASE_URL } from '../api/picktipApi';
+
+const API_KEY = SPOONACULAR_API_KEY;
+const BASE_URL = SPOONACULAR_BASE_URL;
 
 export interface SpoonacularRecipe {
     id: number;
     title: string;
     image: string;
+    summary?: string;
     calories?: number;
     protein?: string;
     fat?: string;
@@ -38,6 +41,7 @@ export const fetchRecommendations = async (params: {
             id: r.id,
             title: r.title,
             image: r.image,
+            summary: r.summary,
             calories: r.nutrition?.nutrients?.find((n: any) => n.name === 'Calories')?.amount,
             protein: r.nutrition?.nutrients?.find((n: any) => n.name === 'Protein')?.amount + 'g',
             fat: r.nutrition?.nutrients?.find((n: any) => n.name === 'Fat')?.amount + 'g',
