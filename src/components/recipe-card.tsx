@@ -1,15 +1,24 @@
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
 import { SpoonacularRecipe } from '../services/spoonacular';
+import { router } from 'expo-router';
 
 interface RecipeCardProps {
     recipe: SpoonacularRecipe;
-    onPress: () => void;
+    onPress?: () => void;
 }
 
 export const RecipeCard = ({ recipe, onPress }: RecipeCardProps) => {
+    const handlePress = () => {
+        if (onPress) {
+            onPress();
+        } else {
+            router.push(`/recipe/${recipe.id}`);
+        }
+    };
+
     return (
-        <TouchableOpacity style={styles.container} onPress={onPress}>
+        <TouchableOpacity style={styles.container} onPress={handlePress}>
             <Image source={{ uri: recipe.image }} style={styles.image} />
             <View style={styles.content}>
                 <Text style={styles.title} numberOfLines={2}>{recipe.title}</Text>

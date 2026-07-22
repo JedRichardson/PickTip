@@ -13,7 +13,7 @@ import { useMealLog } from '../context/MealLogContext';
 import { useSmartFoodSuggestions } from '../hooks/useSmartFoodSuggestions';
 import { useUser } from '../context/UserContext';
 import { useWorkoutLog, LoggedWorkout } from '../context/WorkoutLogContext';
-import { FoodSuggestionCard } from '../components/food-suggestion-card';
+import { RecipeCard } from '../components/recipe-card';
 import { Alert } from 'react-native';
 
 const { width } = Dimensions.get('window');
@@ -121,12 +121,10 @@ export default function NutritionDashboard() {
                     <Text style={styles.sectionTitle}>Smart Suggestions</Text>
                     <Text style={styles.sectionSubtitle}>Recommended for your next meal</Text>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.suggestionsScroll}>
-                        {smartSuggestions.map(food => (
-                            <View key={food.id} style={styles.suggestionWrapper}>
-                                <FoodSuggestionCard
-                                    food={food}
-                                    onPress={() => router.push(`/nutrition?intensity=${food.pairingIntensity}`)}
-                                    onLog={() => handleQuickLog(food)}
+                        {smartSuggestions.map(recipe => (
+                            <View key={recipe.id} style={styles.suggestionWrapper}>
+                                <RecipeCard
+                                    recipe={recipe}
                                 />
                             </View>
                         ))}

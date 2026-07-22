@@ -1,0 +1,5 @@
+- `[ ]` Update `MealLogContext.tsx` to support Spoonacular recipe logging
+- `[ ]` Create Recipe Detail Screen (`src/app/recipe/[id].tsx`)
+- `[ ]` Update `RecipeCard.tsx` to navigate to details
+- `[ ]` Update `useSmartFoodSuggestions.ts` to use real-time API data
+- `[ ]` Final UI polish and verification

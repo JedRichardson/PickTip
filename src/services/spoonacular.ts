@@ -1,5 +1,7 @@
-const API_KEY = 'd57e0c0d4cc04530bc651135d558ef93';
-const BASE_URL = 'https://api.spoonacular.com/recipes';
+import { SPOONACULAR_API_KEY, SPOONACULAR_BASE_URL } from '../api/picktipApi';
+
+const API_KEY = SPOONACULAR_API_KEY;
+const BASE_URL = SPOONACULAR_BASE_URL;
 
 export interface SpoonacularRecipe {
     id: number;
