@@ -123,7 +123,6 @@ export default function NutritionScreen() {
                             <RecipeCard
                                 key={recipe.id}
                                 recipe={recipe}
-                                onPress={() => {}}
                             />
                         ))}
                     </ScrollView>

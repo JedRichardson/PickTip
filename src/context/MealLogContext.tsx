@@ -86,7 +86,7 @@ export const MealLogProvider = ({ children }: { children: ReactNode }) => {
     const logMeal = async (food: Food, quantity: number = 1) => {
         const newLog: LoggedMeal = {
             logId: Date.now().toString(),
-            foodId: food.id,
+            foodId: String(food.id),
             name: food.name,
             calories: (food.calories || 0) * quantity,
             protein: (food.protein || 0) * quantity,

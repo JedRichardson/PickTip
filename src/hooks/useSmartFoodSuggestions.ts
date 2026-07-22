@@ -7,9 +7,11 @@ export const useSmartFoodSuggestions = () => {
     const { dailyTotals } = useMealLog();
     const { profile } = useUser();
     const [suggestions, setSuggestions] = useState<SpoonacularRecipe[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const getSuggestions = async () => {
+            setIsLoading(true);
             const hour = new Date().getHours();
             let mealType: string;
 
@@ -33,11 +35,13 @@ export const useSmartFoodSuggestions = () => {
                 setSuggestions(results);
             } catch (error) {
                 console.error('Smart Suggestions Error:', error);
+            } finally {
+                setIsLoading(false);
             }
         };
 
         getSuggestions();
     }, [profile.dietaryPreference, dailyTotals.protein < profile.goals.protein * 0.5]);
 
-    return suggestions;
+    return { suggestions, isLoading };
 };

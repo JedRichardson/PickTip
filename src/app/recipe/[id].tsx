@@ -85,6 +85,12 @@ export default function RecipeDetailScreen() {
                 <View style={styles.content}>
                     <Text style={styles.title}>{recipe.title}</Text>
 
+                    {recipe.summary && (
+                        <Text style={styles.summary} numberOfLines={3}>
+                            {recipe.summary.replace(/<[^>]*>?/gm, '')}
+                        </Text>
+                    )}
+
                     <View style={styles.infoRow}>
                         <View style={styles.infoBox}>
                             <Text style={styles.infoValue}>{recipe.readyInMinutes}</Text>
@@ -164,7 +170,14 @@ const styles = StyleSheet.create({
         fontSize: 28,
         fontWeight: '800',
         color: '#1a1a1a',
+        marginBottom: 8,
+    },
+    summary: {
+        fontSize: 14,
+        color: '#666',
+        lineHeight: 20,
         marginBottom: 20,
+        fontStyle: 'italic',
     },
     infoRow: {
         flexDirection: 'row',

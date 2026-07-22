@@ -1,40 +1,32 @@
-# Walkthrough - Recipe Details & One-Tap Logging
+# Walkthrough - Fine-Tuning & Polish
 
-I have implemented a deep integration with the Spoonacular API, allowing users to view full recipe details and log their meals directly to the daily nutrition tracker.
+I have completed a "fine-tune" sweep across all the new features to ensure better performance, smoother UI transitions, and more robust data handling.
 
-## Changes Made
+## Refinements Made
 
-### 1. Recipe Detail Screen
-- Created a new dynamic route [recipe/[id].tsx](file:///C:/Users/neonw/AndroidStudioProjects/PickTip-Tristan/src/app/recipe/[id].tsx).
-- Features:
-    - High-quality recipe imagery.
-    - Preparation time and serving size.
-    - Full list of ingredients.
-    - Formatted cooking instructions.
-    - Macros summary (Calories, Protein).
+### 1. Enhanced Dashboard Experience
+- **Loading States**: Added a loading spinner to the "Smart Suggestions" section on the Dashboard. This prevents the UI from appearing empty or "jumping" when fetching live data from Spoonacular.
+- **Improved Hook Logic**: The `useSmartFoodSuggestions` hook now returns both the suggestions and a loading state, making it easier for the UI to respond to API delays.
 
-### 2. One-Tap Macro Logging
-- Updated [MealLogContext.tsx](file:///C:/Users/neonw/AndroidStudioProjects/PickTip-Tristan/src/context/MealLogContext.tsx) with `logSpoonacularRecipe`.
-- Added a "Log this Meal" button in the recipe details.
-- **Smart Parsing**: The app now automatically parses Spoonacular's string-based macros (e.g., "25g") into numbers to keep your daily totals accurate.
+### 2. Improved Recipe Details
+- **Recipe Summaries**: The [Recipe Detail Screen](file:///C:/Users/neonw/AndroidStudioProjects/PickTip-Tristan/src/app/recipe/[id].tsx) now displays a brief "summary" or overview of the dish at the top, giving users a quick idea of what they're looking at.
+- **Visual Polish**: Adjusted the spacing and typography for ingredients and instructions to make them more readable.
+- **Navigation Fix**: Enabled seamless navigation from the "Suggested Meals" list on the Nutrition screen to the recipe details.
 
-### 3. Real-Time Smart Suggestions
-- Overhauled the [useSmartFoodSuggestions](file:///C:/Users/neonw/AndroidStudioProjects/PickTip-Tristan/src/hooks/useSmartFoodSuggestions.ts) hook.
-- The Dashboard now suggests **real recipes** from Spoonacular based on the time of day:
-    - 🍳 **Breakfast** in the morning.
-    - 🍲 **Main Courses** for lunch and dinner.
-    - 🍎 **Snacks** for other times.
-- Suggestions also adapt to your protein needs—if you're low on your daily goal, it prioritizes high-protein meals.
+### 3. Robust Data Handling
+- **Macro Parsing**: Refined the `parseMacro` function in [MealLogContext](file:///C:/Users/neonw/AndroidStudioProjects/PickTip-Tristan/src/context/MealLogContext.tsx) to be more resilient to different string formats from the Spoonacular API.
+- **Type Safety**: Ensured that all meal logging functions correctly handle ID types (converting numbers to strings where necessary) to prevent future crashes.
+- **Interface Expansion**: Added `summary` to the `SpoonacularRecipe` interface so it can be used consistently across the app.
 
-### 4. UI Polish
-- Updated [RecipeCard.tsx](file:///C:/Users/neonw/AndroidStudioProjects/PickTip-Tristan/src/components/recipe-card.tsx) to support seamless navigation.
-- Refreshed the [NutritionDashboard](file:///C:/Users/neonw/AndroidStudioProjects/PickTip-Tristan/src/app/dashboard.tsx) to display these live recipe suggestions.
+### 4. Code Cleanup
+- Removed redundant parameters and unused imports in several files.
+- Labeled API configurations more clearly in [picktipApi.ts](file:///C:/Users/neonw/AndroidStudioProjects/PickTip-Tristan/src/api/picktipApi.ts).
 
-## Verification
+## Verification Results
 
-- **Navigation**: Tapping any recipe card now correctly navigates to the detailed instructions.
-- **Data Integrity**: Verified that logging a meal from the detail screen correctly updates the "Food" and "Remaining" calories on the Dashboard.
-- **Contextual Suggestions**: Verified that suggestions change based on the system clock (simulated).
+- **UI Transitions**: Verified that the loading spinners appear and disappear correctly on both the Dashboard and Nutrition screens.
+- **Data Flow**: Verified that recipe summaries are correctly fetched and displayed.
+- **Logging**: Confirmed that logging a Spoonacular recipe still correctly updates the user's daily macro totals.
 
-> [!IMPORTANT]
-> The "Smart Suggestions" now require an internet connection as they fetch directly from the Spoonacular API. I've added error handling to ensure the app remains stable if the API is unreachable.
+> [!TIP]
+> The app is now fully integrated with live data. If you ever find the suggestions are slow, it might be worth checking your internet connection or ensuring your API key has enough remaining "points" for the day!

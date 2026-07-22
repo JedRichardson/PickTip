@@ -7,6 +7,7 @@ export interface SpoonacularRecipe {
     id: number;
     title: string;
     image: string;
+    summary?: string;
     calories?: number;
     protein?: string;
     fat?: string;
@@ -40,6 +41,7 @@ export const fetchRecommendations = async (params: {
             id: r.id,
             title: r.title,
             image: r.image,
+            summary: r.summary,
             calories: r.nutrition?.nutrients?.find((n: any) => n.name === 'Calories')?.amount,
             protein: r.nutrition?.nutrients?.find((n: any) => n.name === 'Protein')?.amount + 'g',
             fat: r.nutrition?.nutrients?.find((n: any) => n.name === 'Fat')?.amount + 'g',

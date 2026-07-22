@@ -22,7 +22,7 @@ export default function NutritionDashboard() {
     const { mealLogs, dailyTotals, removeLog, logMeal, logWater } = useMealLog();
     const { profile } = useUser();
     const { workouts, dailyTotalCalories, removeWorkout } = useWorkoutLog();
-    const smartSuggestions = useSmartFoodSuggestions();
+    const { suggestions: smartSuggestions, isLoading: suggestionsLoading } = useSmartFoodSuggestions();
 
     const WATER_GOAL = 2500; // ml
     const CALORIE_BUDGET = profile.goals.calories + dailyTotalCalories;
@@ -120,15 +120,21 @@ export default function NutritionDashboard() {
                 <View style={styles.suggestionsSection}>
                     <Text style={styles.sectionTitle}>Smart Suggestions</Text>
                     <Text style={styles.sectionSubtitle}>Recommended for your next meal</Text>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.suggestionsScroll}>
-                        {smartSuggestions.map(recipe => (
-                            <View key={recipe.id} style={styles.suggestionWrapper}>
-                                <RecipeCard
-                                    recipe={recipe}
-                                />
-                            </View>
-                        ))}
-                    </ScrollView>
+                    {suggestionsLoading ? (
+                        <View style={styles.loadingSuggestions}>
+                            <ActivityIndicator color="#4D7A20" />
+                        </View>
+                    ) : (
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.suggestionsScroll}>
+                            {smartSuggestions.map(recipe => (
+                                <View key={recipe.id} style={styles.suggestionWrapper}>
+                                    <RecipeCard
+                                        recipe={recipe}
+                                    />
+                                </View>
+                            ))}
+                        </ScrollView>
+                    )}
                 </View>
 
                 <View style={styles.logsSection}>
@@ -373,6 +379,11 @@ const styles = StyleSheet.create({
     suggestionsScroll: {
         paddingLeft: 4,
         paddingRight: 16,
+    },
+    loadingSuggestions: {
+        height: 150,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     suggestionWrapper: {
         width: width * 0.75,
