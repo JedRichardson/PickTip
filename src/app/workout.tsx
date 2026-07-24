@@ -1,294 +1,761 @@
-import { useCallback, useEffect, useState } from 'react';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
+
 import {
-    ActivityIndicator,
+    useLocalSearchParams,
+    router
+} from 'expo-router';
+
+
+import {
     StyleSheet,
     Text,
     TouchableOpacity,
     View,
 } from 'react-native';
+
+
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import {
-    Exercise,
-    getExercises,
-} from '../api/picktipApi';
 
-const categoryMuscles = {
-    legs: ['quadriceps', 'hamstrings', 'glutes', 'calves'],
-    arms: ['biceps', 'triceps', 'forearms'],
-    core: ['abdominals', 'lower_back'],
-    fullBody: [
-        'quadriceps',
-        'hamstrings',
-        'glutes',
-        'chest',
-        'lats',
-        'biceps',
-        'triceps',
-        'abdominals',
-    ],
-} as const;
+// ==========================================
+// ADDED:
+// PickTip gradient background.
+// ==========================================
+import { LinearGradient } from 'expo-linear-gradient';
 
-type WorkoutCategory = keyof typeof categoryMuscles;
+
+
+import { workouts } from '../data/workouts';
+
+import { useWorkoutLog } from '../context/WorkoutLogContext';
+
+
+
+
+
+
 
 export default function WorkoutScreen() {
-    const { category } = useLocalSearchParams<{
-        category?: string | string[];
-    }>();
 
-    const [workout, setWorkout] = useState<Exercise | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState('');
+
+    const { category } = useLocalSearchParams();
+
+
+
+    const { logWorkout } = useWorkoutLog();
+
+
+
+    const [
+        workout,
+        setWorkout
+    ] = useState<(typeof workouts)[number] | null>(null);
+
+
+
+
 
     const categoryParam = Array.isArray(category)
+
         ? category[0]
+
         : category;
 
-    const pickRandomWorkout = useCallback(async () => {
-        if (
-            !categoryParam ||
-            !(categoryParam in categoryMuscles)
-        ) {
+
+
+
+
+
+    const filtered = workouts.filter(
+
+        item => item.category === categoryParam
+
+    );
+
+
+
+
+
+
+    function pickRandomWorkout() {
+
+
+        if (filtered.length === 0) {
+
             setWorkout(null);
-            setError('That workout category was not found.');
-            setIsLoading(false);
+
             return;
+
         }
 
-        try {
-            setIsLoading(true);
-            setError('');
 
-            const selectedCategory =
-                categoryParam as WorkoutCategory;
 
-            const muscles = categoryMuscles[selectedCategory];
+        const randomIndex = Math.floor(
 
-            const randomMuscle =
-                muscles[
-                    Math.floor(Math.random() * muscles.length)
-                ];
+            Math.random() * filtered.length
 
-            const exercises = await getExercises(randomMuscle);
+        );
 
-            if (exercises.length === 0) {
-                setWorkout(null);
-                setError('No exercises were found. Please try again.');
-                return;
-            }
 
-            const randomIndex = Math.floor(
-                Math.random() * exercises.length
-            );
 
-            setWorkout(exercises[randomIndex]);
-        } catch (requestError) {
-            console.error(requestError);
-            setWorkout(null);
-            setError('Could not load a workout.');
-        } finally {
-            setIsLoading(false);
-        }
-    }, [categoryParam]);
+        setWorkout(filtered[randomIndex]);
+
+    }
+
+
+
+
+
+
 
     useEffect(() => {
+
+
         pickRandomWorkout();
-    }, [pickRandomWorkout]);
 
-    if (isLoading) {
-        return (
-            <SafeAreaView style={styles.container}>
-                <TouchableOpacity
-                    style={styles.backButton}
-                    onPress={() => router.back()}
-                >
-                    <Text style={styles.backButtonText}>
-                        ← Back
-                    </Text>
-                </TouchableOpacity>
 
-                <ActivityIndicator size="large" />
+    }, [categoryParam]);
 
-                <Text style={styles.loadingText}>
-                    Picking a workout...
-                </Text>
-            </SafeAreaView>
-        );
-    }
+
+
+
+
+
+
+
+
+    const handleFinishWorkout = async () => {
+
+
+        if (workout) {
+
+
+            await logWorkout({
+
+                name: workout.name,
+
+                duration: workout.duration,
+
+                intensity: workout.intensity,
+
+                calories: parseInt(workout.calories),
+
+            });
+
+
+
+
+            router.push(
+
+                `/nutrition?intensity=${encodeURIComponent(workout.intensity)}&category=${encodeURIComponent(workout.category)}`
+
+            );
+
+
+        }
+
+
+    };
+
+
+
+
+
+
+
+
 
     if (!workout) {
+
+
         return (
-            <SafeAreaView style={styles.container}>
-                <TouchableOpacity
-                    style={styles.backButton}
-                    onPress={() => router.back()}
-                >
-                    <Text style={styles.backButtonText}>
-                        ← Back
-                    </Text>
-                </TouchableOpacity>
 
-                <Text style={styles.title}>
-                    No workout found
-                </Text>
 
-                <Text style={styles.description}>
-                    {error ||
-                        'Please go back and choose another category.'}
-                </Text>
+            <LinearGradient
 
-                <TouchableOpacity
-                    style={styles.rerollButton}
-                    onPress={pickRandomWorkout}
-                >
-                    <Text style={styles.rerollButtonText}>
-                        Try Again
-                    </Text>
-                </TouchableOpacity>
-            </SafeAreaView>
+                colors={[
+                    '#78B63C',
+                    '#4D7A20',
+                    '#355817'
+                ]}
+
+                style={styles.gradient}
+
+            >
+
+
+                <SafeAreaView style={styles.container}>
+
+
+                    <TouchableOpacity
+
+                        style={styles.backButton}
+
+                        onPress={() => router.back()}
+
+                    >
+
+                        <Text style={styles.backButtonText}>
+
+                            Back
+
+                        </Text>
+
+
+                    </TouchableOpacity>
+
+
+
+
+
+
+                    <View style={styles.emptyCard}>
+
+
+                        <Text style={styles.title}>
+
+                            No workouts found.
+
+                        </Text>
+
+
+
+                        <Text style={styles.description}>
+
+                            Please go back and choose another category.
+
+                        </Text>
+
+
+                    </View>
+
+
+
+                </SafeAreaView>
+
+
+            </LinearGradient>
+
+
         );
+
+
     }
 
+
+
+
+
+
+
+
+
     return (
-        <SafeAreaView style={styles.container}>
-            <TouchableOpacity
-                style={styles.backButton}
-                onPress={() => router.back()}
-            >
-                <Text style={styles.backButtonText}>
-                    ← Back
-                </Text>
-            </TouchableOpacity>
 
-            <View style={styles.card}>
-                <Text style={styles.title}>
-                    {workout.name}
-                </Text>
 
-                <Text style={styles.detail}>
-                    Muscle: {workout.muscle}
-                </Text>
+        // ==========================================
+        // CHANGED:
+        // Added consistent PickTip gradient.
+        // ==========================================
 
-                <Text style={styles.detail}>
-                    Type: {workout.type}
-                </Text>
+        <LinearGradient
 
-                <Text style={styles.detail}>
-                    Equipment: {workout.equipment}
-                </Text>
 
-                <Text style={styles.detail}>
-                    Difficulty: {workout.difficulty}
-                </Text>
+            colors={[
+                '#78B63C',
+                '#4D7A20',
+                '#355817'
+            ]}
 
-                <Text style={styles.description}>
-                    {workout.instructions}
-                </Text>
-            </View>
 
-            <TouchableOpacity
-                style={styles.rerollButton}
-                onPress={pickRandomWorkout}
-                disabled={isLoading}
-            >
-                <Text style={styles.rerollButtonText}>
-                    Reroll Workout
-                </Text>
-            </TouchableOpacity>
 
-            <TouchableOpacity
-                style={styles.button}
-                onPress={() =>
-                    router.push(
-                        `/nutrition?intensity=${encodeURIComponent(
-                            workout.difficulty
-                        )}`
-                    )
-                }
-            >
-                <Text style={styles.buttonText}>
-                    View Nutrition Tips
-                </Text>
-            </TouchableOpacity>
-        </SafeAreaView>
+            style={styles.gradient}
+
+
+        >
+
+
+            <SafeAreaView style={styles.container}>
+
+
+                <TouchableOpacity
+
+                    style={styles.backButton}
+
+                    onPress={() => router.back()}
+
+                >
+
+                    <Text style={styles.backButtonText}>
+
+                        Back
+
+                    </Text>
+
+
+                </TouchableOpacity>
+
+
+
+
+
+
+
+                <View style={styles.card}>
+
+
+                    <Text style={styles.title}>
+
+                        {workout.name}
+
+                    </Text>
+
+
+
+
+
+
+                    <View style={styles.infoBox}>
+
+
+                        <Text style={styles.detail}>
+
+                            Duration: {workout.duration}
+
+                        </Text>
+
+
+
+
+                        <Text style={styles.detail}>
+
+                            Intensity: {workout.intensity}
+
+                        </Text>
+
+
+                    </View>
+
+
+
+
+
+
+                    <Text style={styles.description}>
+
+                        {workout.description}
+
+                    </Text>
+
+
+
+                </View>
+
+
+
+
+
+
+
+
+                <TouchableOpacity
+
+
+                    style={styles.rerollButton}
+
+
+                    onPress={pickRandomWorkout}
+
+
+                >
+
+                    <Text style={styles.rerollButtonText}>
+
+                        Try Another Workout
+
+                    </Text>
+
+
+                </TouchableOpacity>
+
+
+
+
+
+
+
+
+                <TouchableOpacity
+
+
+                    style={styles.button}
+
+
+                    onPress={handleFinishWorkout}
+
+
+                >
+
+                    <Text style={styles.buttonText}>
+
+                        Finish Workout
+
+                    </Text>
+
+
+                </TouchableOpacity>
+
+
+
+            </SafeAreaView>
+
+
+        </LinearGradient>
+
+
     );
+
 }
 
+
+
+
+
+
+
+
 const styles = StyleSheet.create({
-    container: {
+
+
+    // ==========================================
+    // ADDED:
+    // Full PickTip background.
+    // ==========================================
+
+    gradient: {
+
         flex: 1,
-        justifyContent: 'center',
-        padding: 24,
+
     },
+
+
+
+
+
+    container: {
+
+
+        flex: 1,
+
+
+        justifyContent: 'center',
+
+
+        padding: 24,
+
+
+    },
+
+
+
+
+
+
+
+    // ==========================================
+    // CHANGED:
+    // Floating back button.
+    // ==========================================
 
     backButton: {
+
+
         position: 'absolute',
+
+
         top: 60,
+
+
         left: 24,
+
+
+        backgroundColor: 'rgba(255,255,255,.2)',
+
+
+        paddingHorizontal: 16,
+
+
         paddingVertical: 10,
-        paddingHorizontal: 14,
+
+
+        borderRadius: 20,
+
+
     },
+
+
+
+
 
     backButtonText: {
-        color: '#4D7A20',
+
+
+        color: '#FFFFFF',
+
+
         fontSize: 16,
-        fontWeight: '700',
+
+
+        fontWeight: '800',
+
+
     },
+
+
+
+
+
+
 
     card: {
-        backgroundColor: '#F5F5F5',
-        borderRadius: 20,
-        padding: 24,
+
+
+        backgroundColor: '#FFFFFF',
+
+
+        borderRadius: 28,
+
+
+        padding: 26,
+
+
+
+        shadowColor: '#000',
+
+
+        shadowOffset: {
+
+
+            width: 0,
+
+
+            height: 8,
+
+
+        },
+
+
+        shadowOpacity: .18,
+
+
+        shadowRadius: 15,
+
+
+        elevation: 8,
+
+
     },
+
+
+
+
+
+
+
+    emptyCard: {
+
+
+        backgroundColor: '#FFFFFF',
+
+
+        padding: 25,
+
+
+        borderRadius: 25,
+
+
+    },
+
+
+
+
+
+
 
     title: {
+
+
         fontSize: 32,
-        fontWeight: '700',
-        marginBottom: 16,
+
+
+        fontWeight: '800',
+
+
+        color: '#355817',
+
+
+        marginBottom: 18,
+
+
     },
+
+
+
+
+
+
+
+    infoBox: {
+
+
+        backgroundColor: '#EEF7E8',
+
+
+        padding: 16,
+
+
+        borderRadius: 18,
+
+
+        marginBottom: 16,
+
+
+    },
+
+
+
+
+
 
     detail: {
-        fontSize: 18,
+
+
+        fontSize: 17,
+
+
+        fontWeight: '700',
+
+
+        color: '#4D7A20',
+
+
         marginBottom: 8,
+
+
     },
+
+
+
+
+
+
 
     description: {
+
+
         fontSize: 16,
-        lineHeight: 22,
-        marginTop: 12,
+
+
+        color: '#555',
+
+
+        lineHeight: 24,
+
+
     },
+
+
+
+
+
+
 
     rerollButton: {
-        borderColor: '#4D7A20',
-        borderWidth: 2,
+
+
+        backgroundColor: '#FFFFFF',
+
+
         padding: 18,
-        borderRadius: 16,
-        marginTop: 30,
+
+
+        borderRadius: 18,
+
+
+        marginTop: 28,
+
+
+
     },
+
+
+
+
+
 
     rerollButtonText: {
-        color: '#4D7A20',
+
+
         textAlign: 'center',
-        fontWeight: '700',
+
+
+        color: '#4D7A20',
+
+
+        fontWeight: '800',
+
+
+        fontSize: 16,
+
+
     },
+
+
+
+
+
+
+
 
     button: {
-        backgroundColor: '#4D7A20',
+
+
+        backgroundColor: '#FFFFFF',
+
+
         padding: 18,
-        borderRadius: 16,
+
+
+        borderRadius: 18,
+
+
         marginTop: 14,
+
+
     },
+
+
+
+
+
+
 
     buttonText: {
-        color: '#fff',
+
+
+        color: '#4D7A20',
+
+
         textAlign: 'center',
-        fontWeight: '700',
+
+
+        fontWeight: '900',
+
+
+        fontSize: 17,
+
+
     },
 
-    loadingText: {
-        fontSize: 16,
-        textAlign: 'center',
-        marginTop: 16,
-    },
+
 });

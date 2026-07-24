@@ -25,7 +25,8 @@ export default function RootLayout() {
                         <BottomNav />
                     </View>
                 </SavedNutritionProvider>
-            </MealLogProvider>
+                </MealLogProvider>
+                </WorkoutLogProvider>
         </UserProvider>
     );
 }
