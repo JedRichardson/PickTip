@@ -1,47 +1,37 @@
-import { useState, useEffect } from 'react';
-import { fetchRecommendations, SpoonacularRecipe } from '../services/spoonacular';
+import { useMemo } from 'react';
+import { foodItems, Food } from '../data/nutrition';
 import { useMealLog } from '../context/MealLogContext';
 import { useUser } from '../context/UserContext';
 
 export const useSmartFoodSuggestions = () => {
     const { dailyTotals } = useMealLog();
     const { profile } = useUser();
-    const [suggestions, setSuggestions] = useState<SpoonacularRecipe[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => {
-        const getSuggestions = async () => {
-            setIsLoading(true);
-            const hour = new Date().getHours();
-            let mealType: string;
+    return useMemo(() => {
+        const hour = new Date().getHours();
+        let targetMealType: 'Breakfast' | 'Lunch' | 'Dinner' | 'Snack';
 
-            if (hour >= 5 && hour < 11) mealType = 'breakfast';
-            else if (hour >= 11 && hour < 15) mealType = 'main course';
-            else if (hour >= 15 && hour < 22) mealType = 'main course';
-            else mealType = 'snack';
+        if (hour >= 5 && hour < 11) targetMealType = 'Breakfast';
+        else if (hour >= 11 && hour < 15) targetMealType = 'Lunch';
+        else if (hour >= 15 && hour < 22) targetMealType = 'Dinner';
+        else targetMealType = 'Snack';
 
-            try {
-                // Determine protein priority
-                const proteinGap = profile.goals.protein - dailyTotals.protein;
-                const minProtein = proteinGap > 50 ? 30 : 15;
+        // Filter by dietary preference first
+        let suggestions = foodItems;
+        if (profile.dietaryPreference !== 'None') {
+            suggestions = suggestions.filter(item =>
+                item.dietaryLabels.includes(profile.dietaryPreference)
+            );
+        }
 
-                const results = await fetchRecommendations({
-                    diet: profile.dietaryPreference === 'None' ? undefined : profile.dietaryPreference,
-                    type: mealType,
-                    minProtein: minProtein,
-                    number: 3
-                });
+        // Filter by meal type
+        suggestions = suggestions.filter(item => item.mealType === targetMealType);
 
-                setSuggestions(results);
-            } catch (error) {
-                console.error('Smart Suggestions Error:', error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
+        // If we are low on protein, prioritize high protein foods
+        if (dailyTotals.protein < profile.goals.protein * 0.5) {
+            suggestions.sort((a, b) => b.protein - a.protein);
+        }
 
-        getSuggestions();
-    }, [profile.dietaryPreference, dailyTotals.protein < profile.goals.protein * 0.5]);
-
-    return { suggestions, isLoading };
+        return suggestions.slice(0, 3); // Return top 3
+    }, [dailyTotals, profile]);
 };

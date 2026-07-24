@@ -1,7 +1,6 @@
 import { router } from 'expo-router';
 
 import {
-   // SafeAreaView,
     StyleSheet,
     Text,
     TouchableOpacity,
