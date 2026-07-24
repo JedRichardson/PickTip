@@ -1,6 +1,6 @@
 const API_URL = "https://api.api-ninjas.com/v1/exercises";
 
-const API_KEY = process.env.EXPO_PUBLIC_API_NINJAS_KEY;
+const API_KEY = process.env.EXPO_PUBLIC_API_NINJAS_KEY || 'SkBU3mf8WLH2z6ClFSuH9T4qURvqgFYcFpf5ch2a';
 
 // Spoonacular API Configuration
 export const SPOONACULAR_API_KEY = process.env.EXPO_PUBLIC_SPOONACULAR_API_KEY || 'd57e0c0d4cc04530bc651135d558ef93';
