@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
     ActivityIndicator,
+    ScrollView,
     StyleSheet,
     Text,
     TouchableOpacity,
@@ -129,23 +130,25 @@ export default function WorkoutScreen() {
                     </Text>
                 </TouchableOpacity>
 
-                <Text style={styles.title}>
-                    No workout found
-                </Text>
-
-                <Text style={styles.description}>
-                    {error ||
-                        'Please go back and choose another category.'}
-                </Text>
-
-                <TouchableOpacity
-                    style={styles.rerollButton}
-                    onPress={pickRandomWorkout}
-                >
-                    <Text style={styles.rerollButtonText}>
-                        Try Again
+                <View style={styles.emptyContent}>
+                    <Text style={styles.title}>
+                        No workout found
                     </Text>
-                </TouchableOpacity>
+
+                    <Text style={styles.description}>
+                        {error ||
+                            'Please go back and choose another category.'}
+                    </Text>
+
+                    <TouchableOpacity
+                        style={styles.rerollButton}
+                        onPress={pickRandomWorkout}
+                    >
+                        <Text style={styles.rerollButtonText}>
+                            Try Again
+                        </Text>
+                    </TouchableOpacity>
+                </View>
             </SafeAreaView>
         );
     }
@@ -161,71 +164,76 @@ export default function WorkoutScreen() {
                 </Text>
             </TouchableOpacity>
 
-            <View style={styles.card}>
-                <Text style={styles.title}>
-                    {workout.name}
-                </Text>
+            <ScrollView
+                style={styles.scrollView}
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator
+            >
+                <View style={styles.card}>
+                    <Text style={styles.title}>
+                        {workout.name}
+                    </Text>
 
-                <Text style={styles.detail}>
-                    Muscle: {workout.muscle}
-                </Text>
+                    <Text style={styles.detail}>
+                        Muscle: {workout.muscle}
+                    </Text>
 
-                <Text style={styles.detail}>
-                    Type: {workout.type}
-                </Text>
+                    <Text style={styles.detail}>
+                        Type: {workout.type}
+                    </Text>
 
-                <Text style={styles.detail}>
-                    Equipment: {workout.equipment}
-                </Text>
+                    <Text style={styles.detail}>
+                        Equipment: {workout.equipment}
+                    </Text>
 
-                <Text style={styles.detail}>
-                    Difficulty: {workout.difficulty}
-                </Text>
+                    <Text style={styles.detail}>
+                        Difficulty: {workout.difficulty}
+                    </Text>
 
-                <Text style={styles.description}>
-                    {workout.instructions}
-                </Text>
+                    <Text style={styles.description}>
+                        {workout.instructions}
+                    </Text>
+                </View>
+            </ScrollView>
+
+            <View style={styles.actions}>
+                <TouchableOpacity
+                    style={styles.rerollButton}
+                    onPress={pickRandomWorkout}
+                    disabled={isLoading}
+                >
+                    <Text style={styles.rerollButtonText}>
+                        Reroll Workout
+                    </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={() =>
+                        router.push(
+                            `/nutrition?intensity=${encodeURIComponent(
+                                workout.difficulty
+                            )}`
+                        )
+                    }
+                >
+                    <Text style={styles.buttonText}>
+                        View Nutrition Tips
+                    </Text>
+                </TouchableOpacity>
             </View>
-
-            <TouchableOpacity
-                style={styles.rerollButton}
-                onPress={pickRandomWorkout}
-                disabled={isLoading}
-            >
-                <Text style={styles.rerollButtonText}>
-                    Reroll Workout
-                </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-                style={styles.button}
-                onPress={() =>
-                    router.push(
-                        `/nutrition?intensity=${encodeURIComponent(
-                            workout.difficulty
-                        )}`
-                    )
-                }
-            >
-                <Text style={styles.buttonText}>
-                    View Nutrition Tips
-                </Text>
-            </TouchableOpacity>
         </SafeAreaView>
     );
-}
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
-        padding: 24,
+        paddingHorizontal: 24,
+        backgroundColor: '#FFFFFF',
     },
 
     backButton: {
-        position: 'absolute',
-        top: 60,
-        left: 24,
+        alignSelf: 'flex-start',
         paddingVertical: 10,
         paddingHorizontal: 14,
     },
@@ -264,7 +272,6 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         padding: 18,
         borderRadius: 16,
-        marginTop: 30,
     },
 
     rerollButtonText: {
@@ -290,5 +297,25 @@ const styles = StyleSheet.create({
         fontSize: 16,
         textAlign: 'center',
         marginTop: 16,
+    },
+
+    scrollView: {
+        flex: 1,
+    },
+
+    scrollContent: {
+        flexGrow: 1,
+        justifyContent: 'center',
+        paddingVertical: 12,
+    },
+
+    actions: {
+        paddingTop: 10,
+        paddingBottom: 12,
+    },
+
+    emptyContent: {
+        flex: 1,
+        justifyContent: 'center',
     },
 });
