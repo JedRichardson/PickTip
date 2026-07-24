@@ -24,16 +24,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useMealLog } from '../context/MealLogContext';
 import { useSmartFoodSuggestions } from '../hooks/useSmartFoodSuggestions';
 import { useUser } from '../context/UserContext';
-import { useWorkoutLog, LoggedWorkout } from '../context/WorkoutLogContext';
-import { RecipeCard } from '../components/recipe-card';
-import { Alert } from 'react-native';
+import { useWorkoutLog } from '../context/WorkoutLogContext';
+
+import { FoodSuggestionCard } from '../components/food-suggestion-card';
 
 
-export default function NutritionDashboard() {
-    const { mealLogs, dailyTotals, removeLog, logMeal, logWater } = useMealLog();
-    const { profile } = useUser();
-    const { workouts, dailyTotalCalories, removeWorkout } = useWorkoutLog();
-    const { suggestions: smartSuggestions, isLoading: suggestionsLoading } = useSmartFoodSuggestions();
 
 const { width } = Dimensions.get('window');
 
@@ -874,25 +869,6 @@ export default function NutritionDashboard() {
 
                     </View>
 
-                <View style={styles.suggestionsSection}>
-                    <Text style={styles.sectionTitle}>Smart Suggestions</Text>
-                    <Text style={styles.sectionSubtitle}>Recommended for your next meal</Text>
-                    {suggestionsLoading ? (
-                        <View style={styles.loadingSuggestions}>
-                            <ActivityIndicator color="#4D7A20" />
-                        </View>
-                    ) : (
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.suggestionsScroll}>
-                            {smartSuggestions.map(recipe => (
-                                <View key={recipe.id} style={styles.suggestionWrapper}>
-                                    <RecipeCard
-                                        recipe={recipe}
-                                    />
-                                </View>
-                            ))}
-                        </ScrollView>
-                    )}
-                </View>
 
 
 
@@ -1378,11 +1354,9 @@ const styles = StyleSheet.create({
         paddingRight: 20,
 
     },
-    loadingSuggestions: {
-        height: 150,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
+
+
+
     suggestionWrapper: {
 
         width: width * 0.75,
