@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Food } from '../data/nutrition';
+import { SpoonacularRecipe } from '../services/spoonacular';
 
 export interface LoggedMeal {
     logId: string;
@@ -17,6 +18,7 @@ export interface LoggedMeal {
 interface MealLogContextType {
     mealLogs: LoggedMeal[];
     logMeal: (food: Food, quantity?: number) => Promise<void>;
+    logSpoonacularRecipe: (recipe: SpoonacularRecipe, quantity?: number) => Promise<void>;
     removeLog: (logId: string) => Promise<void>;
     dailyTotals: {
         calories: number;
@@ -84,12 +86,35 @@ export const MealLogProvider = ({ children }: { children: ReactNode }) => {
     const logMeal = async (food: Food, quantity: number = 1) => {
         const newLog: LoggedMeal = {
             logId: Date.now().toString(),
-            foodId: food.id,
+            foodId: String(food.id),
             name: food.name,
-            calories: food.calories * quantity,
-            protein: food.protein * quantity,
-            carbs: food.carbs * quantity,
-            fat: food.fat * quantity,
+            calories: (food.calories || 0) * quantity,
+            protein: (food.protein || 0) * quantity,
+            carbs: (food.carbs || 0) * quantity,
+            fat: (food.fat || 0) * quantity,
+            timestamp: Date.now(),
+            quantity,
+        };
+
+        const updatedLogs = [newLog, ...mealLogs];
+        setMealLogs(updatedLogs);
+        await saveLogs(updatedLogs);
+    };
+
+    const parseMacro = (macro?: string): number => {
+        if (!macro) return 0;
+        return parseFloat(macro.replace(/[^\d.]/g, '')) || 0;
+    };
+
+    const logSpoonacularRecipe = async (recipe: SpoonacularRecipe, quantity: number = 1) => {
+        const newLog: LoggedMeal = {
+            logId: Date.now().toString(),
+            foodId: recipe.id.toString(),
+            name: recipe.title,
+            calories: (recipe.calories || 0) * quantity,
+            protein: parseMacro(recipe.protein) * quantity,
+            carbs: parseMacro(recipe.carbs) * quantity,
+            fat: parseMacro(recipe.fat) * quantity,
             timestamp: Date.now(),
             quantity,
         };
@@ -136,6 +161,7 @@ export const MealLogProvider = ({ children }: { children: ReactNode }) => {
             value={{
                 mealLogs,
                 logMeal,
+                logSpoonacularRecipe,
                 removeLog,
                 logWater,
                 dailyTotals: getDailyTotals(),
