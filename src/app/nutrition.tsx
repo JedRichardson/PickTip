@@ -1,223 +1,1603 @@
-import { useLocalSearchParams, router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import React, {
+    useState,
+    useMemo,
+    useEffect
+} from 'react';
+
+
 import {
     StyleSheet,
     Text,
     TouchableOpacity,
-    ScrollView,
-    ActivityIndicator,
     View,
+    FlatList,
+    TextInput,
+    Alert,
+    ScrollView,
 } from 'react-native';
+
+
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { fetchRecommendations, SpoonacularRecipe } from '../services/spoonacular';
+
+import {
+    useLocalSearchParams,
+    router
+} from 'expo-router';
+
+
+// ==========================================
+// ADDED:
+// PickTip gradient background.
+// ==========================================
+import { LinearGradient } from 'expo-linear-gradient';
+
+
+
+import { Food } from '../data/nutrition';
+
+import { useFoodSuggestions } from '../hooks/useFoodSuggestions';
+
+import { useSavedNutrition } from '../context/SavedNutritionContext';
+
+import { useMealLog } from '../context/MealLogContext';
+
 import { useUser } from '../context/UserContext';
+
+import {
+    fetchRecommendations,
+    SpoonacularRecipe
+} from '../services/spoonacular';
+
+
 import { RecipeCard } from '../components/recipe-card';
-import { nutritionRecommendations } from '../data/nutrition';
+
+
+
+
 
 export default function NutritionScreen() {
-    const { intensity } = useLocalSearchParams();
+
+
+    const {
+        intensity,
+        category
+    } = useLocalSearchParams();
+
+
+
     const { profile } = useUser();
 
-    const [recipes, setRecipes] = useState<SpoonacularRecipe[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState('');
 
-    const intensityParam = Array.isArray(intensity) ? intensity[0] : (intensity || 'beginner');
+
+    const [
+        selectedMealType,
+        setSelectedMealType
+    ] = useState<string | undefined>(undefined);
+
+
+
+
+    const suggestions = useFoodSuggestions({
+
+        intensity,
+
+        category,
+
+        mealType: selectedMealType
+
+    });
+
+
+
+
+    const {
+        saveFood,
+        isSaved,
+        removeFood
+
+    } = useSavedNutrition();
+
+
+
+
+    const {
+        logMeal
+
+    } = useMealLog();
+
+
+
+
+
+    const [
+        searchQuery,
+        setSearchQuery
+
+    ] = useState('');
+
+
+
+
+    const [
+        globalRecipes,
+        setGlobalRecipes
+
+    ] = useState<SpoonacularRecipe[]>([]);
+
+
+
+
+    const [
+        isLoadingRecipes,
+        setIsLoadingRecipes
+
+    ] = useState(false);
+
+
+
+
+
+    const mealTypes = [
+
+        'Breakfast',
+
+        'Lunch',
+
+        'Dinner',
+
+        'Snack'
+
+    ];
+
+
+
+
 
     useEffect(() => {
-        const loadRecipes = async () => {
-            try {
-                setIsLoading(true);
-                setError('');
 
-                // Map intensity to nutrition targets
-                let minProtein = 15;
-                let maxCalories = 500;
+        loadGlobalRecipes();
 
-                if (intensityParam.toLowerCase() === 'expert' || intensityParam === 'High') {
-                    minProtein = 30;
-                    maxCalories = 800;
-                } else if (intensityParam.toLowerCase() === 'intermediate' || intensityParam === 'Medium') {
-                    minProtein = 20;
-                    maxCalories = 600;
-                }
+    }, [
+        intensity,
+        selectedMealType,
+        profile.dietaryPreference
+    ]);
 
-                const results = await fetchRecommendations({
-                    diet: profile.dietaryPreference === 'None' ? undefined : profile.dietaryPreference,
-                    minProtein,
-                    maxCalories,
-                    number: 5
-                });
 
-                setRecipes(results);
-            } catch (err) {
-                console.error(err);
-                setError('Failed to load meal recommendations.');
-            } finally {
-                setIsLoading(false);
-            }
-        };
 
-        loadRecipes();
-    }, [intensityParam, profile.dietaryPreference]);
 
-    // Mapping for fallback tips
-    const mapping: Record<string, string> = {
-        'beginner': 'Low',
-        'intermediate': 'Medium',
-        'expert': 'High'
+
+    const loadGlobalRecipes = async () => {
+
+
+        setIsLoadingRecipes(true);
+
+
+
+        let minProtein = 10;
+
+        let maxCalories = 800;
+
+
+
+        if (intensity === 'High') {
+
+            minProtein = 30;
+
+            maxCalories = 1000;
+
+
+        }
+
+        else if (intensity === 'Low') {
+
+            minProtein = 5;
+
+            maxCalories = 400;
+
+        }
+
+
+
+
+        const recipes = await fetchRecommendations({
+
+            diet: profile.dietaryPreference,
+
+            minProtein,
+
+            maxCalories,
+
+            type: selectedMealType?.toLowerCase(),
+
+            number: 10
+
+        });
+
+
+
+
+        setGlobalRecipes(recipes);
+
+
+
+        setIsLoadingRecipes(false);
+
+
     };
 
-    const fallbackKey = mapping[intensityParam.toLowerCase()] || intensityParam;
-    const nutrition = nutritionRecommendations[fallbackKey as keyof typeof nutritionRecommendations];
 
-    return (
-        <SafeAreaView style={styles.container}>
-            <TouchableOpacity
-                style={styles.backButton}
-                onPress={() => router.back()}
-            >
-                <Text style={styles.backButtonText}>← Back</Text>
-            </TouchableOpacity>
 
-            <ScrollView contentContainerStyle={styles.scrollContent}>
-                <Text style={styles.title}>Recommended Fuel</Text>
-                <Text style={styles.subtitle}>Tailored for your {intensityParam} workout</Text>
 
-                {nutrition && (
-                    <View style={styles.tipsCard}>
-                        <Text style={styles.sectionTitle}>General Guidelines</Text>
-                        <View style={styles.tipRow}>
-                            <Text style={styles.tipLabel}>Protein:</Text>
-                            <Text style={styles.tipValue}>{nutrition.protein}</Text>
-                        </View>
-                        <View style={styles.tipRow}>
-                            <Text style={styles.tipLabel}>Carbs:</Text>
-                            <Text style={styles.tipValue}>{nutrition.carbs}</Text>
-                        </View>
-                        <View style={styles.tipRow}>
-                            <Text style={styles.tipLabel}>Hydration:</Text>
-                            <Text style={styles.tipValue}>{nutrition.hydration}</Text>
-                        </View>
+
+
+
+    const filteredSuggestions = useMemo(() => {
+
+
+        if (!searchQuery)
+
+            return suggestions;
+
+
+
+
+        return suggestions.filter(item =>
+
+
+            item.name
+
+                .toLowerCase()
+
+                .includes(
+                    searchQuery.toLowerCase()
+                )
+
+
+
+            ||
+
+            item.description
+
+                .toLowerCase()
+
+                .includes(
+                    searchQuery.toLowerCase()
+                )
+
+
+
+            ||
+
+            item.dietaryLabels.some(label =>
+
+                label
+
+                    .toLowerCase()
+
+                    .includes(
+                        searchQuery.toLowerCase()
+                    )
+
+            )
+
+
+        );
+
+
+    }, [
+        suggestions,
+        searchQuery
+    ]);
+
+
+
+
+
+
+
+    const handleLogMeal = async (item: Food) => {
+
+
+        await logMeal(item);
+
+
+
+        Alert.alert(
+
+            'Success',
+
+            `${item.name} has been logged to your dashboard!`
+
+        );
+
+
+    };
+
+
+
+
+
+
+
+    const renderFoodItem = ({
+        item
+    }: {
+        item: Food
+    }) => {
+
+
+        const saved = isSaved(item.id);
+
+
+
+
+        return (
+
+
+            <View style={styles.card}>
+
+
+                <View style={styles.cardHeader}>
+
+
+                    <View style={styles.nameContainer}>
+
+
+                        <Text style={styles.foodName}>
+
+                            {item.name}
+
+                        </Text>
+
+
+
+                        <Text style={styles.servingSize}>
+
+                            {item.servingSize}
+
+                        </Text>
+
+
                     </View>
-                )}
 
-                <Text style={styles.sectionTitle}>Suggested Meals</Text>
+
+
+
+
+                    <TouchableOpacity
+
+
+                        onPress={() =>
+
+                            saved
+
+                                ? removeFood(item.id)
+
+                                : saveFood(item)
+
+                        }
+
+
+                        style={[
+                            styles.saveButton,
+
+                            saved &&
+                            styles.savedButton
+
+                        ]}
+
+
+                    >
+
+                        <Text style={styles.saveButtonText}>
+
+                            {saved ? 'Saved' : 'Save'}
+
+                        </Text>
+
+
+                    </TouchableOpacity>
+
+
+                </View>
+
+
+
+
+
                 <Text style={styles.description}>
-                    Real-time suggestions based on your {profile.dietaryPreference !== 'None' ? profile.dietaryPreference : ''} preferences
+
+                    {item.description}
+
                 </Text>
 
-                {isLoading ? (
-                    <View style={styles.loaderContainer}>
-                        <ActivityIndicator size="large" color="#fff" />
-                        <Text style={styles.loadingText}>Fetching recipes...</Text>
+
+
+
+
+
+
+                <View style={styles.statsRow}>
+
+
+                    <View style={styles.stat}>
+
+                        <Text style={styles.statValue}>
+
+                            {item.calories}
+
+                        </Text>
+
+
+                        <Text style={styles.statLabel}>
+
+                            kcal
+
+                        </Text>
+
+
                     </View>
-                ) : error ? (
-                    <Text style={styles.errorText}>{error}</Text>
-                ) : recipes.length === 0 ? (
-                    <Text style={styles.errorText}>No specific recipes found for your criteria. Try adjusting your preferences in settings.</Text>
-                ) : (
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.recipeList}>
-                        {recipes.map(recipe => (
-                            <RecipeCard
-                                key={recipe.id}
-                                recipe={recipe}
-                            />
+
+
+
+
+                    <View style={styles.stat}>
+
+                        <Text style={styles.statValue}>
+
+                            {item.protein}g
+
+                        </Text>
+
+
+                        <Text style={styles.statLabel}>
+
+                            Protein
+
+                        </Text>
+
+
+                    </View>
+
+
+
+
+                    <View style={styles.stat}>
+
+                        <Text style={styles.statValue}>
+
+                            {item.carbs}g
+
+                        </Text>
+
+
+                        <Text style={styles.statLabel}>
+
+                            Carbs
+
+                        </Text>
+
+
+                    </View>
+
+
+
+
+                    <View style={styles.stat}>
+
+                        <Text style={styles.statValue}>
+
+                            {item.fat}g
+
+                        </Text>
+
+
+                        <Text style={styles.statLabel}>
+
+                            Fat
+
+                        </Text>
+
+
+                    </View>
+
+
+                </View>
+
+
+
+
+
+                <View style={styles.footerRow}>
+
+
+                    <View style={styles.labelContainer}>
+
+
+                        {item.dietaryLabels.map(label => (
+
+
+                            <View
+
+                                key={label}
+
+                                style={styles.label}
+
+                            >
+
+                                <Text style={styles.labelText}>
+
+                                    {label}
+
+                                </Text>
+
+
+                            </View>
+
+
                         ))}
-                    </ScrollView>
-                )}
-            </ScrollView>
-        </SafeAreaView>
+
+
+                    </View>
+
+
+
+
+
+                    <TouchableOpacity
+
+
+                        style={styles.logButton}
+
+
+                        onPress={() =>
+                            handleLogMeal(item)
+                        }
+
+
+                    >
+
+                        <Text style={styles.logButtonText}>
+
+                            Log Meal
+
+                        </Text>
+
+
+                    </TouchableOpacity>
+
+
+                </View>
+
+
+
+            </View>
+
+
+        );
+
+
+    };
+    return (
+
+        // ==========================================
+        // CHANGED:
+        // Added PickTip gradient theme.
+        // ==========================================
+        <LinearGradient
+
+            colors={[
+                '#78B63C',
+                '#4D7A20',
+                '#355817'
+            ]}
+
+            start={{
+                x: 0,
+                y: 0
+            }}
+
+            end={{
+                x: 1,
+                y: 1
+            }}
+
+            style={styles.gradient}
+
+        >
+
+
+            <SafeAreaView style={styles.container}>
+
+
+                {/* ==========================================
+                    CHANGED:
+                    Transparent header to blend with theme.
+                ========================================== */}
+
+                <View style={styles.header}>
+
+
+                    <View style={styles.topBar}>
+
+
+                        <TouchableOpacity
+
+                            onPress={() => router.back()}
+
+                        >
+
+                            <Text style={styles.backButton}>
+                                Back
+                            </Text>
+
+
+                        </TouchableOpacity>
+
+
+
+
+
+                        <TouchableOpacity
+
+                            onPress={() =>
+                                router.push('/dashboard')
+                            }
+
+                        >
+
+                            <Text style={styles.dashboardLink}>
+                                Dashboard
+                            </Text>
+
+
+                        </TouchableOpacity>
+
+
+                    </View>
+
+
+
+
+
+                    <Text style={styles.title}>
+                        Recommended Fuel
+                    </Text>
+
+
+
+                    <Text style={styles.subtitle}>
+                        Based on {intensity} intensity workout
+                    </Text>
+
+
+
+
+
+
+
+                    <TextInput
+
+                        style={styles.searchInput}
+
+                        placeholder="Search foods, ingredients, or diet..."
+
+                        placeholderTextColor="#888"
+
+                        value={searchQuery}
+
+                        onChangeText={setSearchQuery}
+
+                    />
+
+
+
+
+
+
+
+                    <View style={styles.filterContainer}>
+
+
+                        <ScrollView
+
+                            horizontal
+
+                            showsHorizontalScrollIndicator={false}
+
+                        >
+
+
+                            <TouchableOpacity
+
+                                style={[
+                                    styles.filterChip,
+
+                                    !selectedMealType &&
+                                    styles.activeFilterChip
+
+                                ]}
+
+
+                                onPress={() =>
+                                    setSelectedMealType(undefined)
+                                }
+
+                            >
+
+                                <Text
+
+                                    style={[
+                                        styles.filterChipText,
+
+                                        !selectedMealType &&
+                                        styles.activeFilterChipText
+
+                                    ]}
+
+                                >
+
+                                    All
+
+                                </Text>
+
+
+                            </TouchableOpacity>
+
+
+
+
+
+
+
+                            {mealTypes.map(type => (
+
+
+                                <TouchableOpacity
+
+
+                                    key={type}
+
+
+                                    style={[
+                                        styles.filterChip,
+
+                                        selectedMealType === type &&
+
+                                        styles.activeFilterChip
+
+                                    ]}
+
+
+
+                                    onPress={() =>
+                                        setSelectedMealType(type)
+                                    }
+
+
+                                >
+
+
+                                    <Text
+
+                                        style={[
+                                            styles.filterChipText,
+
+                                            selectedMealType === type &&
+
+                                            styles.activeFilterChipText
+
+                                        ]}
+
+                                    >
+
+                                        {type}
+
+                                    </Text>
+
+
+                                </TouchableOpacity>
+
+
+                            ))}
+
+
+
+                        </ScrollView>
+
+
+                    </View>
+
+
+                </View>
+
+
+
+
+
+
+
+                <FlatList
+
+
+                    data={filteredSuggestions}
+
+
+                    renderItem={renderFoodItem}
+
+
+                    keyExtractor={item => item.id}
+
+
+
+                    contentContainerStyle={styles.listContent}
+
+
+
+
+
+
+
+                    ListHeaderComponent={
+
+
+                        globalRecipes.length > 0 ? (
+
+
+
+                            <View style={styles.globalSection}>
+
+
+                                <Text style={styles.sectionTitle}>
+                                    Global Recipe Discoveries
+                                </Text>
+
+
+
+                                <Text style={styles.sectionSubtitle}>
+                                    Powered by Spoonacular
+                                </Text>
+
+
+
+
+
+
+                                <FlatList
+
+
+                                    horizontal
+
+
+                                    data={globalRecipes}
+
+
+
+                                    renderItem={({ item }) => (
+
+
+                                        <RecipeCard
+
+                                            recipe={item}
+
+                                            onPress={() =>
+
+                                                Alert.alert(
+
+                                                    item.title,
+
+                                                    'Recipe details integration coming soon!'
+
+                                                )
+
+                                            }
+
+                                        />
+
+
+                                    )}
+
+
+
+                                    keyExtractor={item =>
+                                        item.id.toString()
+                                    }
+
+
+
+                                    showsHorizontalScrollIndicator={false}
+
+
+                                    contentContainerStyle={
+                                        styles.horizontalList
+                                    }
+
+
+                                />
+
+
+
+
+
+                                <View style={styles.divider} />
+
+
+
+
+
+                                <Text style={styles.sectionTitle}>
+                                    Hand-picked Suggestions
+                                </Text>
+
+
+
+                            </View>
+
+
+
+                        ) : null
+
+
+                    }
+
+
+
+
+
+
+
+                    ListEmptyComponent={
+
+
+                        <Text style={styles.emptyText}>
+
+
+                            {
+                                searchQuery
+
+                                    ? 'No foods match your search.'
+
+                                    : 'No specific recommendations found for this intensity.'
+                            }
+
+
+                        </Text>
+
+
+                    }
+
+
+                />
+
+
+
+
+
+
+
+
+                <View style={styles.bottomButtons}>
+
+
+                    <TouchableOpacity
+
+                        style={styles.viewSavedButton}
+
+                        onPress={() =>
+                            router.push('/saved')
+                        }
+
+                    >
+
+                        <Text style={styles.viewSavedText}>
+                            Saved Items
+                        </Text>
+
+
+                    </TouchableOpacity>
+
+
+
+
+
+
+                    <TouchableOpacity
+
+
+                        style={[
+                            styles.viewSavedButton,
+
+                            styles.dashboardButton
+
+                        ]}
+
+
+
+                        onPress={() =>
+                            router.push('/dashboard')
+                        }
+
+
+                    >
+
+                        <Text style={styles.dashboardButtonText}>
+                            My Dashboard
+                        </Text>
+
+
+                    </TouchableOpacity>
+
+
+
+                </View>
+
+
+
+            </SafeAreaView>
+
+
+        </LinearGradient>
+
     );
 }
-
 const styles = StyleSheet.create({
+
+    // ==========================================
+    // ADDED:
+    // Full PickTip gradient background.
+    // ==========================================
+    gradient: {
+        flex: 1,
+    },
+
+
     container: {
         flex: 1,
-        backgroundColor: '#4D7A20',
     },
-    scrollContent: {
-        padding: 24,
-        paddingTop: 80,
+
+
+
+    header: {
+
+        paddingHorizontal: 22,
+
+        paddingTop: 15,
+
+        paddingBottom: 20,
+
     },
-    backButton: {
-        position: 'absolute',
-        top: 60,
-        left: 24,
-        zIndex: 10,
-        paddingVertical: 10,
-        paddingHorizontal: 14,
-    },
-    backButtonText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: '700',
-    },
-    title: {
-        fontSize: 36,
-        fontWeight: '800',
-        color: '#fff',
-    },
-    subtitle: {
-        fontSize: 18,
-        color: '#E8F5E9',
-        marginBottom: 24,
-        opacity: 0.9,
-    },
-    tipsCard: {
-        backgroundColor: 'rgba(255, 255, 255, 0.15)',
-        borderRadius: 20,
-        padding: 20,
-        marginBottom: 30,
-        borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.2)',
-    },
-    sectionTitle: {
-        fontSize: 22,
-        fontWeight: '700',
-        color: '#fff',
-        marginBottom: 16,
-    },
-    tipRow: {
+
+
+
+    topBar: {
+
         flexDirection: 'row',
-        marginBottom: 8,
+
+        justifyContent: 'space-between',
+
         alignItems: 'center',
+
+        marginBottom: 15,
+
     },
-    tipLabel: {
+
+
+
+    backButton: {
+
+        color: '#FFFFFF',
+
         fontSize: 16,
-        fontWeight: '600',
-        color: '#C8E6C9',
-        width: 80,
+
+        fontWeight: '700',
+
     },
-    tipValue: {
+
+
+
+    dashboardLink: {
+
+        color: '#355817',
+
+        backgroundColor: '#FFFFFF',
+
+        paddingHorizontal: 14,
+
+        paddingVertical: 8,
+
+        borderRadius: 20,
+
+        fontWeight: '800',
+
+    },
+
+
+
+    title: {
+
+        color: '#FFFFFF',
+
+        fontSize: 34,
+
+        fontWeight: '800',
+
+    },
+
+
+
+    subtitle: {
+
+        color: '#FFFFFF',
+
+        opacity: .85,
+
         fontSize: 16,
-        color: '#fff',
-        fontWeight: '500',
+
+        marginTop: 5,
+
+        marginBottom: 18,
+
     },
-    description: {
-        fontSize: 14,
-        color: '#E8F5E9',
+
+
+
+    searchInput: {
+
+        backgroundColor: '#FFFFFF',
+
+        borderRadius: 18,
+
+        padding: 14,
+
+        fontSize: 15,
+
+        color: '#333',
+
+    },
+
+
+
+    filterContainer: {
+
+        marginTop: 16,
+
+    },
+
+
+
+    filterChip: {
+
+        backgroundColor: 'rgba(255,255,255,.25)',
+
+        paddingHorizontal: 18,
+
+        paddingVertical: 9,
+
+        borderRadius: 20,
+
+        marginRight: 10,
+
+    },
+
+
+
+    activeFilterChip: {
+
+        backgroundColor: '#FFFFFF',
+
+    },
+
+
+
+    filterChipText: {
+
+        color: '#FFFFFF',
+
+        fontWeight: '700',
+
+    },
+
+
+
+    activeFilterChipText: {
+
+        color: '#355817',
+
+    },
+
+
+
+    listContent: {
+
+        paddingHorizontal: 20,
+
+        paddingBottom: 120,
+
+    },
+
+
+
+    card: {
+
+        backgroundColor: '#FFFFFF',
+
+        borderRadius: 24,
+
+        padding: 18,
+
         marginBottom: 16,
-        opacity: 0.8,
+
+
+        shadowColor: '#000',
+
+        shadowOffset: {
+            width: 0,
+            height: 7,
+        },
+
+        shadowOpacity: .15,
+
+        shadowRadius: 12,
+
+        elevation: 7,
+
     },
-    recipeList: {
-        flexGrow: 0,
-        marginBottom: 20,
+
+
+
+    cardHeader: {
+
+        flexDirection: 'row',
+
+        justifyContent: 'space-between',
+
+        alignItems: 'flex-start',
+
     },
-    loaderContainer: {
-        marginTop: 40,
+
+
+
+    nameContainer: {
+
+        flex: 1,
+
+    },
+
+
+
+    foodName: {
+
+        fontSize: 20,
+
+        fontWeight: '800',
+
+        color: '#355817',
+
+    },
+
+
+
+    servingSize: {
+
+        fontSize: 12,
+
+        color: '#777',
+
+        marginTop: 4,
+
+    },
+
+
+
+    saveButton: {
+
+        backgroundColor: '#EEF7E8',
+
+        paddingHorizontal: 12,
+
+        paddingVertical: 8,
+
+        borderRadius: 16,
+
+    },
+
+
+
+    savedButton: {
+
+        backgroundColor: '#4D7A20',
+
+    },
+
+
+
+    saveButtonText: {
+
+        color: '#4D7A20',
+
+        fontWeight: '800',
+
+        fontSize: 12,
+
+    },
+
+
+
+    description: {
+
+        marginTop: 14,
+
+        color: '#444',
+
+        lineHeight: 21,
+
+    },
+
+
+
+    statsRow: {
+
+        flexDirection: 'row',
+
+        justifyContent: 'space-between',
+
+        marginTop: 16,
+
+        paddingVertical: 12,
+
+        borderTopWidth: 1,
+
+        borderBottomWidth: 1,
+
+        borderColor: '#EEEEEE',
+
+    },
+
+
+
+    stat: {
+
         alignItems: 'center',
+
     },
-    loadingText: {
-        color: '#fff',
-        marginTop: 10,
-        fontSize: 16,
+
+
+
+    statValue: {
+
+        color: '#4D7A20',
+
+        fontWeight: '800',
+
+        fontSize: 17,
+
     },
-    errorText: {
-        color: '#FFCDD2',
+
+
+
+    statLabel: {
+
+        fontSize: 11,
+
+        color: '#777',
+
+    },
+
+
+
+    footerRow: {
+
+        flexDirection: 'row',
+
+        justifyContent: 'space-between',
+
+        alignItems: 'center',
+
+        marginTop: 14,
+
+    },
+
+
+
+    labelContainer: {
+
+        flexDirection: 'row',
+
+        flexWrap: 'wrap',
+
+        flex: 1,
+
+    },
+
+
+
+    label: {
+
+        backgroundColor: '#EEF7E8',
+
+        paddingHorizontal: 8,
+
+        paddingVertical: 5,
+
+        borderRadius: 12,
+
+        marginRight: 6,
+
+    },
+
+
+
+    labelText: {
+
+        color: '#355817',
+
+        fontSize: 11,
+
+        fontWeight: '700',
+
+    },
+
+
+
+    logButton: {
+
+        backgroundColor: '#4D7A20',
+
+        paddingHorizontal: 18,
+
+        paddingVertical: 10,
+
+        borderRadius: 16,
+
+    },
+
+
+
+    logButtonText: {
+
+        color: '#FFFFFF',
+
+        fontWeight: '800',
+
+    },
+
+
+
+    bottomButtons: {
+
+        position: 'absolute',
+
+        bottom: 0,
+
+        left: 0,
+
+        right: 0,
+
+        flexDirection: 'row',
+
+        padding: 16,
+
+        backgroundColor: 'rgba(255,255,255,.95)',
+
+    },
+
+
+
+    viewSavedButton: {
+
+        flex: 1,
+
+        borderWidth: 1,
+
+        borderColor: '#4D7A20',
+
+        padding: 14,
+
+        borderRadius: 16,
+
+        alignItems: 'center',
+
+        marginRight: 8,
+
+    },
+
+
+
+    dashboardButton: {
+
+        backgroundColor: '#4D7A20',
+
+        marginRight: 0,
+
+        marginLeft: 8,
+
+    },
+
+    // ==========================================
+    // ADDED:
+    // Allows green button text and white button
+    // text to exist separately.
+    // ==========================================
+
+    dashboardButtonText: {
+        color: '#FFFFFF',
         fontSize: 16,
+        fontWeight: '700',
+    },
+
+    viewSavedText: {
+
+        color: '#4D7A20',
+        fontSize: 16,
+        fontWeight: '700',
+    },
+
+
+
+    emptyText: {
+
         textAlign: 'center',
-        marginTop: 20,
+
+        color: '#FFFFFF',
+
+        marginTop: 40,
+
     },
+
+
+
+    globalSection: {
+
+        marginBottom: 20,
+
+    },
+
+
+
+    sectionTitle: {
+
+        color: '#FFFFFF',
+
+        fontSize: 22,
+
+        fontWeight: '800',
+
+        marginBottom: 6,
+
+    },
+
+
+
+    sectionSubtitle: {
+
+        color: '#FFFFFF',
+
+        opacity: .8,
+
+        marginBottom: 12,
+
+    },
+
+
+
+    horizontalList: {
+
+        paddingBottom: 10,
+
+    },
+
+
+
+    divider: {
+
+        height: 1,
+
+        backgroundColor: 'rgba(255,255,255,.3)',
+
+        marginVertical: 20,
+
+    },
+
 });
