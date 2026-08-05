@@ -1,0 +1,105 @@
+const API_KEY = 'd57e0c0d4cc04530bc651135d558ef93';
+const BASE_URL = 'https://api.spoonacular.com/recipes';
+
+export interface SpoonacularRecipe {
+    id: number;
+    title: string;
+    image: string;
+    calories?: number;
+    protein?: string;
+    fat?: string;
+    carbs?: string;
+}
+
+export const fetchRecommendations = async (params: {
+    diet?: string;
+    maxCalories?: number;
+    minProtein?: number;
+    type?: string;
+    number?: number;
+}): Promise<SpoonacularRecipe[]> => {
+
+    const {
+        diet,
+        maxCalories,
+        minProtein,
+        type,
+        number = 5
+    } = params;
+
+    let url =
+        `${BASE_URL}/complexSearch?apiKey=${API_KEY}` +
+        `&number=${number}` +
+        `&addRecipeInformation=true` +
+        `&addRecipeNutrition=true`;
+
+    if (diet && diet !== 'None') {
+        url += `&diet=${encodeURIComponent(diet.toLowerCase())}`;
+    }
+
+    if (maxCalories)
+        url += `&maxCalories=${maxCalories}`;
+
+    if (minProtein)
+        url += `&minProtein=${minProtein}`;
+
+    if (type)
+        url += `&type=${encodeURIComponent(type)}`;
+
+    try {
+
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            console.error(
+                `Spoonacular HTTP Error: ${response.status}`
+            );
+            return [];
+        }
+
+        const data = await response.json();
+
+        console.log("Spoonacular Response:", data);
+
+        if (!data?.results || !Array.isArray(data.results)) {
+            console.error(
+                "Unexpected Spoonacular response:",
+                data
+            );
+            return [];
+        }
+
+        return data.results.map((r: any) => {
+
+            const nutrients = r.nutrition?.nutrients ?? [];
+
+            const calories =
+                nutrients.find((n: any) => n.name === "Calories")?.amount;
+
+            const protein =
+                nutrients.find((n: any) => n.name === "Protein")?.amount;
+
+            const fat =
+                nutrients.find((n: any) => n.name === "Fat")?.amount;
+
+            const carbs =
+                nutrients.find((n: any) => n.name === "Carbohydrates")?.amount;
+
+            return {
+                id: r.id,
+                title: r.title,
+                image: r.image,
+                calories,
+                protein: protein != null ? `${protein}g` : undefined,
+                fat: fat != null ? `${fat}g` : undefined,
+                carbs: carbs != null ? `${carbs}g` : undefined,
+            };
+        });
+
+    } catch (error) {
+
+        console.error("Spoonacular Fetch Error:", error);
+
+        return [];
+    }
+};

@@ -9,6 +9,7 @@ import {
     View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import {
     Exercise,
@@ -75,7 +76,9 @@ export default function WorkoutScreen() {
 
             if (exercises.length === 0) {
                 setWorkout(null);
-                setError('No exercises were found. Please try again.');
+                setError(
+                    'No exercises were found. Please try again.'
+                );
                 return;
             }
 
@@ -99,27 +102,98 @@ export default function WorkoutScreen() {
 
     if (isLoading) {
         return (
-            <SafeAreaView style={styles.container}>
-                <TouchableOpacity
-                    style={styles.backButton}
-                    onPress={() => router.back()}
-                >
-                    <Text style={styles.backButtonText}>
-                        ← Back
-                    </Text>
-                </TouchableOpacity>
+            <LinearGradient
+                colors={[
+                    '#78B63C',
+                    '#4D7A20',
+                    '#355817',
+                ]}
+                style={styles.gradient}
+            >
+                <SafeAreaView style={styles.container}>
+                    <TouchableOpacity
+                        style={styles.backButton}
+                        onPress={() => router.back()}
+                    >
+                        <Text style={styles.backButtonText}>
+                            ← Back
+                        </Text>
+                    </TouchableOpacity>
 
-                <ActivityIndicator size="large" />
+                    <View style={styles.centeredContent}>
+                        <ActivityIndicator
+                            size="large"
+                            color="#FFFFFF"
+                        />
 
-                <Text style={styles.loadingText}>
-                    Picking a workout...
-                </Text>
-            </SafeAreaView>
+                        <Text style={styles.loadingText}>
+                            Picking a workout...
+                        </Text>
+                    </View>
+                </SafeAreaView>
+            </LinearGradient>
         );
     }
 
     if (!workout) {
         return (
+            <LinearGradient
+                colors={[
+                    '#78B63C',
+                    '#4D7A20',
+                    '#355817',
+                ]}
+                style={styles.gradient}
+            >
+                <SafeAreaView style={styles.container}>
+                    <TouchableOpacity
+                        style={styles.backButton}
+                        onPress={() => router.back()}
+                    >
+                        <Text style={styles.backButtonText}>
+                            ← Back
+                        </Text>
+                    </TouchableOpacity>
+
+                    <View style={styles.centeredContent}>
+                        <View style={styles.card}>
+                            <Text style={styles.title}>
+                                No workout found
+                            </Text>
+
+                            <Text style={styles.description}>
+                                {error ||
+                                    'Please go back and choose another category.'}
+                            </Text>
+
+                            <TouchableOpacity
+                                style={styles.rerollButton}
+                                onPress={pickRandomWorkout}
+                            >
+                                <Text
+                                    style={
+                                        styles.rerollButtonText
+                                    }
+                                >
+                                    Try Again
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </SafeAreaView>
+            </LinearGradient>
+        );
+    }
+
+    return (
+        <LinearGradient
+            colors={[
+                '#78B63C',
+                '#4D7A20',
+                '#355817',
+            ]}
+            style={styles.gradient}
+        >
             <SafeAreaView style={styles.container}>
                 <TouchableOpacity
                     style={styles.backButton}
@@ -130,174 +204,102 @@ export default function WorkoutScreen() {
                     </Text>
                 </TouchableOpacity>
 
-                <View style={styles.emptyContent}>
-                    <Text style={styles.title}>
-                        No workout found
-                    </Text>
+                <ScrollView
+                    style={styles.scrollView}
+                    contentContainerStyle={styles.scrollContent}
+                    showsVerticalScrollIndicator
+                >
+                    <View style={styles.card}>
+                        <Text style={styles.title}>
+                            {workout.name}
+                        </Text>
 
-                    <Text style={styles.description}>
-                        {error ||
-                            'Please go back and choose another category.'}
-                    </Text>
+                        <View style={styles.infoBox}>
+                            <Text style={styles.detail}>
+                                Muscle: {workout.muscle}
+                            </Text>
 
+                            <Text style={styles.detail}>
+                                Type: {workout.type}
+                            </Text>
+
+                            <Text style={styles.detail}>
+                                Equipment: {workout.equipment}
+                            </Text>
+
+                            <Text style={styles.detail}>
+                                Difficulty: {workout.difficulty}
+                            </Text>
+                        </View>
+
+                        <Text style={styles.description}>
+                            {workout.instructions}
+                        </Text>
+                    </View>
+                </ScrollView>
+
+                <View style={styles.actions}>
                     <TouchableOpacity
                         style={styles.rerollButton}
                         onPress={pickRandomWorkout}
+                        disabled={isLoading}
                     >
                         <Text style={styles.rerollButtonText}>
-                            Try Again
+                            Try Another Workout
+                        </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.button}
+                        onPress={() =>
+                            router.push(
+                                `/nutrition?intensity=${encodeURIComponent(
+                                    workout.difficulty
+                                )}&category=${encodeURIComponent(
+                                    categoryParam ?? ''
+                                )}`
+                            )
+                        }
+                    >
+                        <Text style={styles.buttonText}>
+                            View Nutrition Tips
                         </Text>
                     </TouchableOpacity>
                 </View>
             </SafeAreaView>
-        );
-    }
-
-    return (
-        <SafeAreaView style={styles.container}>
-            <TouchableOpacity
-                style={styles.backButton}
-                onPress={() => router.back()}
-            >
-                <Text style={styles.backButtonText}>
-                    ← Back
-                </Text>
-            </TouchableOpacity>
-
-            <ScrollView
-                style={styles.scrollView}
-                contentContainerStyle={styles.scrollContent}
-                showsVerticalScrollIndicator
-            >
-                <View style={styles.card}>
-                    <Text style={styles.title}>
-                        {workout.name}
-                    </Text>
-
-                    <Text style={styles.detail}>
-                        Muscle: {workout.muscle}
-                    </Text>
-
-                    <Text style={styles.detail}>
-                        Type: {workout.type}
-                    </Text>
-
-                    <Text style={styles.detail}>
-                        Equipment: {workout.equipment}
-                    </Text>
-
-                    <Text style={styles.detail}>
-                        Difficulty: {workout.difficulty}
-                    </Text>
-
-                    <Text style={styles.description}>
-                        {workout.instructions}
-                    </Text>
-                </View>
-            </ScrollView>
-
-            <View style={styles.actions}>
-                <TouchableOpacity
-                    style={styles.rerollButton}
-                    onPress={pickRandomWorkout}
-                    disabled={isLoading}
-                >
-                    <Text style={styles.rerollButtonText}>
-                        Reroll Workout
-                    </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={() =>
-                        router.push(
-                            `/nutrition?intensity=${encodeURIComponent(
-                                workout.difficulty
-                            )}`
-                        )
-                    }
-                >
-                    <Text style={styles.buttonText}>
-                        View Nutrition Tips
-                    </Text>
-                </TouchableOpacity>
-            </View>
-        </SafeAreaView>
+        </LinearGradient>
     );
 }
 
 const styles = StyleSheet.create({
+    gradient: {
+        flex: 1,
+    },
+
     container: {
         flex: 1,
         paddingHorizontal: 24,
-        backgroundColor: '#FFFFFF',
     },
 
     backButton: {
         alignSelf: 'flex-start',
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        paddingHorizontal: 16,
         paddingVertical: 10,
-        paddingHorizontal: 14,
-    },
-
-    backButtonText: {
-        color: '#4D7A20',
-        fontSize: 16,
-        fontWeight: '700',
-    },
-
-    card: {
-        backgroundColor: '#F5F5F5',
         borderRadius: 20,
-        padding: 24,
-    },
-
-    title: {
-        fontSize: 32,
-        fontWeight: '700',
-        marginBottom: 16,
-    },
-
-    detail: {
-        fontSize: 18,
+        marginTop: 8,
         marginBottom: 8,
     },
 
-    description: {
+    backButtonText: {
+        color: '#FFFFFF',
         fontSize: 16,
-        lineHeight: 22,
-        marginTop: 12,
+        fontWeight: '800',
     },
 
-    rerollButton: {
-        borderColor: '#4D7A20',
-        borderWidth: 2,
-        padding: 18,
-        borderRadius: 16,
-    },
-
-    rerollButtonText: {
-        color: '#4D7A20',
-        textAlign: 'center',
-        fontWeight: '700',
-    },
-
-    button: {
-        backgroundColor: '#4D7A20',
-        padding: 18,
-        borderRadius: 16,
-        marginTop: 14,
-    },
-
-    buttonText: {
-        color: '#fff',
-        textAlign: 'center',
-        fontWeight: '700',
-    },
-
-    loadingText: {
-        fontSize: 16,
-        textAlign: 'center',
-        marginTop: 16,
+    centeredContent: {
+        flex: 1,
+        justifyContent: 'center',
     },
 
     scrollView: {
@@ -310,13 +312,86 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
     },
 
+    card: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 28,
+        padding: 26,
+        shadowColor: '#000000',
+        shadowOffset: {
+            width: 0,
+            height: 8,
+        },
+        shadowOpacity: 0.18,
+        shadowRadius: 15,
+        elevation: 8,
+    },
+
+    title: {
+        fontSize: 32,
+        fontWeight: '800',
+        color: '#355817',
+        marginBottom: 18,
+    },
+
+    infoBox: {
+        backgroundColor: '#EEF7E8',
+        padding: 16,
+        borderRadius: 18,
+        marginBottom: 16,
+    },
+
+    detail: {
+        fontSize: 17,
+        fontWeight: '700',
+        color: '#4D7A20',
+        marginBottom: 8,
+        textTransform: 'capitalize',
+    },
+
+    description: {
+        fontSize: 16,
+        color: '#555555',
+        lineHeight: 24,
+    },
+
+    rerollButton: {
+        backgroundColor: '#FFFFFF',
+        padding: 18,
+        borderRadius: 18,
+        marginTop: 14,
+    },
+
+    rerollButtonText: {
+        textAlign: 'center',
+        color: '#4D7A20',
+        fontWeight: '800',
+        fontSize: 16,
+    },
+
+    button: {
+        backgroundColor: '#FFFFFF',
+        padding: 18,
+        borderRadius: 18,
+        marginTop: 14,
+    },
+
+    buttonText: {
+        color: '#4D7A20',
+        textAlign: 'center',
+        fontWeight: '900',
+        fontSize: 17,
+    },
+
+    loadingText: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: '700',
+        textAlign: 'center',
+        marginTop: 16,
+    },
+
     actions: {
         paddingTop: 10,
         paddingBottom: 12,
-    },
-
-    emptyContent: {
-        flex: 1,
-        justifyContent: 'center',
     },
 });
