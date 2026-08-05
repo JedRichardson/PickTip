@@ -224,6 +224,7 @@ export default function WorkoutScreen() {
             </View>
         </SafeAreaView>
     );
+}
 
 const styles = StyleSheet.create({
     container: {
