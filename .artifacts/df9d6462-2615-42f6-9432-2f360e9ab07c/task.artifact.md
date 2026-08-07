@@ -1,0 +1,10 @@
+- `[x]` Create `SavedWorkoutContext.tsx`
+- `[x]` Create `ShoppingListContext.tsx`
+- `[x]` Update `MealLogContext.tsx` for planned meals
+- `[x]` Update `_layout.tsx` with new providers
+- `[x]` Create Recipe Detail Screen (`src/app/recipe/[id].tsx`)
+- `[x]` Create Shopping List Screen (`src/app/shopping-list.tsx`)
+- `[x]` Update `Saved` screen with tabs
+- `[x]` Update `Workout` screen with "Save" functionality
+- `[x]` Update `BottomNav` with "Saved" tab
+- `[x]` Update `Dashboard` with projected calories and shopping shortcut

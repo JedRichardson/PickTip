@@ -26,25 +26,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 
 import { workouts } from '../data/workouts';
-
 import { useWorkoutLog } from '../context/WorkoutLogContext';
-
-
-
-
-
-
+import { useSavedWorkout } from '../context/SavedWorkoutContext';
 
 export default function WorkoutScreen() {
-
-
     const { category } = useLocalSearchParams();
-
-
-
     const { logWorkout } = useWorkoutLog();
-
-
+    const { saveWorkout, removeWorkout, isSaved } = useSavedWorkout();
 
     const [
         workout,
@@ -302,18 +290,17 @@ export default function WorkoutScreen() {
 
 
                 <View style={styles.card}>
-
-
-                    <Text style={styles.title}>
-
-                        {workout.name}
-
-                    </Text>
-
-
-
-
-
+                    <View style={styles.cardHeader}>
+                        <Text style={styles.title}>
+                            {workout.name}
+                        </Text>
+                        <TouchableOpacity
+                            onPress={() => isSaved(workout.id) ? removeWorkout(workout.id) : saveWorkout(workout)}
+                            style={styles.saveIconButton}
+                        >
+                            <Text style={styles.saveIcon}>{isSaved(workout.id) ? '❤️' : '🤍'}</Text>
+                        </TouchableOpacity>
+                    </View>
 
                     <View style={styles.infoBox}>
 
@@ -583,20 +570,25 @@ const styles = StyleSheet.create({
 
 
     title: {
-
-
         fontSize: 32,
-
-
         fontWeight: '800',
-
-
         color: '#355817',
+        flex: 1,
+    },
 
-
+    cardHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         marginBottom: 18,
+    },
 
+    saveIconButton: {
+        padding: 8,
+    },
 
+    saveIcon: {
+        fontSize: 24,
     },
 
 
