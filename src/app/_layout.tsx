@@ -4,6 +4,7 @@ import { SavedNutritionProvider } from '../context/SavedNutritionContext';
 import { MealLogProvider } from '../context/MealLogContext';
 import { UserProvider } from '../context/UserContext';
 import { WorkoutLogProvider } from '../context/WorkoutLogContext';
+import { SavedWorkoutProvider } from '../context/SavedWorkoutContext';
 
 import BottomNav from '../components/navigation/bottom_nav';
 
@@ -13,20 +14,22 @@ export default function RootLayout() {
             <WorkoutLogProvider>
                 <MealLogProvider>
                     <SavedNutritionProvider>
-                    <View style={styles.container}>
-                        <View style={styles.content}>
-                            <Stack
-                                screenOptions={{
-                                    headerShown: false,
-                                }}
-                            />
-                        </View>
+                        <SavedWorkoutProvider>
+                            <View style={styles.container}>
+                                <View style={styles.content}>
+                                    <Stack
+                                        screenOptions={{
+                                            headerShown: false,
+                                        }}
+                                    />
+                                </View>
 
-                        <BottomNav />
-                    </View>
-                </SavedNutritionProvider>
+                                <BottomNav />
+                            </View>
+                        </SavedWorkoutProvider>
+                    </SavedNutritionProvider>
                 </MealLogProvider>
-                </WorkoutLogProvider>
+            </WorkoutLogProvider>
         </UserProvider>
     );
 }

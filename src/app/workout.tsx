@@ -10,6 +10,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
+import { useSavedWorkouts } from '../context/SavedWorkoutContext';
 
 import {
     Exercise,
@@ -42,10 +44,17 @@ export default function WorkoutScreen() {
     const [workout, setWorkout] = useState<Exercise | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
+    const {
+        saveWorkout,
+        isWorkoutSaved,
+    } = useSavedWorkouts();
 
     const categoryParam = Array.isArray(category)
         ? category[0]
         : category;
+    const workoutId = workout
+        ? `${workout.name}-${workout.muscle}`
+        : '';
 
     const pickRandomWorkout = useCallback(async () => {
         if (
@@ -207,12 +216,39 @@ export default function WorkoutScreen() {
                 <ScrollView
                     style={styles.scrollView}
                     contentContainerStyle={styles.scrollContent}
-                    showsVerticalScrollIndicator
-                >
+                    showsVerticalScrollIndicator>
+
                     <View style={styles.card}>
-                        <Text style={styles.title}>
-                            {workout.name}
-                        </Text>
+                        <View style={styles.titleRow}>
+                            <Text style={styles.title}>
+                                {workout.name}
+                            </Text>
+
+                            <TouchableOpacity
+                                style={styles.starButton}
+                                onPress={() =>
+                                    saveWorkout({
+                                        id: workoutId,
+                                        name: workout.name,
+                                        exercises: [workout],
+                                    })
+                                }
+                            >
+                                <Ionicons
+                                    name={
+                                        isWorkoutSaved(workoutId)
+                                            ? 'star'
+                                            : 'star-outline'
+                                    }
+                                    size={32}
+                                    color={
+                                        isWorkoutSaved(workoutId)
+                                             ? '#FFD700'
+                                             : '#355817'
+                                    }
+                                />
+                            </TouchableOpacity>
+                        </View>
 
                         <View style={styles.infoBox}>
                             <Text style={styles.detail}>
@@ -327,10 +363,21 @@ const styles = StyleSheet.create({
     },
 
     title: {
+        flex: 1,
         fontSize: 32,
         fontWeight: '800',
         color: '#355817',
-        marginBottom: 18,
+    },
+
+    titleRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 15,
+    },
+
+    starButton: {
+        padding: 6,
     },
 
     infoBox: {
