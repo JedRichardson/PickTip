@@ -1,19 +1,13 @@
-import { useEffect, useState } from 'react';
-
+import { useCallback, useEffect, useState } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
 import {
-    useLocalSearchParams,
-    router
-} from 'expo-router';
-
-
-import {
+    ActivityIndicator,
+    ScrollView,
     StyleSheet,
     Text,
     TouchableOpacity,
     View,
 } from 'react-native';
-
-
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 
@@ -23,36 +17,33 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 // ==========================================
 import { LinearGradient } from 'expo-linear-gradient';
 
+import {
+    Exercise,
+    getExercises,
+} from '../api/picktipApi';
 
+const categoryMuscles = {
+    legs: ['quadriceps', 'hamstrings', 'glutes', 'calves'],
+    arms: ['biceps', 'triceps', 'forearms'],
+    core: ['abdominals', 'lower_back'],
+    fullBody: [
+        'quadriceps',
+        'hamstrings',
+        'glutes',
+        'chest',
+        'lats',
+        'biceps',
+        'triceps',
+        'abdominals',
+    ],
+} as const;
 
-import { workouts } from '../data/workouts';
-
-import { useWorkoutLog } from '../context/WorkoutLogContext';
-
-
-
-
-
-
+type WorkoutCategory = keyof typeof categoryMuscles;
 
 export default function WorkoutScreen() {
-
-
-    const { category } = useLocalSearchParams();
-
-
-
-    const { logWorkout } = useWorkoutLog();
-
-
-
-    const [
-        workout,
-        setWorkout
-    ] = useState<(typeof workouts)[number] | null>(null);
-
-
-
+    const { category } = useLocalSearchParams<{
+        category?: string | string[];
+    }>();
 
 
     const categoryParam = Array.isArray(category)
@@ -61,109 +52,93 @@ export default function WorkoutScreen() {
 
         : category;
 
-
-
-
-
-
-    const filtered = workouts.filter(
-
-        item => item.category === categoryParam
-
-    );
-
-
-
-
-
-
-    function pickRandomWorkout() {
-
-
-        if (filtered.length === 0) {
-
+    const pickRandomWorkout = useCallback(async () => {
+        if (
+            !categoryParam ||
+            !(categoryParam in categoryMuscles)
+        ) {
             setWorkout(null);
-
+            setError('That workout category was not found.');
+            setIsLoading(false);
             return;
-
         }
 
+        try {
+            setIsLoading(true);
+            setError('');
+
+            const selectedCategory =
+                categoryParam as WorkoutCategory;
 
 
-        const randomIndex = Math.floor(
+            const randomMuscle =
+                muscles[
+                    Math.floor(Math.random() * muscles.length)
+                ];
 
-            Math.random() * filtered.length
+            const exercises = await getExercises(randomMuscle);
 
-        );
+            if (exercises.length === 0) {
+                setWorkout(null);
+                setError(
+                    'No exercises were found. Please try again.'
+                );
+                return;
+            }
 
+            const randomIndex = Math.floor(
+                Math.random() * exercises.length
+            );
 
-
-        setWorkout(filtered[randomIndex]);
-
-    }
-
-
-
-
-
-
+            setWorkout(exercises[randomIndex]);
+        } catch (requestError) {
+            console.error(requestError);
+            setWorkout(null);
+            setError('Could not load a workout.');
+        } finally {
+            setIsLoading(false);
+        }
+    }, [categoryParam]);
 
     useEffect(() => {
 
 
         pickRandomWorkout();
 
+    if (isLoading) {
+        return (
+            <LinearGradient
+                colors={[
+                    '#78B63C',
+                    '#4D7A20',
+                    '#355817',
+                ]}
+                style={styles.gradient}
+            >
+                <SafeAreaView style={styles.container}>
+                    <TouchableOpacity
+                        style={styles.backButton}
+                        onPress={() => router.back()}
+                    >
+                        <Text style={styles.backButtonText}>
+                            ← Back
+                        </Text>
+                    </TouchableOpacity>
 
-    }, [categoryParam]);
+                    <View style={styles.centeredContent}>
+                        <ActivityIndicator
+                            size="large"
+                            color="#FFFFFF"
+                        />
 
-
-
-
-
-
-
-
-
-    const handleFinishWorkout = async () => {
-
-
-        if (workout) {
-
-
-            await logWorkout({
-
-                name: workout.name,
-
-                duration: workout.duration,
-
-                intensity: workout.intensity,
-
-                calories: parseInt(workout.calories),
-
-            });
-
-
-
-
-            router.push(
-
-                `/nutrition?intensity=${encodeURIComponent(workout.intensity)}&category=${encodeURIComponent(workout.category)}`
-
-            );
-
-
-        }
-
-
-    };
-
-
-
-
-
-
-
-
+                        <Text style={styles.loadingText}>
+                            Picking a workout...
+                        </Text>
+                    </View>
+                </SafeAreaView>
+            </LinearGradient>
+        );
+    }
 
     if (!workout) {
 
@@ -172,21 +147,15 @@ export default function WorkoutScreen() {
 
 
             <LinearGradient
-
                 colors={[
                     '#78B63C',
                     '#4D7A20',
-                    '#355817'
+                    '#355817',
                 ]}
-
                 style={styles.gradient}
 
             >
-
-
                 <SafeAreaView style={styles.container}>
-
-
                     <TouchableOpacity
 
                         style={styles.backButton}
@@ -194,43 +163,38 @@ export default function WorkoutScreen() {
                         onPress={() => router.back()}
 
                     >
-
                         <Text style={styles.backButtonText}>
-
-                            Back
-
+                            ← Back
                         </Text>
 
 
                     </TouchableOpacity>
 
+                    <View style={styles.centeredContent}>
+                        <View style={styles.card}>
+                            <Text style={styles.title}>
+                                No workout found
+                            </Text>
 
+                            <Text style={styles.description}>
+                                {error ||
+                                    'Please go back and choose another category.'}
+                            </Text>
 
-
-
-
-                    <View style={styles.emptyCard}>
-
-
-                        <Text style={styles.title}>
-
-                            No workouts found.
-
-                        </Text>
-
-
-
-                        <Text style={styles.description}>
-
-                            Please go back and choose another category.
-
-                        </Text>
-
-
+                            <TouchableOpacity
+                                style={styles.rerollButton}
+                                onPress={pickRandomWorkout}
+                            >
+                                <Text
+                                    style={
+                                        styles.rerollButtonText
+                                    }
+                                >
+                                    Try Again
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
-
-
-
                 </SafeAreaView>
 
 
@@ -242,14 +206,6 @@ export default function WorkoutScreen() {
 
     }
 
-
-
-
-
-
-
-
-
     return (
 
 
@@ -259,25 +215,16 @@ export default function WorkoutScreen() {
         // ==========================================
 
         <LinearGradient
-
-
             colors={[
                 '#78B63C',
                 '#4D7A20',
-                '#355817'
+                '#355817',
             ]}
-
-
-
             style={styles.gradient}
 
 
         >
-
-
             <SafeAreaView style={styles.container}>
-
-
                 <TouchableOpacity
 
                     style={styles.backButton}
@@ -285,44 +232,27 @@ export default function WorkoutScreen() {
                     onPress={() => router.back()}
 
                 >
-
                     <Text style={styles.backButtonText}>
-
-                        Back
-
+                        ← Back
                     </Text>
 
 
                 </TouchableOpacity>
 
-
-
-
-
-
-
-                <View style={styles.card}>
-
-
-                    <Text style={styles.title}>
-
-                        {workout.name}
-
-                    </Text>
-
-
-
-
-
-
-                    <View style={styles.infoBox}>
-
-
-                        <Text style={styles.detail}>
-
-                            Duration: {workout.duration}
-
+                <ScrollView
+                    style={styles.scrollView}
+                    contentContainerStyle={styles.scrollContent}
+                    showsVerticalScrollIndicator
+                >
+                    <View style={styles.card}>
+                        <Text style={styles.title}>
+                            {workout.name}
                         </Text>
+
+                        <View style={styles.infoBox}>
+                            <Text style={styles.detail}>
+                                Muscle: {workout.muscle}
+                            </Text>
 
 
 
@@ -333,79 +263,49 @@ export default function WorkoutScreen() {
 
                         </Text>
 
+                            <Text style={styles.detail}>
+                                Equipment: {workout.equipment}
+                            </Text>
 
+                            <Text style={styles.detail}>
+                                Difficulty: {workout.difficulty}
+                            </Text>
+                        </View>
+
+                        <Text style={styles.description}>
+                            {workout.instructions}
+                        </Text>
                     </View>
+                </ScrollView>
 
+                <View style={styles.actions}>
+                    <TouchableOpacity
+                        style={styles.rerollButton}
+                        onPress={pickRandomWorkout}
+                        disabled={isLoading}
+                    >
+                        <Text style={styles.rerollButtonText}>
+                            Try Another Workout
+                        </Text>
+                    </TouchableOpacity>
 
-
-
-
-
-                    <Text style={styles.description}>
-
-                        {workout.description}
-
-                    </Text>
-
-
-
+                    <TouchableOpacity
+                        style={styles.button}
+                        onPress={() =>
+                            router.push(
+                                `/nutrition?intensity=${encodeURIComponent(
+                                    workout.difficulty
+                                )}&category=${encodeURIComponent(
+                                    categoryParam ?? ''
+                                )}`
+                            )
+                        }
+                    >
+                        <Text style={styles.buttonText}>
+                            View Nutrition Tips
+                        </Text>
+                    </TouchableOpacity>
                 </View>
-
-
-
-
-
-
-
-
-                <TouchableOpacity
-
-
-                    style={styles.rerollButton}
-
-
-                    onPress={pickRandomWorkout}
-
-
-                >
-
-                    <Text style={styles.rerollButtonText}>
-
-                        Try Another Workout
-
-                    </Text>
-
-
-                </TouchableOpacity>
-
-
-
-
-
-
-
-
-                <TouchableOpacity
-
-
-                    style={styles.button}
-
-
-                    onPress={handleFinishWorkout}
-
-
-                >
-
-                    <Text style={styles.buttonText}>
-
-                        Finish Workout
-
-                    </Text>
-
-
-                </TouchableOpacity>
-
-
 
             </SafeAreaView>
 
@@ -417,30 +317,12 @@ export default function WorkoutScreen() {
 
 }
 
-
-
-
-
-
-
-
 const styles = StyleSheet.create({
-
-
-    // ==========================================
-    // ADDED:
-    // Full PickTip background.
-    // ==========================================
-
     gradient: {
 
         flex: 1,
 
     },
-
-
-
-
 
     container: {
 
@@ -456,32 +338,9 @@ const styles = StyleSheet.create({
 
     },
 
-
-
-
-
-
-
-    // ==========================================
-    // CHANGED:
-    // Floating back button.
-    // ==========================================
-
     backButton: {
-
-
-        position: 'absolute',
-
-
-        top: 60,
-
-
-        left: 24,
-
-
-        backgroundColor: 'rgba(255,255,255,.2)',
-
-
+        alignSelf: 'flex-start',
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
         paddingHorizontal: 16,
 
 
@@ -492,10 +351,6 @@ const styles = StyleSheet.create({
 
 
     },
-
-
-
-
 
     backButtonText: {
 
@@ -511,12 +366,28 @@ const styles = StyleSheet.create({
 
     },
 
+    centeredContent: {
+        flex: 1,
+        justifyContent: 'center',
+    },
+
+    scrollView: {
+        flex: 1,
+    },
+
+    scrollContent: {
+        flexGrow: 1,
+        justifyContent: 'center',
+        paddingVertical: 12,
+    },
 
 
+    // ==========================================
+    // WORKOUT CARD
+    // ==========================================
 
-
-
-
+    // Main white card containing the
+    // workout information.
     card: {
 
 
@@ -527,12 +398,7 @@ const styles = StyleSheet.create({
 
 
         padding: 26,
-
-
-
-        shadowColor: '#000',
-
-
+        shadowColor: '#000000',
         shadowOffset: {
 
 
@@ -549,8 +415,6 @@ const styles = StyleSheet.create({
 
 
         shadowRadius: 15,
-
-
         elevation: 8,
 
 
@@ -576,12 +440,6 @@ const styles = StyleSheet.create({
 
     },
 
-
-
-
-
-
-
     title: {
 
 
@@ -598,12 +456,6 @@ const styles = StyleSheet.create({
 
 
     },
-
-
-
-
-
-
 
     infoBox: {
 
@@ -622,11 +474,6 @@ const styles = StyleSheet.create({
 
     },
 
-
-
-
-
-
     detail: {
 
 
@@ -644,12 +491,6 @@ const styles = StyleSheet.create({
 
     },
 
-
-
-
-
-
-
     description: {
 
 
@@ -663,12 +504,6 @@ const styles = StyleSheet.create({
 
 
     },
-
-
-
-
-
-
 
     rerollButton: {
 
@@ -688,11 +523,6 @@ const styles = StyleSheet.create({
 
     },
 
-
-
-
-
-
     rerollButtonText: {
 
 
@@ -709,13 +539,6 @@ const styles = StyleSheet.create({
 
 
     },
-
-
-
-
-
-
-
 
     button: {
 
@@ -734,12 +557,6 @@ const styles = StyleSheet.create({
 
     },
 
-
-
-
-
-
-
     buttonText: {
 
 
@@ -757,5 +574,16 @@ const styles = StyleSheet.create({
 
     },
 
+    loadingText: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: '700',
+        textAlign: 'center',
+        marginTop: 16,
+    },
 
+    actions: {
+        paddingTop: 10,
+        paddingBottom: 12,
+    },
 });
