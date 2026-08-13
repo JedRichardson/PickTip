@@ -1,8 +1,6 @@
 import { Stack } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import { SavedNutritionProvider } from '../context/SavedNutritionContext';
-import { SavedWorkoutProvider } from '../context/SavedWorkoutContext';
-import { ShoppingListProvider } from '../context/ShoppingListContext';
 import { MealLogProvider } from '../context/MealLogContext';
 import { UserProvider } from '../context/UserContext';
 import { WorkoutLogProvider } from '../context/WorkoutLogContext';
@@ -13,26 +11,22 @@ export default function RootLayout() {
     return (
         <UserProvider>
             <WorkoutLogProvider>
-                <SavedWorkoutProvider>
-                    <MealLogProvider>
-                        <SavedNutritionProvider>
-                            <ShoppingListProvider>
-                                <View style={styles.container}>
-                                    <View style={styles.content}>
-                                        <Stack
-                                            screenOptions={{
-                                                headerShown: false,
-                                            }}
-                                        />
-                                    </View>
+                <MealLogProvider>
+                    <SavedNutritionProvider>
+                    <View style={styles.container}>
+                        <View style={styles.content}>
+                            <Stack
+                                screenOptions={{
+                                    headerShown: false,
+                                }}
+                            />
+                        </View>
 
-                                    <BottomNav />
-                                </View>
-                            </ShoppingListProvider>
-                        </SavedNutritionProvider>
-                    </MealLogProvider>
-                </SavedWorkoutProvider>
-            </WorkoutLogProvider>
+                        <BottomNav />
+                    </View>
+                </SavedNutritionProvider>
+                </MealLogProvider>
+                </WorkoutLogProvider>
         </UserProvider>
     );
 }
