@@ -1,6 +1,7 @@
 const API_URL = "https://api.api-ninjas.com/v1/exercises";
 
-const API_KEY = process.env.EXPO_PUBLIC_API_NINJAS_KEY || 'SkBU3mf8WLH2z6ClFSuH9T4qURvqgFYcFpf5ch2a';
+// Unified API Key management
+const API_KEY = process.env.EXPO_PUBLIC_API_NINJAS_KEY || '5KATBLHf7SvLorRKxLy4T3Aa3JN8lb6UrEUmwG38';
 
 // Spoonacular API Configuration
 export const SPOONACULAR_API_KEY = process.env.EXPO_PUBLIC_SPOONACULAR_API_KEY || 'd57e0c0d4cc04530bc651135d558ef93';
@@ -22,22 +23,25 @@ export async function getExercises(
     throw new Error("API Ninjas key is missing");
   }
 
-  const response = await fetch(
-    `${API_URL}?muscle=${encodeURIComponent(muscle)}`,
-    {
+  const requestUrl = `${API_URL}?muscle=${encodeURIComponent(muscle)}`;
+
+  try {
+    const response = await fetch(requestUrl, {
       headers: {
         "X-Api-Key": API_KEY,
       },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`API Ninjas Error (${response.status}):`, errorText);
+      throw new Error(`Exercise API request failed with status ${response.status}`);
     }
-  );
 
-  if (!response.ok) {
-    throw new Error(
-      `Exercise API request failed with status ${response.status}`
-    );
+    const exercises: Exercise[] = await response.json();
+    return exercises;
+  } catch (error) {
+    console.error("Fetch Exercises Error:", error);
+    throw error;
   }
-
-  const exercises: Exercise[] = await response.json();
-
-  return exercises;
 }

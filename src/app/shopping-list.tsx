@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
     StyleSheet,
     Text,
     View,
-    FlatList,
+    SectionList,
     TouchableOpacity,
     Alert,
 } from 'react-native';
@@ -14,6 +14,18 @@ import { useShoppingList, Ingredient } from '../context/ShoppingListContext';
 
 export default function ShoppingListScreen() {
     const { ingredients, toggleIngredient, removeIngredient, clearList } = useShoppingList();
+
+    const sections = useMemo(() => {
+        const groups: Record<string, Ingredient[]> = {};
+        ingredients.forEach(item => {
+            if (!groups[item.category]) groups[item.category] = [];
+            groups[item.category].push(item);
+        });
+        return Object.keys(groups).map(cat => ({
+            title: cat,
+            data: groups[cat]
+        }));
+    }, [ingredients]);
 
     const handleClear = () => {
         Alert.alert(
@@ -67,11 +79,17 @@ export default function ShoppingListScreen() {
                     </TouchableOpacity>
                 </View>
 
-                <FlatList
-                    data={ingredients}
+                <SectionList
+                    sections={sections}
                     renderItem={renderItem}
+                    renderSectionHeader={({ section: { title } }) => (
+                        <View style={styles.sectionHeader}>
+                            <Text style={styles.sectionHeaderText}>{title}</Text>
+                        </View>
+                    )}
                     keyExtractor={item => item.id}
                     contentContainerStyle={styles.listContent}
+                    stickySectionHeadersEnabled={false}
                     ListEmptyComponent={
                         <View style={styles.emptyContainer}>
                             <Text style={styles.emptyText}>Your shopping list is empty.</Text>
@@ -91,12 +109,8 @@ export default function ShoppingListScreen() {
 }
 
 const styles = StyleSheet.create({
-    gradient: {
-        flex: 1,
-    },
-    container: {
-        flex: 1,
-    },
+    gradient: { flex: 1 },
+    container: { flex: 1 },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -105,24 +119,21 @@ const styles = StyleSheet.create({
         paddingTop: 20,
         paddingBottom: 25,
     },
-    backButton: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: '700',
+    backButton: { color: '#fff', fontSize: 16, fontWeight: '700' },
+    title: { color: '#fff', fontSize: 28, fontWeight: '800' },
+    clearButton: { color: '#fff', fontSize: 16, fontWeight: '700' },
+    listContent: { paddingHorizontal: 20, paddingBottom: 40 },
+    sectionHeader: {
+        marginTop: 10,
+        marginBottom: 8,
+        paddingHorizontal: 4,
     },
-    title: {
+    sectionHeaderText: {
         color: '#fff',
-        fontSize: 28,
+        fontSize: 18,
         fontWeight: '800',
-    },
-    clearButton: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: '700',
-    },
-    listContent: {
-        paddingHorizontal: 20,
-        paddingBottom: 40,
+        textTransform: 'uppercase',
+        opacity: 0.9,
     },
     itemCard: {
         backgroundColor: '#fff',
@@ -147,64 +158,17 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginRight: 12,
     },
-    checkboxChecked: {
-        backgroundColor: '#4D7A20',
-    },
-    checkmark: {
-        color: '#fff',
-        fontSize: 14,
-        fontWeight: 'bold',
-    },
-    itemInfo: {
-        flex: 1,
-    },
-    itemName: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: '#333',
-        textTransform: 'capitalize',
-    },
-    itemOriginal: {
-        fontSize: 12,
-        color: '#888',
-        marginTop: 2,
-    },
-    textChecked: {
-        textDecorationLine: 'line-through',
-        opacity: 0.6,
-    },
-    removeButton: {
-        padding: 8,
-    },
-    removeText: {
-        color: '#ccc',
-        fontSize: 18,
-    },
-    emptyContainer: {
-        alignItems: 'center',
-        marginTop: 100,
-    },
-    emptyText: {
-        color: '#fff',
-        fontSize: 20,
-        fontWeight: '700',
-        marginBottom: 8,
-    },
-    emptySubtext: {
-        color: '#fff',
-        opacity: 0.8,
-        fontSize: 14,
-        textAlign: 'center',
-        marginBottom: 24,
-    },
-    browseButton: {
-        backgroundColor: '#fff',
-        paddingHorizontal: 24,
-        paddingVertical: 12,
-        borderRadius: 14,
-    },
-    browseButtonText: {
-        color: '#4D7A20',
-        fontWeight: '800',
-    },
+    checkboxChecked: { backgroundColor: '#4D7A20' },
+    checkmark: { color: '#fff', fontSize: 14, fontWeight: 'bold' },
+    itemInfo: { flex: 1 },
+    itemName: { fontSize: 16, fontWeight: '700', color: '#333', textTransform: 'capitalize' },
+    itemOriginal: { fontSize: 12, color: '#888', marginTop: 2 },
+    textChecked: { textDecorationLine: 'line-through', opacity: 0.6 },
+    removeButton: { padding: 8 },
+    removeText: { color: '#ccc', fontSize: 18 },
+    emptyContainer: { alignItems: 'center', marginTop: 100 },
+    emptyText: { color: '#fff', fontSize: 20, fontWeight: '700', marginBottom: 8 },
+    emptySubtext: { color: '#fff', opacity: 0.8, fontSize: 14, textAlign: 'center', marginBottom: 24 },
+    browseButton: { backgroundColor: '#fff', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 14 },
+    browseButtonText: { color: '#4D7A20', fontWeight: '800' },
 });

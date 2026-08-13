@@ -11,7 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Food } from '../data/nutrition';
 import { useSavedNutrition } from '../context/SavedNutritionContext';
-import { useSavedWorkout, Workout } from '../context/SavedWorkoutContext';
+import { useSavedWorkout, SavedWorkout } from '../context/SavedWorkoutContext';
 
 export default function SavedScreen() {
     const [activeTab, setActiveTab] = useState<'meals' | 'workouts'>('meals');
@@ -55,7 +55,7 @@ export default function SavedScreen() {
         </View>
     );
 
-    const renderWorkoutItem = ({ item }: { item: Workout }) => (
+    const renderWorkoutItem = ({ item }: { item: SavedWorkout }) => (
         <View style={styles.card}>
             <View style={styles.cardHeader}>
                 <Text style={styles.foodName}>{item.name}</Text>
@@ -66,14 +66,14 @@ export default function SavedScreen() {
 
             <View style={styles.workoutInfo}>
                 <View style={[styles.badge, styles.intensityBadge]}>
-                    <Text style={styles.badgeText}>{item.intensity}</Text>
+                    <Text style={styles.badgeText}>{item.difficulty}</Text>
                 </View>
                 <View style={[styles.badge, styles.durationBadge]}>
-                    <Text style={styles.badgeText}>{item.duration}</Text>
+                    <Text style={styles.badgeText}>{item.muscle}</Text>
                 </View>
             </View>
 
-            <Text style={styles.description} numberOfLines={2}>{item.description}</Text>
+            <Text style={styles.description} numberOfLines={2}>{item.instructions}</Text>
 
             <TouchableOpacity
                 style={styles.viewDetailsButton}
@@ -114,7 +114,7 @@ export default function SavedScreen() {
                 </View>
 
                 <FlatList
-                    data={activeTab === 'meals' ? savedFoods : savedWorkouts}
+                    data={activeTab === 'meals' ? savedFoods : (savedWorkouts as any)}
                     renderItem={activeTab === 'meals' ? renderFoodItem : (renderWorkoutItem as any)}
                     keyExtractor={item => item.id}
                     contentContainerStyle={styles.listContent}
@@ -136,34 +136,12 @@ export default function SavedScreen() {
 }
 
 const styles = StyleSheet.create({
-    gradient: {
-        flex: 1,
-    },
-    container: {
-        flex: 1,
-    },
-    header: {
-        paddingHorizontal: 24,
-        paddingTop: 20,
-        paddingBottom: 25,
-    },
-    backButton: {
-        color: '#FFFFFF',
-        fontSize: 16,
-        fontWeight: '700',
-        marginBottom: 12,
-    },
-    title: {
-        color: '#FFFFFF',
-        fontSize: 34,
-        fontWeight: '800',
-    },
-    subtitle: {
-        color: '#FFFFFF',
-        opacity: .85,
-        marginTop: 6,
-        fontSize: 15,
-    },
+    gradient: { flex: 1 },
+    container: { flex: 1 },
+    header: { paddingHorizontal: 24, paddingTop: 20, paddingBottom: 25 },
+    backButton: { color: '#FFFFFF', fontSize: 16, fontWeight: '700', marginBottom: 12 },
+    title: { color: '#FFFFFF', fontSize: 34, fontWeight: '800' },
+    subtitle: { color: '#FFFFFF', opacity: .85, marginTop: 6, fontSize: 15 },
     tabContainer: {
         flexDirection: 'row',
         backgroundColor: 'rgba(255,255,255,0.15)',
@@ -172,27 +150,11 @@ const styles = StyleSheet.create({
         padding: 5,
         marginBottom: 20,
     },
-    tab: {
-        flex: 1,
-        paddingVertical: 12,
-        alignItems: 'center',
-        borderRadius: 16,
-    },
-    activeTab: {
-        backgroundColor: '#FFFFFF',
-    },
-    tabText: {
-        color: '#FFFFFF',
-        fontWeight: '700',
-        fontSize: 16,
-    },
-    activeTabText: {
-        color: '#355817',
-    },
-    listContent: {
-        paddingHorizontal: 20,
-        paddingBottom: 30,
-    },
+    tab: { flex: 1, paddingVertical: 12, alignItems: 'center', borderRadius: 16 },
+    activeTab: { backgroundColor: '#FFFFFF' },
+    tabText: { color: '#FFFFFF', fontWeight: '700', fontSize: 16 },
+    activeTabText: { color: '#355817' },
+    listContent: { paddingHorizontal: 20, paddingBottom: 30 },
     card: {
         backgroundColor: '#FFFFFF',
         borderRadius: 24,
@@ -204,106 +166,24 @@ const styles = StyleSheet.create({
         shadowRadius: 12,
         elevation: 6,
     },
-    cardHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 16,
-    },
-    foodName: {
-        fontSize: 20,
-        fontWeight: '800',
-        color: '#355817',
-        flex: 1,
-    },
-    removeButton: {
-        backgroundColor: '#FFEAEA',
-        paddingHorizontal: 14,
-        paddingVertical: 7,
-        borderRadius: 16,
-    },
-    removeButtonText: {
-        color: '#FF5252',
-        fontSize: 12,
-        fontWeight: '800',
-    },
-    statsRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingTop: 14,
-        borderTopWidth: 1,
-        borderTopColor: '#EEEEEE',
-    },
-    stat: {
-        alignItems: 'center',
-    },
-    statValue: {
-        fontSize: 16,
-        fontWeight: '800',
-        color: '#4D7A20',
-    },
-    statLabel: {
-        fontSize: 10,
-        color: '#888',
-        textTransform: 'uppercase',
-        marginTop: 3,
-    },
-    workoutInfo: {
-        flexDirection: 'row',
-        gap: 8,
-        marginBottom: 12,
-    },
-    badge: {
-        paddingHorizontal: 10,
-        paddingVertical: 5,
-        borderRadius: 12,
-    },
-    intensityBadge: {
-        backgroundColor: '#EEF7E8',
-    },
-    durationBadge: {
-        backgroundColor: '#F5F5F5',
-    },
-    badgeText: {
-        fontSize: 12,
-        fontWeight: '700',
-        color: '#4D7A20',
-    },
-    description: {
-        fontSize: 14,
-        color: '#666',
-        lineHeight: 20,
-        marginBottom: 16,
-    },
-    viewDetailsButton: {
-        backgroundColor: '#EEF7E8',
-        padding: 12,
-        borderRadius: 14,
-        alignItems: 'center',
-    },
-    viewDetailsText: {
-        color: '#4D7A20',
-        fontWeight: '800',
-        fontSize: 14,
-    },
-    emptyContainer: {
-        alignItems: 'center',
-        marginTop: 80,
-    },
-    emptyText: {
-        color: '#FFFFFF',
-        fontSize: 17,
-        marginBottom: 22,
-        fontWeight: '600',
-    },
-    browseButton: {
-        backgroundColor: '#FFFFFF',
-        paddingHorizontal: 28,
-        paddingVertical: 14,
-        borderRadius: 18,
-    },
-    browseButtonText: {
-        color: '#4D7A20',
-        fontWeight: '800',
-    },
+    cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+    foodName: { fontSize: 20, fontWeight: '800', color: '#355817', flex: 1 },
+    removeButton: { backgroundColor: '#FFEAEA', paddingHorizontal: 14, paddingVertical: 7, borderRadius: 16 },
+    removeButtonText: { color: '#FF5252', fontSize: 12, fontWeight: '800' },
+    statsRow: { flexDirection: 'row', justifyContent: 'space-between', paddingTop: 14, borderTopWidth: 1, borderTopColor: '#EEEEEE' },
+    stat: { alignItems: 'center' },
+    statValue: { fontSize: 16, fontWeight: '800', color: '#4D7A20' },
+    statLabel: { fontSize: 10, color: '#888', textTransform: 'uppercase', marginTop: 3 },
+    workoutInfo: { flexDirection: 'row', gap: 8, marginBottom: 12 },
+    badge: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12 },
+    intensityBadge: { backgroundColor: '#EEF7E8' },
+    durationBadge: { backgroundColor: '#F5F5F5' },
+    badgeText: { fontSize: 12, fontWeight: '700', color: '#4D7A20' },
+    description: { fontSize: 14, color: '#666', lineHeight: 20, marginBottom: 16 },
+    viewDetailsButton: { backgroundColor: '#EEF7E8', padding: 12, borderRadius: 14, alignItems: 'center' },
+    viewDetailsText: { color: '#4D7A20', fontWeight: '800', fontSize: 14 },
+    emptyContainer: { alignItems: 'center', marginTop: 80 },
+    emptyText: { color: '#FFFFFF', fontSize: 17, marginBottom: 22, fontWeight: '600' },
+    browseButton: { backgroundColor: '#FFFFFF', paddingHorizontal: 28, paddingVertical: 14, borderRadius: 18 },
+    browseButtonText: { color: '#4D7A20', fontWeight: '800' },
 });
