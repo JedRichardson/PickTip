@@ -47,7 +47,7 @@ export default function NutritionDashboard() {
 
 
     const { profile } = useUser();
-
+w
 
     const {
         workouts,

@@ -1,9 +1,12 @@
 ﻿import { router } from 'expo-router';
 
+import  LoadingScreen from '@/components/LoadingScreen';
+
+import { PickTipGradient } from '@/constants/theme';
 // ==============================
 // ADDED: Import React hooks
 // ==============================
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef ,useState} from 'react';
 
 // ==============================
 // ADDED: Linear Gradient
@@ -28,6 +31,30 @@ import { useUser } from '../context/UserContext';
 
 export default function HomeScreen() {
     const { profile } = useUser();
+    // ====================================
+    // ADDED: Loading Screen to match Theme
+    // ====================================
+    const [isLoading, setIsLoading] = useState(true);
+    const loadingOpacity = useRef(new Animated.Value(1)).current; 
+
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            Animated.timing(loadingOpacity, {
+
+                toValue: 0,
+                duration: 500,
+                useNativeDriver: true,
+
+            }).start(() => {
+
+                setIsLoading(false);
+
+            });
+        }, 2000);
+
+        return () => clearTimeout(timer);
+    }, []);
 
     // ==========================================
     // ADDED: Animated value for floating effect
@@ -60,6 +87,20 @@ export default function HomeScreen() {
         ).start();
     }, []);
 
+
+
+    // ==========================================
+    // DISPLAY REUSABLE LOADING SCREEN
+    // ==========================================
+    if (isLoading) {
+        return (
+            <LoadingScreen
+                opacity={loadingOpacity}
+                message="Preparing your recommendations..."
+            />
+        );
+    }
+
     return (
         // ==========================================
         // CHANGED:
@@ -67,7 +108,7 @@ export default function HomeScreen() {
         // green gradient.
         // ==========================================
         <LinearGradient
-            colors={['#78B63C', '#4D7A20', '#355817']}
+            colors={PickTipGradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.gradient}
@@ -344,4 +385,5 @@ const styles = StyleSheet.create({
 
         opacity: 0.9,
     },
+    
 });
