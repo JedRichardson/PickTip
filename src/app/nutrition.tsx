@@ -51,6 +51,7 @@ import {
 
 
 import { RecipeCard } from '../components/recipe-card';
+import LoadingScreen from '../components/LoadingScreen';
 
 
 
@@ -132,7 +133,7 @@ export default function NutritionScreen() {
         isLoadingRecipes,
         setIsLoadingRecipes
 
-    ] = useState(false);
+    ] = useState(true);
 
 
 
@@ -580,6 +581,19 @@ export default function NutritionScreen() {
 
 
     };
+
+    if (isLoadingRecipes) {
+
+        return (
+
+            <LoadingScreen
+                message="Picking your food recommendations..."
+            />
+
+        );
+
+    }
+
     return (
 
         // ==========================================
