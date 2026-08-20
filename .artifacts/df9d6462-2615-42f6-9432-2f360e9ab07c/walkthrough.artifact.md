@@ -1,36 +1,40 @@
-# Walkthrough - Productivity & Tracking Suite
+# Walkthrough - PickTip Pro Features
 
-I have implemented three major feature sets to transform PickTip into a complete health and productivity tool.
+I have significantly upgraded PickTip with a suite of professional features designed to increase user engagement and provide deeper health insights.
 
-## New Features
+## New Pro Features
 
-### 1. Saved Workout Library 🏋️
-Users can now build their own collection of favorite exercises.
-- **Save on the Go**: Added a "Heart" icon to the workout detail card.
-- **Unified Collection**: The [Saved Screen](file:///C:/Users/neonw/AndroidStudioProjects/PickTip-Tristan/src/app/saved.tsx) now features a tabbed interface to toggle between **Saved Meals** and **Saved Workouts**.
-- **Persistent Storage**: Uses `SavedWorkoutContext` to ensure your favorites are there when you return.
+### 1. Active Workout Mode ⏱️
+Your workouts are now interactive!
+- **Interactive Timer**: Launch a real-time timer when you start an exercise.
+- **Dynamic Burn Logic**: Calorie tracking is now smarter—it calculates your burn based on the actual minutes you spent exercising vs. a fixed number.
+- **Session Control**: Pause and Resume your session anytime.
 
-### 2. Smart Meal Planner 📅
-Take control of your day by planning meals in advance.
-- **Recipe Detail Integration**: The new [Recipe Detail Screen](file:///C:/Users/neonw/AndroidStudioProjects/PickTip-Tristan/src/app/recipe/[id].tsx) includes an "Add to Plan" button.
-- **Projected Calories**: The Dashboard now calculates your **Projected Remaining Calories** by combining what you've already eaten with what you've planned for later.
-- **Visual Feedback**: Planned meals appear in a dedicated section on the Dashboard with a distinct blue accent.
+### 2. Visual Macro Analytics 📊
+The Dashboard now features visual data representations for better insights.
+- **Macro Balance Bar**: A sleek, custom chart showing the ratio of Protein, Carbs, and Fats in your current diet.
+- **Dynamic Coloring**: Instantly see if your day is leaning too heavily into one macro category.
 
-### 3. Shopping List Generator 🛒
-Never forget an ingredient again.
-- **One-Tap Export**: From any recipe detail screen, you can tap "Add all to Shopping List" to automatically extract all ingredients.
-- **Interactive Checklist**: The new [Shopping List Screen](file:///C:/Users/neonw/AndroidStudioProjects/PickTip-Tristan/src/app/shopping-list.tsx) allows you to check off items as you shop and remove them when done.
-- **Dashboard Shortcut**: A new tool card on the Dashboard gives you quick access to your list and shows how many items are currently in it.
+### 3. Consistency Streak Tracker 🔥
+Gamified tracking to keep you motivated.
+- **7-Day Heatmap**: A visual record of your activity over the last week right on your Health Hub.
+- **Streak Counter**: Track how many days in a row you've used PickTip to log a meal or workout.
+
+### 4. Smart Recipe Scaling ⚖️
+Professional-grade cooking tools for any occasion.
+- **Servings Selector**: Adjust recipes from 1 to 20+ servings.
+- **Automatic Math**: Ingredients, calories, and macros scale instantly as you change the serving count.
+- **Pro Logging**: When you log a scaled recipe, the correct multiplied values are added to your tracker.
 
 ## Technical Improvements
-- **Context Expansion**: Added `SavedWorkoutContext` and `ShoppingListContext`.
-- **Navigation Upgrade**: Added a third "Saved" tab to the [Bottom Navigation](file:///C:/Users/neonw/AndroidStudioProjects/PickTip-Tristan/src/components/navigation/bottom_nav.tsx) for easier access.
-- **Real-time Engine**: Overhauled the smart suggestions to fetch live data from Spoonacular, tailoring it to your protein needs and time of day.
+- **Context Logic**: Added a `Streak Engine` to [MealLogContext.tsx](file:///C:/Users/neonw/AndroidStudioProjects/PickTip-Tristan/src/context/MealLogContext.tsx) to calculate activity history.
+- **UI Redesign**: Updated [dashboard.tsx](file:///C:/Users/neonw/AndroidStudioProjects/PickTip-Tristan/src/app/dashboard.tsx) with a more "Premium" aesthetic and high-density information cards.
+- **Refined Workout Flow**: Overhauled [workout.tsx](file:///C:/Users/neonw/AndroidStudioProjects/PickTip-Tristan/src/app/workout.tsx) to handle interactive states.
 
-## Verification Results
-- **Persistent Save**: Verified that saving a workout survives an app reload.
-- **Projected Math**: Confirmed that adding a planned meal correctly updates the "Projected Remaining" calories on the dashboard.
-- **Shopping Sync**: Verified that ingredients from various recipes aggregate correctly in the shopping list.
+## Verification
+- **Scaling Test**: Scaled a recipe to 4 servings; verified ingredients and logged macros were 4x the original.
+- **Timer Test**: Ran timer for 5 minutes; verified log showed "5:00" and approx. 60 extra calories burned.
+- **Heatmap Test**: Verified that logging water for "Yesterday" and "Today" activated a 2-day streak.
 
 > [!TIP]
-> Use the "Add to Plan" feature in the morning to see exactly how much calorie "budget" you have left for snacks after your main meals!
+> The Macro Balance bar is your best friend for weight management—try to keep the Blue (Protein) segment at at least 25% of the total bar for optimal muscle recovery!

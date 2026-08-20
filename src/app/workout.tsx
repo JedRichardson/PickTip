@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useLocalSearchParams, router } from 'expo-router';
 import {
     StyleSheet,
@@ -6,6 +6,7 @@ import {
     TouchableOpacity,
     View,
     ActivityIndicator,
+    Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -28,6 +29,11 @@ export default function WorkoutScreen() {
     const [workout, setWorkout] = useState<Exercise | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
+
+    // Timer State
+    const [timerActive, setTimerActive] = useState(false);
+    const [seconds, setSeconds] = useState(0);
+    const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
     const categoryParam = Array.isArray(category) ? category[0] : (category as string);
 
@@ -52,6 +58,8 @@ export default function WorkoutScreen() {
             } else {
                 const randomExercise = exercises[Math.floor(Math.random() * exercises.length)];
                 setWorkout(randomExercise);
+                setSeconds(0);
+                setTimerActive(false);
             }
         } catch (err) {
             setError('Failed to fetch workout. Please check your connection.');
@@ -65,28 +73,55 @@ export default function WorkoutScreen() {
         fetchWorkout();
     }, [fetchWorkout]);
 
+    // Timer Effect
+    useEffect(() => {
+        if (timerActive) {
+            intervalRef.current = setInterval(() => {
+                setSeconds(prev => prev + 1);
+            }, 1000);
+        } else if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+        }
+        return () => {
+            if (intervalRef.current) clearInterval(intervalRef.current);
+        };
+    }, [timerActive]);
+
+    const formatTime = (totalSeconds: number) => {
+        const mins = Math.floor(totalSeconds / 60);
+        const secs = totalSeconds % 60;
+        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    };
+
     const handleFinishWorkout = async () => {
         if (workout) {
-            // Estimate calories based on difficulty if not provided
-            const calMap: Record<string, number> = { beginner: 150, intermediate: 250, expert: 400 };
-            const estCalories = calMap[workout.difficulty.toLowerCase()] || 200;
+            const finalDuration = formatTime(seconds);
+            const minsSpent = seconds / 60;
+
+            // Scaled calories based on actual time spent
+            const intensityMultiplier: Record<string, number> = { beginner: 5, intermediate: 8, expert: 12 };
+            const perMinCals = intensityMultiplier[workout.difficulty.toLowerCase()] || 7;
+            const finalCals = Math.round(minsSpent * perMinCals);
 
             await logWorkout({
                 name: workout.name,
-                duration: '20 min', // Default estimation
+                duration: finalDuration,
                 intensity: workout.difficulty,
-                calories: estCalories,
+                calories: finalCals > 0 ? finalCals : 10, // Min 10 cals
             });
 
-            router.push(`/nutrition?intensity=${encodeURIComponent(workout.difficulty)}&category=${encodeURIComponent(categoryParam)}`);
+            setTimerActive(false);
+            Alert.alert(
+                'Workout Complete!',
+                `You crushed ${workout.name} for ${finalDuration}.\nBurned approx. ${finalCals} kcal!`,
+                [{ text: 'Great!', onPress: () => router.push(`/nutrition?intensity=${encodeURIComponent(workout.difficulty)}&category=${encodeURIComponent(categoryParam)}`) }]
+            );
         }
     };
 
     const toggleSave = () => {
         if (!workout) return;
-
         const workoutId = workout.name.replace(/\s+/g, '-').toLowerCase();
-
         if (isSaved(workoutId)) {
             removeWorkout(workoutId);
         } else {
@@ -150,24 +185,43 @@ export default function WorkoutScreen() {
                         </TouchableOpacity>
                     </View>
 
+                    <View style={styles.timerRow}>
+                        <View style={styles.timerDisplay}>
+                            <Text style={styles.timerLabel}>ACTIVE TIME</Text>
+                            <Text style={styles.timerValue}>{formatTime(seconds)}</Text>
+                        </View>
+                        <TouchableOpacity
+                            style={[styles.timerButton, timerActive && styles.timerButtonActive]}
+                            onPress={() => setTimerActive(!timerActive)}
+                        >
+                            <Text style={styles.timerButtonText}>{timerActive ? 'PAUSE' : 'START'}</Text>
+                        </TouchableOpacity>
+                    </View>
+
                     <View style={styles.infoBox}>
                         <Text style={styles.detail}>Muscle: {workout.muscle}</Text>
                         <Text style={styles.detail}>Difficulty: {workout.difficulty}</Text>
                         <Text style={styles.detail}>Equipment: {workout.equipment}</Text>
                     </View>
 
-                    <Text style={styles.description} numberOfLines={8}>
+                    <Text style={styles.description} numberOfLines={6}>
                         {workout.instructions}
                     </Text>
                 </View>
 
-                <TouchableOpacity style={styles.rerollButton} onPress={fetchWorkout}>
-                    <Text style={styles.rerollButtonText}>Try Another Workout</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.button} onPress={handleFinishWorkout}>
-                    <Text style={styles.buttonText}>Finish Workout</Text>
-                </TouchableOpacity>
+                {!timerActive && seconds === 0 ? (
+                    <TouchableOpacity style={styles.rerollButton} onPress={fetchWorkout}>
+                        <Text style={styles.rerollButtonText}>Try Another Workout</Text>
+                    </TouchableOpacity>
+                ) : (
+                    <TouchableOpacity
+                        style={[styles.button, seconds < 10 && { opacity: 0.5 }]}
+                        onPress={handleFinishWorkout}
+                        disabled={seconds < 10}
+                    >
+                        <Text style={styles.buttonText}>Finish Workout</Text>
+                    </TouchableOpacity>
+                )}
             </SafeAreaView>
         </LinearGradient>
     );
@@ -185,6 +239,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingVertical: 10,
         borderRadius: 20,
+        zIndex: 10,
     },
     backButtonText: { color: '#FFFFFF', fontSize: 16, fontWeight: '800' },
     card: {
@@ -201,6 +256,30 @@ const styles = StyleSheet.create({
     title: { fontSize: 24, fontWeight: '800', color: '#355817', flex: 1 },
     saveIconButton: { padding: 8 },
     saveIcon: { fontSize: 24 },
+    timerRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        backgroundColor: '#F8F9FA',
+        padding: 15,
+        borderRadius: 20,
+        marginBottom: 16,
+        borderWidth: 1,
+        borderColor: '#EEE',
+    },
+    timerDisplay: { flex: 1 },
+    timerLabel: { fontSize: 10, color: '#888', fontWeight: '800', letterSpacing: 1 },
+    timerValue: { fontSize: 32, fontWeight: '900', color: '#333', fontFamily: 'monospace' },
+    timerButton: {
+        backgroundColor: '#4D7A20',
+        paddingHorizontal: 20,
+        paddingVertical: 12,
+        borderRadius: 14,
+    },
+    timerButtonActive: {
+        backgroundColor: '#FFA000',
+    },
+    timerButtonText: { color: '#FFF', fontWeight: '900', fontSize: 14 },
     emptyCard: { backgroundColor: '#FFFFFF', padding: 25, borderRadius: 25, alignItems: 'center' },
     infoBox: { backgroundColor: '#EEF7E8', padding: 16, borderRadius: 18, marginBottom: 16 },
     detail: { fontSize: 15, fontWeight: '700', color: '#4D7A20', marginBottom: 4, textTransform: 'capitalize' },

@@ -32,6 +32,10 @@ interface MealLogContextType {
         water: number;
         projectedCalories: number;
     };
+    streak: {
+        current: number;
+        history: string[]; // ISO dates of activity
+    };
     logWater: (amount: number) => Promise<void>;
     refreshLogs: () => Promise<void>;
 }
@@ -217,6 +221,51 @@ export const MealLogProvider = ({ children }: { children: ReactNode }) => {
         };
     };
 
+    const getStreakInfo = () => {
+        const activityDates = new Set([
+            ...mealLogs.map(l => new Date(l.timestamp).toDateString()),
+            ...waterLogs.map(w => new Date(w.timestamp).toDateString())
+        ]);
+
+        const sortedDates = Array.from(activityDates)
+            .map(d => new Date(d))
+            .sort((a, b) => b.getTime() - a.getTime());
+
+        let currentStreak = 0;
+        const today = new Date();
+        today.setHours(0,0,0,0);
+
+        if (sortedDates.length > 0) {
+            let checkDate = new Date(sortedDates[0]);
+            checkDate.setHours(0,0,0,0);
+
+            // If the latest activity was today or yesterday, streak continues
+            const diff = (today.getTime() - checkDate.getTime()) / (1000 * 3600 * 24);
+
+            if (diff <= 1) {
+                currentStreak = 1;
+                for (let i = 0; i < sortedDates.length - 1; i++) {
+                    const d1 = new Date(sortedDates[i]);
+                    const d2 = new Date(sortedDates[i+1]);
+                    d1.setHours(0,0,0,0);
+                    d2.setHours(0,0,0,0);
+
+                    const dayDiff = (d1.getTime() - d2.getTime()) / (1000 * 3600 * 24);
+                    if (dayDiff === 1) {
+                        currentStreak++;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+
+        return {
+            current: currentStreak,
+            history: Array.from(activityDates)
+        };
+    };
+
     return (
         <MealLogContext.Provider
             value={{
@@ -228,6 +277,7 @@ export const MealLogProvider = ({ children }: { children: ReactNode }) => {
                 removeLog,
                 removePlannedMeal,
                 dailyTotals: getDailyTotals(),
+                streak: getStreakInfo(),
                 logWater,
                 refreshLogs: loadLogs
             }}
