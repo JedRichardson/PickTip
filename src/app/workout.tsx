@@ -438,6 +438,37 @@ export default function WorkoutScreen() {
                     </TouchableOpacity>
 
 
+                    {/* ==========================================
+                        START WORKOUT
+                    ========================================== */}
+                    {/* Navigate to the active workout session
+                        and pass the selected API Ninjas workout
+                        information to WorkoutSession. */}
+                    <TouchableOpacity
+                        style={styles.startWorkoutButton}
+                        onPress={() =>
+                            router.push({
+                                pathname: '/workoutsession',
+                                params: {
+                                    name: workout.name,
+                                    muscle: workout.muscle,
+                                    type: workout.type,
+                                    equipment: workout.equipments,
+                                    difficulty: workout.difficulty,
+                                    instructions: workout.instructions,
+                                    category: categoryParam ?? '',
+                                },
+                            })
+                        }
+                    >
+                        <Text
+                            style={styles.startWorkoutButtonText}
+                        >
+                            Start Workout
+                        </Text>
+                    </TouchableOpacity>
+
+
                     {/* Navigate to nutrition recommendations */}
                     <TouchableOpacity
                         style={styles.button}
@@ -447,7 +478,7 @@ export default function WorkoutScreen() {
                                     workout.difficulty
                                 )}&category=${encodeURIComponent(
                                     categoryParam ?? ''
-                                )}`
+                                )}&fromWorkout=true`
                             )
                         }
                     >
@@ -641,6 +672,40 @@ const styles = StyleSheet.create({
 
 
     // ==========================================
+    // START WORKOUT BUTTON
+    // ==========================================
+
+    // Primary button that opens the active
+    // WorkoutSession screen.
+    startWorkoutButton: {
+        backgroundColor: '#355817',
+        padding: 18,
+        borderRadius: 18,
+        marginTop: 14,
+
+        // iOS shadow
+        shadowColor: '#000000',
+        shadowOffset: {
+            width: 0,
+            height: 5,
+        },
+        shadowOpacity: 0.18,
+        shadowRadius: 10,
+
+        // Android shadow
+        elevation: 6,
+    },
+
+    // Text inside the Start Workout button.
+    startWorkoutButtonText: {
+        color: '#FFFFFF',
+        textAlign: 'center',
+        fontWeight: '900',
+        fontSize: 18,
+    },
+
+
+    // ==========================================
     // NUTRITION BUTTON
     // ==========================================
 
@@ -666,7 +731,7 @@ const styles = StyleSheet.create({
     // BOTTOM ACTION AREA
     // ==========================================
 
-    // Holds the workout and nutrition buttons
+    // Holds the workout action buttons
     // at the bottom of the screen.
     actions: {
         paddingTop: 10,
