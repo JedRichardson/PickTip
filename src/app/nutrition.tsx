@@ -1,7 +1,8 @@
 import React, {
     useState,
     useMemo,
-    useEffect
+    useEffect,
+    useRef
 } from 'react';
 
 
@@ -14,6 +15,7 @@ import {
     TextInput,
     Alert,
     ScrollView,
+    Animated,
 } from 'react-native';
 
 
@@ -31,6 +33,13 @@ import {
 // PickTip gradient background.
 // ==========================================
 import { LinearGradient } from 'expo-linear-gradient';
+
+
+// ==========================================
+// ADDED:
+// Lottie confetti celebration.
+// ==========================================
+import LottieView from 'lottie-react-native';
 
 
 
@@ -62,8 +71,25 @@ export default function NutritionScreen() {
 
     const {
         intensity,
-        category
+        category,
+        workoutComplete,
+        fromWorkout
     } = useLocalSearchParams();
+
+
+
+
+    // ==========================================
+    // ADDED:
+    // WORKOUT ROUTE SOURCE
+    // ==========================================
+    // Nutrition should render immediately when
+    // opened from either workout screen while the
+    // Spoonacular recipes load in the background.
+    const cameFromWorkout =
+        Array.isArray(fromWorkout)
+            ? fromWorkout[0] === 'true'
+            : fromWorkout === 'true';
 
 
 
@@ -138,6 +164,41 @@ export default function NutritionScreen() {
 
 
 
+    // ==========================================
+    // ADDED:
+    // Workout completion confetti state.
+    // ==========================================
+    // The celebration only appears when Nutrition
+    // was opened from Complete Workout.
+    const [
+        showConfetti,
+        setShowConfetti
+    ] = useState(false);
+
+
+    // Prevents the confetti from replaying if the
+    // Nutrition screen reloads recipes or filters.
+    const hasPlayedConfetti =
+        useRef(false);
+
+
+    // Controls the shared fade in / fade out.
+    const confettiOpacity =
+        useRef(new Animated.Value(0)).current;
+
+
+    // Controls the left-side slide animation.
+    const leftConfettiTranslate =
+        useRef(new Animated.Value(-40)).current;
+
+
+    // Controls the right-side slide animation.
+    const rightConfettiTranslate =
+        useRef(new Animated.Value(40)).current;
+
+
+
+
 
     const mealTypes = [
 
@@ -163,6 +224,160 @@ export default function NutritionScreen() {
         intensity,
         selectedMealType,
         profile.dietaryPreference
+    ]);
+
+
+
+
+    // ==========================================
+    // ADDED:
+    // WORKOUT COMPLETION CONFETTI
+    // ==========================================
+    // Runs once as soon as Nutrition opens when
+    // the user arrives by pressing Complete Workout.
+    //
+    // The animation fades and slides in from both
+    // sides, stays visible during the celebration,
+    // then fades back out near the end of the
+    // workout completion audio.
+    useEffect(() => {
+
+
+        const workoutWasCompleted =
+            Array.isArray(workoutComplete)
+                ? workoutComplete[0] === 'true'
+                : workoutComplete === 'true';
+
+
+        if (
+            !workoutWasCompleted ||
+            hasPlayedConfetti.current
+        ) {
+
+            return;
+
+        }
+
+
+        hasPlayedConfetti.current = true;
+
+        setShowConfetti(true);
+
+
+        // Reset the animation values before playing.
+        confettiOpacity.setValue(0);
+
+        leftConfettiTranslate.setValue(-40);
+
+        rightConfettiTranslate.setValue(40);
+
+
+        const celebrationAnimation =
+            Animated.sequence([
+
+
+                // ==========================================
+                // FADE / SLIDE IN
+                // ==========================================
+                Animated.parallel([
+
+                    Animated.timing(
+                        confettiOpacity,
+                        {
+                            toValue: 1,
+                            duration: 350,
+                            useNativeDriver: true,
+                        }
+                    ),
+
+                    Animated.timing(
+                        leftConfettiTranslate,
+                        {
+                            toValue: 0,
+                            duration: 350,
+                            useNativeDriver: true,
+                        }
+                    ),
+
+                    Animated.timing(
+                        rightConfettiTranslate,
+                        {
+                            toValue: 0,
+                            duration: 350,
+                            useNativeDriver: true,
+                        }
+                    ),
+
+                ]),
+
+
+                // Keep the celebration visible while the
+                // completion sounds are playing.
+                Animated.delay(2650),
+
+
+                // ==========================================
+                // FADE / SLIDE OUT
+                // ==========================================
+                Animated.parallel([
+
+                    Animated.timing(
+                        confettiOpacity,
+                        {
+                            toValue: 0,
+                            duration: 700,
+                            useNativeDriver: true,
+                        }
+                    ),
+
+                    Animated.timing(
+                        leftConfettiTranslate,
+                        {
+                            toValue: -24,
+                            duration: 700,
+                            useNativeDriver: true,
+                        }
+                    ),
+
+                    Animated.timing(
+                        rightConfettiTranslate,
+                        {
+                            toValue: 24,
+                            duration: 700,
+                            useNativeDriver: true,
+                        }
+                    ),
+
+                ]),
+
+            ]);
+
+
+        celebrationAnimation.start(
+            ({ finished }) => {
+
+                if (finished) {
+
+                    setShowConfetti(false);
+
+                }
+
+            }
+        );
+
+
+        return () => {
+
+            celebrationAnimation.stop();
+
+        };
+
+
+    }, [
+        workoutComplete,
+        confettiOpacity,
+        leftConfettiTranslate,
+        rightConfettiTranslate
     ]);
 
 
@@ -582,7 +797,21 @@ export default function NutritionScreen() {
 
     };
 
-    if (isLoadingRecipes) {
+    // ==========================================
+    // NUTRITION LOADING BEHAVIOR
+    // ==========================================
+    // Keep the reusable loading screen when
+    // Nutrition is opened independently.
+    //
+    // When Nutrition is opened from workout.tsx
+    // or workoutsession.tsx, render Nutrition
+    // immediately while Spoonacular continues
+    // loading recipes in the background.
+    // ==========================================
+    if (
+        isLoadingRecipes &&
+        !cameFromWorkout
+    ) {
 
         return (
 
@@ -621,6 +850,103 @@ export default function NutritionScreen() {
             style={styles.gradient}
 
         >
+
+
+            {/* ==========================================
+                ADDED:
+                WORKOUT COMPLETION CONFETTI
+            ========================================== */}
+            {/* Confetti appears only after Complete Workout.
+                The overlay does not block Nutrition controls. */}
+            {showConfetti && (
+
+                <View
+                    pointerEvents="none"
+                    style={styles.confettiOverlay}
+                >
+
+
+                    {/* Left-side confetti burst */}
+                    <Animated.View
+                        style={[
+                            styles.confettiSide,
+                            styles.confettiLeft,
+                            {
+                                opacity:
+                                    confettiOpacity,
+
+                                transform: [
+                                    {
+                                        translateX:
+                                            leftConfettiTranslate
+                                    }
+                                ]
+                            }
+                        ]}
+                    >
+
+                        <LottieView
+
+                            source={
+                                require('../../assets/animations/confetti.json')
+                            }
+
+                            autoPlay
+
+                            loop={false}
+
+                            style={
+                                styles.confettiAnimation
+                            }
+
+                        />
+
+                    </Animated.View>
+
+
+
+                    {/* Right-side confetti burst */}
+                    <Animated.View
+                        style={[
+                            styles.confettiSide,
+                            styles.confettiRight,
+                            {
+                                opacity:
+                                    confettiOpacity,
+
+                                transform: [
+                                    {
+                                        translateX:
+                                            rightConfettiTranslate
+                                    }
+                                ]
+                            }
+                        ]}
+                    >
+
+                        <LottieView
+
+                            source={
+                                require('../../assets/animations/confetti.json')
+                            }
+
+                            autoPlay
+
+                            loop={false}
+
+                            style={[
+                                styles.confettiAnimation,
+                                styles.confettiAnimationRight
+                            ]}
+
+                        />
+
+                    </Animated.View>
+
+
+                </View>
+
+            )}
 
 
             <SafeAreaView style={styles.container}>
@@ -1050,6 +1376,59 @@ const styles = StyleSheet.create({
     // ==========================================
     gradient: {
         flex: 1,
+    },
+
+
+
+    // ==========================================
+    // ADDED:
+    // Workout completion confetti overlay.
+    // ==========================================
+    confettiOverlay: {
+        ...StyleSheet.absoluteFill,
+        zIndex: 100,
+        elevation: 100,
+    },
+
+
+    // Shared positioning for both celebration
+    // bursts along the sides of the screen.
+    confettiSide: {
+        position: 'absolute',
+        top: 30,
+        width: 260,
+        height: 430,
+    },
+
+
+    // Keeps most of the left burst near the edge
+    // so the center Nutrition content stays clear.
+    confettiLeft: {
+        left: -78,
+    },
+
+
+    // Mirrors the placement on the right side.
+    confettiRight: {
+        right: -78,
+    },
+
+
+    // Main Lottie sizing for the celebration.
+    confettiAnimation: {
+        width: '100%',
+        height: '100%',
+    },
+
+
+    // Reuses the same JSON file while mirroring
+    // the right-side burst toward the app content.
+    confettiAnimationRight: {
+        transform: [
+            {
+                scaleX: -1,
+            }
+        ],
     },
 
 

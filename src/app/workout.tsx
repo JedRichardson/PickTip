@@ -1,291 +1,679 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
-import { useLocalSearchParams, router } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
+
 import {
+    ScrollView,
     StyleSheet,
     Text,
     TouchableOpacity,
     View,
-    ActivityIndicator,
-    Alert,
 } from 'react-native';
+
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { getExercises, Exercise } from '../api/picktipApi';
-import { useWorkoutLog } from '../context/WorkoutLogContext';
-import { useSavedWorkout } from '../context/SavedWorkoutContext';
 
-const categoryMuscles: Record<string, string[]> = {
-    legs: ['quadriceps', 'hamstrings', 'glutes', 'calves'],
-    arms: ['biceps', 'triceps', 'forearms'],
-    core: ['abdominals', 'lower_back'],
-    fullbody: ['chest', 'lats', 'biceps', 'triceps', 'quadriceps', 'hamstrings'],
-};
+// ==========================================
+// ADDED: Reusable PickTip Loading Screen
+// ==========================================
+import LoadingScreen from '@/components/LoadingScreen';
 
+// ==========================================
+// ADDED: Reusable PickTip App Gradient
+// ==========================================
+import { PickTipGradient } from '@/constants/theme';
+
+// ==========================================
+// CHANGED:
+// API Ninjas workout service now comes from
+// the services folder instead of the api folder.
+// ==========================================
+import {
+    Exercise,
+    getExercises,
+} from '../services/Ninjas';
+
+
+// ==========================================
+// WORKOUT CATEGORY MUSCLE GROUPS
+// ==========================================
+// Each workout category maps to the muscle
+// groups that API Ninjas can search for.
+const categoryMuscles = {
+    legs: [
+        'quadriceps',
+        'hamstrings',
+        'glutes',
+        'calves',
+    ],
+
+    arms: [
+        'biceps',
+        'triceps',
+        'forearms',
+    ],
+
+    core: [
+        'abdominals',
+        'lower_back',
+    ],
+
+    fullbody: [
+        'quadriceps',
+        'hamstrings',
+        'glutes',
+        'chest',
+        'lats',
+        'biceps',
+        'triceps',
+        'abdominals',
+    ],
+} as const;
+
+
+// ==========================================
+// WORKOUT CATEGORY TYPE
+// ==========================================
+// Restricts valid category values to the keys
+// defined inside categoryMuscles.
+type WorkoutCategory = keyof typeof categoryMuscles;
+
+
+// ==========================================
+// WORKOUT SCREEN
+// ==========================================
 export default function WorkoutScreen() {
-    const { category } = useLocalSearchParams();
-    const { logWorkout } = useWorkoutLog();
-    const { saveWorkout, removeWorkout, isSaved } = useSavedWorkout();
 
-    const [workout, setWorkout] = useState<Exercise | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState('');
+    // ==========================================
+    // GET CATEGORY FROM ROUTE PARAMETERS
+    // ==========================================
+    const { category } = useLocalSearchParams<{
+        category?: string | string[];
+    }>();
 
-    // Timer State
-    const [timerActive, setTimerActive] = useState(false);
-    const [seconds, setSeconds] = useState(0);
-    const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-    const categoryParam = Array.isArray(category) ? category[0] : (category as string);
+    // ==========================================
+    // WORKOUT SCREEN STATE
+    // ==========================================
 
-    const fetchWorkout = useCallback(async () => {
-        if (!categoryParam || !categoryMuscles[categoryParam]) {
-            setError('Invalid category selected.');
+    // Stores the workout selected from API Ninjas.
+    const [workout, setWorkout] =
+        useState<Exercise | null>(null);
+
+    // Controls when the reusable loading screen
+    // is displayed.
+    const [isLoading, setIsLoading] =
+        useState(true);
+
+    // Stores an error message if the workout
+    // request fails.
+    const [error, setError] =
+        useState('');
+
+
+    // ==========================================
+    // NORMALIZE CATEGORY PARAMETER
+    // ==========================================
+    // Expo Router parameters can sometimes be
+    // returned as an array, so we make sure we
+    // only work with one category value.
+    const categoryParam = Array.isArray(category)
+        ? category[0]
+        : category;
+
+
+    // ==========================================
+    // PICK RANDOM WORKOUT
+    // ==========================================
+    // Requests exercises from API Ninjas and
+    // randomly chooses one exercise for the user.
+    const pickRandomWorkout = useCallback(async () => {
+
+        // ==========================================
+        // VALIDATE WORKOUT CATEGORY
+        // ==========================================
+        if (
+            !categoryParam ||
+            !(categoryParam in categoryMuscles)
+        ) {
+            setWorkout(null);
+            setError(
+                'That workout category was not found.'
+            );
             setIsLoading(false);
             return;
         }
 
+
         try {
+
+            // ==========================================
+            // START LOADING
+            // ==========================================
+            // Displays the reusable LoadingScreen
+            // while the API request is running.
             setIsLoading(true);
+
+            // Clear any previous error message.
             setError('');
 
-            const muscles = categoryMuscles[categoryParam];
-            const randomMuscle = muscles[Math.floor(Math.random() * muscles.length)];
 
-            const exercises = await getExercises(randomMuscle);
+            // Convert the route parameter into one
+            // of our valid WorkoutCategory values.
+            const selectedCategory =
+                categoryParam as WorkoutCategory;
 
+
+            // Get all muscles associated with
+            // the selected workout category.
+            const muscles =
+                categoryMuscles[selectedCategory];
+
+
+            // ==========================================
+            // RANDOM MUSCLE SELECTION
+            // ==========================================
+            // Randomly select one muscle from
+            // the selected workout category.
+            const randomMuscle =
+                muscles[
+                Math.floor(
+                    Math.random() * muscles.length
+                )
+                ];
+
+
+            // ==========================================
+            // API NINJAS REQUEST
+            // ==========================================
+            // Sends the selected muscle to the
+            // reusable Ninjas service.
+            const exercises =
+                await getExercises(randomMuscle);
+
+
+            // ==========================================
+            // HANDLE EMPTY API RESPONSE
+            // ==========================================
             if (exercises.length === 0) {
-                setError('No exercises found. Please try again.');
-            } else {
-                const randomExercise = exercises[Math.floor(Math.random() * exercises.length)];
-                setWorkout(randomExercise);
-                setSeconds(0);
-                setTimerActive(false);
+                setWorkout(null);
+
+                setError(
+                    'No exercises were found. Please try again.'
+                );
+
+                return;
             }
-        } catch (err) {
-            setError('Failed to fetch workout. Please check your connection.');
-            console.error(err);
+
+
+            // ==========================================
+            // RANDOM EXERCISE SELECTION
+            // ==========================================
+            // Pick one exercise from the results
+            // returned by API Ninjas.
+            const randomIndex = Math.floor(
+                Math.random() * exercises.length
+            );
+
+
+            // Save the randomly selected workout
+            // into component state.
+            setWorkout(exercises[randomIndex]);
+
+        } catch (requestError) {
+
+            // ==========================================
+            // API ERROR HANDLING
+            // ==========================================
+            console.error(requestError);
+
+            setWorkout(null);
+
+            setError(
+                'Could not load a workout.'
+            );
+
         } finally {
+
+            // ==========================================
+            // END LOADING
+            // ==========================================
+            // Runs whether the request succeeds
+            // or fails.
             setIsLoading(false);
         }
+
     }, [categoryParam]);
 
+
+    // ==========================================
+    // LOAD WORKOUT WHEN SCREEN OPENS
+    // ==========================================
+    // Runs the workout request when the screen
+    // first loads or when the category changes.
     useEffect(() => {
-        fetchWorkout();
-    }, [fetchWorkout]);
+        pickRandomWorkout();
+    }, [pickRandomWorkout]);
 
-    // Timer Effect
-    useEffect(() => {
-        if (timerActive) {
-            intervalRef.current = setInterval(() => {
-                setSeconds(prev => prev + 1);
-            }, 1000);
-        } else if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-        }
-        return () => {
-            if (intervalRef.current) clearInterval(intervalRef.current);
-        };
-    }, [timerActive]);
 
-    const formatTime = (totalSeconds: number) => {
-        const mins = Math.floor(totalSeconds / 60);
-        const secs = totalSeconds % 60;
-        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-    };
-
-    const handleFinishWorkout = async () => {
-        if (workout) {
-            const finalDuration = formatTime(seconds);
-            const minsSpent = seconds / 60;
-
-            // Scaled calories based on actual time spent
-            const intensityMultiplier: Record<string, number> = { beginner: 5, intermediate: 8, expert: 12 };
-            const perMinCals = intensityMultiplier[workout.difficulty.toLowerCase()] || 7;
-            const finalCals = Math.round(minsSpent * perMinCals);
-
-            await logWorkout({
-                name: workout.name,
-                duration: finalDuration,
-                intensity: workout.difficulty,
-                calories: finalCals > 0 ? finalCals : 10, // Min 10 cals
-            });
-
-            setTimerActive(false);
-            Alert.alert(
-                'Workout Complete!',
-                `You crushed ${workout.name} for ${finalDuration}.\nBurned approx. ${finalCals} kcal!`,
-                [{ text: 'Great!', onPress: () => router.push(`/nutrition?intensity=${encodeURIComponent(workout.difficulty)}&category=${encodeURIComponent(categoryParam)}`) }]
-            );
-        }
-    };
-
-    const toggleSave = () => {
-        if (!workout) return;
-        const workoutId = workout.name.replace(/\s+/g, '-').toLowerCase();
-        if (isSaved(workoutId)) {
-            removeWorkout(workoutId);
-        } else {
-            saveWorkout({
-                id: workoutId,
-                name: workout.name,
-                type: workout.type,
-                muscle: workout.muscle,
-                equipment: workout.equipment,
-                difficulty: workout.difficulty,
-                instructions: workout.instructions,
-                category: categoryParam
-            });
-        }
-    };
-
+    // ==========================================
+    // REUSABLE LOADING SCREEN
+    // ==========================================
+    // Instead of maintaining a separate loading
+    // design on this page, we reuse the PickTip
+    // LoadingScreen component.
     if (isLoading) {
         return (
-            <LinearGradient colors={['#78B63C', '#4D7A20', '#355817']} style={styles.gradient}>
-                <SafeAreaView style={styles.container}>
-                    <ActivityIndicator size="large" color="#FFFFFF" />
-                    <Text style={styles.loadingText}>Fetching your workout...</Text>
-                </SafeAreaView>
-            </LinearGradient>
+            <LoadingScreen
+                message="Picking a workout..."
+            />
         );
     }
 
-    if (error || !workout) {
+
+    // ==========================================
+    // NO WORKOUT / ERROR SCREEN
+    // ==========================================
+    // Displays when the API request fails or
+    // no workout is returned.
+    if (!workout) {
         return (
-            <LinearGradient colors={['#78B63C', '#4D7A20', '#355817']} style={styles.gradient}>
-                <SafeAreaView style={styles.container}>
-                    <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-                        <Text style={styles.backButtonText}>Back</Text>
+            <LinearGradient
+                colors={PickTipGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.gradient}
+            >
+                <SafeAreaView
+                    style={styles.container}
+                >
+
+                    {/* Back navigation button */}
+                    <TouchableOpacity
+                        style={styles.backButton}
+                        onPress={() => router.back()}
+                    >
+                        <Text
+                            style={styles.backButtonText}
+                        >
+                            ← Back
+                        </Text>
                     </TouchableOpacity>
-                    <View style={styles.emptyCard}>
-                        <Text style={styles.title}>{error || 'No workout found'}</Text>
-                        <TouchableOpacity style={styles.rerollButton} onPress={fetchWorkout}>
-                            <Text style={styles.rerollButtonText}>Try Again</Text>
-                        </TouchableOpacity>
+
+
+                    {/* Center the error card */}
+                    <View
+                        style={styles.centeredContent}
+                    >
+                        <View style={styles.card}>
+
+                            <Text style={styles.title}>
+                                No workout found
+                            </Text>
+
+                            <Text
+                                style={styles.description}
+                            >
+                                {error ||
+                                    'Please go back and choose another category.'}
+                            </Text>
+
+
+                            {/* Retry the API request */}
+                            <TouchableOpacity
+                                style={styles.rerollButton}
+                                onPress={pickRandomWorkout}
+                            >
+                                <Text
+                                    style={
+                                        styles.rerollButtonText
+                                    }
+                                >
+                                    Try Again
+                                </Text>
+                            </TouchableOpacity>
+
+                        </View>
                     </View>
+
                 </SafeAreaView>
             </LinearGradient>
         );
     }
 
-    const workoutId = workout.name.replace(/\s+/g, '-').toLowerCase();
-    const saved = isSaved(workoutId);
 
+    // ==========================================
+    // SUCCESSFUL WORKOUT SCREEN
+    // ==========================================
     return (
-        <LinearGradient colors={['#78B63C', '#4D7A20', '#355817']} style={styles.gradient}>
-            <SafeAreaView style={styles.container}>
-                <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-                    <Text style={styles.backButtonText}>Back</Text>
+        <LinearGradient
+            colors={PickTipGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.gradient}
+        >
+            <SafeAreaView
+                style={styles.container}
+            >
+
+                {/* Back navigation button */}
+                <TouchableOpacity
+                    style={styles.backButton}
+                    onPress={() => router.back()}
+                >
+                    <Text
+                        style={styles.backButtonText}
+                    >
+                        ← Back
+                    </Text>
                 </TouchableOpacity>
 
-                <View style={styles.card}>
-                    <View style={styles.cardHeader}>
-                        <Text style={styles.title}>{workout.name}</Text>
-                        <TouchableOpacity onPress={toggleSave} style={styles.saveIconButton}>
-                            <Text style={styles.saveIcon}>{saved ? '❤️' : '🤍'}</Text>
-                        </TouchableOpacity>
-                    </View>
 
-                    <View style={styles.timerRow}>
-                        <View style={styles.timerDisplay}>
-                            <Text style={styles.timerLabel}>ACTIVE TIME</Text>
-                            <Text style={styles.timerValue}>{formatTime(seconds)}</Text>
+                {/* ==========================================
+                    WORKOUT DETAILS
+                ========================================== */}
+                <ScrollView
+                    style={styles.scrollView}
+                    contentContainerStyle={
+                        styles.scrollContent
+                    }
+                    showsVerticalScrollIndicator
+                >
+                    <View style={styles.card}>
+
+                        {/* Workout name */}
+                        <Text style={styles.title}>
+                            {workout.name}
+                        </Text>
+
+
+                        {/* Workout information */}
+                        <View style={styles.infoBox}>
+
+                            <Text style={styles.detail}>
+                                Muscle: {workout.muscle}
+                            </Text>
+
+                            <Text style={styles.detail}>
+                                Type: {workout.type}
+                            </Text>
+
+                            <Text style={styles.detail}>
+                                Equipment: {workout.equipments}
+                            </Text>
+
+                            <Text style={styles.detail}>
+                                Difficulty: {workout.difficulty}
+                            </Text>
+
                         </View>
-                        <TouchableOpacity
-                            style={[styles.timerButton, timerActive && styles.timerButtonActive]}
-                            onPress={() => setTimerActive(!timerActive)}
+
+
+                        {/* Exercise instructions */}
+                        <Text
+                            style={styles.description}
                         >
-                            <Text style={styles.timerButtonText}>{timerActive ? 'PAUSE' : 'START'}</Text>
-                        </TouchableOpacity>
-                    </View>
+                            {workout.instructions}
+                        </Text>
 
-                    <View style={styles.infoBox}>
-                        <Text style={styles.detail}>Muscle: {workout.muscle}</Text>
-                        <Text style={styles.detail}>Difficulty: {workout.difficulty}</Text>
-                        <Text style={styles.detail}>Equipment: {workout.equipment}</Text>
                     </View>
+                </ScrollView>
 
-                    <Text style={styles.description} numberOfLines={6}>
-                        {workout.instructions}
-                    </Text>
+
+                {/* ==========================================
+                    WORKOUT ACTION BUTTONS
+                ========================================== */}
+                <View style={styles.actions}>
+
+                    {/* Request another random workout */}
+                    <TouchableOpacity
+                        style={styles.rerollButton}
+                        onPress={pickRandomWorkout}
+                        disabled={isLoading}
+                    >
+                        <Text
+                            style={styles.rerollButtonText}
+                        >
+                            Try Another Workout
+                        </Text>
+                    </TouchableOpacity>
+
+
+                    {/* Navigate to nutrition recommendations */}
+                    <TouchableOpacity
+                        style={styles.button}
+                        onPress={() =>
+                            router.push(
+                                `/nutrition?intensity=${encodeURIComponent(
+                                    workout.difficulty
+                                )}&category=${encodeURIComponent(
+                                    categoryParam ?? ''
+                                )}`
+                            )
+                        }
+                    >
+                        <Text style={styles.buttonText}>
+                            View Nutrition Tips
+                        </Text>
+                    </TouchableOpacity>
+
                 </View>
 
-                {!timerActive && seconds === 0 ? (
-                    <TouchableOpacity style={styles.rerollButton} onPress={fetchWorkout}>
-                        <Text style={styles.rerollButtonText}>Try Another Workout</Text>
-                    </TouchableOpacity>
-                ) : (
-                    <TouchableOpacity
-                        style={[styles.button, seconds < 10 && { opacity: 0.5 }]}
-                        onPress={handleFinishWorkout}
-                        disabled={seconds < 10}
-                    >
-                        <Text style={styles.buttonText}>Finish Workout</Text>
-                    </TouchableOpacity>
-                )}
             </SafeAreaView>
         </LinearGradient>
     );
 }
 
+
+// ==========================================
+// WORKOUT SCREEN STYLES
+// ==========================================
 const styles = StyleSheet.create({
-    gradient: { flex: 1 },
-    container: { flex: 1, justifyContent: 'center', padding: 24 },
-    loadingText: { color: '#FFFFFF', marginTop: 20, textAlign: 'center', fontSize: 18, fontWeight: '600' },
+
+    // ==========================================
+    // SCREEN BACKGROUND
+    // ==========================================
+
+    // Allows the LinearGradient to fill
+    // the entire screen.
+    gradient: {
+        flex: 1,
+    },
+
+
+    // ==========================================
+    // MAIN SCREEN CONTAINER
+    // ==========================================
+
+    // Controls the overall page layout.
+    container: {
+        flex: 1,
+        paddingHorizontal: 24,
+    },
+
+
+    // ==========================================
+    // BACK BUTTON
+    // ==========================================
+
+    // Container for the top-left back button.
     backButton: {
-        position: 'absolute',
-        top: 60,
-        left: 24,
-        backgroundColor: 'rgba(255,255,255,.2)',
+        alignSelf: 'flex-start',
+        backgroundColor:
+            'rgba(255, 255, 255, 0.2)',
         paddingHorizontal: 16,
         paddingVertical: 10,
         borderRadius: 20,
-        zIndex: 10,
+        marginTop: 8,
+        marginBottom: 8,
     },
-    backButtonText: { color: '#FFFFFF', fontSize: 16, fontWeight: '800' },
+
+    // Text displayed inside the back button.
+    backButtonText: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: '800',
+    },
+
+
+    // ==========================================
+    // CENTERED CONTENT
+    // ==========================================
+
+    // Centers the error card vertically.
+    centeredContent: {
+        flex: 1,
+        justifyContent: 'center',
+    },
+
+
+    // ==========================================
+    // SCROLL VIEW
+    // ==========================================
+
+    // Allows workout content to scroll
+    // on smaller device screens.
+    scrollView: {
+        flex: 1,
+    },
+
+    // Centers workout content vertically
+    // when enough screen space is available.
+    scrollContent: {
+        flexGrow: 1,
+        justifyContent: 'center',
+        paddingVertical: 12,
+    },
+
+
+    // ==========================================
+    // WORKOUT CARD
+    // ==========================================
+
+    // Main white card containing the
+    // workout information.
     card: {
         backgroundColor: '#FFFFFF',
         borderRadius: 28,
         padding: 26,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: .18,
+
+        // iOS shadow
+        shadowColor: '#000000',
+        shadowOffset: {
+            width: 0,
+            height: 8,
+        },
+        shadowOpacity: 0.18,
         shadowRadius: 15,
+
+        // Android shadow
         elevation: 8,
     },
-    cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 },
-    title: { fontSize: 24, fontWeight: '800', color: '#355817', flex: 1 },
-    saveIconButton: { padding: 8 },
-    saveIcon: { fontSize: 24 },
-    timerRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        backgroundColor: '#F8F9FA',
-        padding: 15,
-        borderRadius: 20,
+
+
+    // ==========================================
+    // WORKOUT TITLE
+    // ==========================================
+
+    // Displays the workout name or error title.
+    title: {
+        fontSize: 32,
+        fontWeight: '800',
+        color: '#355817',
+        marginBottom: 18,
+    },
+
+
+    // ==========================================
+    // WORKOUT INFORMATION BOX
+    // ==========================================
+
+    // Light-green container for workout
+    // muscle, type, equipment, and difficulty.
+    infoBox: {
+        backgroundColor: '#EEF7E8',
+        padding: 16,
+        borderRadius: 18,
         marginBottom: 16,
-        borderWidth: 1,
-        borderColor: '#EEE',
     },
-    timerDisplay: { flex: 1 },
-    timerLabel: { fontSize: 10, color: '#888', fontWeight: '800', letterSpacing: 1 },
-    timerValue: { fontSize: 32, fontWeight: '900', color: '#333', fontFamily: 'monospace' },
-    timerButton: {
-        backgroundColor: '#4D7A20',
-        paddingHorizontal: 20,
-        paddingVertical: 12,
-        borderRadius: 14,
+
+    // Individual workout detail text.
+    detail: {
+        fontSize: 17,
+        fontWeight: '700',
+        color: '#4D7A20',
+        marginBottom: 8,
+        textTransform: 'capitalize',
     },
-    timerButtonActive: {
-        backgroundColor: '#FFA000',
+
+
+    // ==========================================
+    // WORKOUT DESCRIPTION
+    // ==========================================
+
+    // Exercise instructions or error message.
+    description: {
+        fontSize: 16,
+        color: '#555555',
+        lineHeight: 24,
     },
-    timerButtonText: { color: '#FFF', fontWeight: '900', fontSize: 14 },
-    emptyCard: { backgroundColor: '#FFFFFF', padding: 25, borderRadius: 25, alignItems: 'center' },
-    infoBox: { backgroundColor: '#EEF7E8', padding: 16, borderRadius: 18, marginBottom: 16 },
-    detail: { fontSize: 15, fontWeight: '700', color: '#4D7A20', marginBottom: 4, textTransform: 'capitalize' },
-    description: { fontSize: 15, color: '#555', lineHeight: 22 },
-    rerollButton: { backgroundColor: '#FFFFFF', padding: 18, borderRadius: 18, marginTop: 28 },
-    rerollButtonText: { textAlign: 'center', color: '#4D7A20', fontWeight: '800', fontSize: 16 },
-    button: { backgroundColor: '#FFFFFF', padding: 18, borderRadius: 18, marginTop: 14 },
-    buttonText: { color: '#4D7A20', textAlign: 'center', fontWeight: '900', fontSize: 17 },
+
+
+    // ==========================================
+    // TRY ANOTHER WORKOUT BUTTON
+    // ==========================================
+
+    // Button used to request another
+    // random workout.
+    rerollButton: {
+        backgroundColor: '#FFFFFF',
+        padding: 18,
+        borderRadius: 18,
+        marginTop: 14,
+    },
+
+    // Text inside the reroll button.
+    rerollButtonText: {
+        textAlign: 'center',
+        color: '#4D7A20',
+        fontWeight: '800',
+        fontSize: 16,
+    },
+
+
+    // ==========================================
+    // NUTRITION BUTTON
+    // ==========================================
+
+    // Button that navigates to the
+    // nutrition recommendation screen.
+    button: {
+        backgroundColor: '#FFFFFF',
+        padding: 18,
+        borderRadius: 18,
+        marginTop: 14,
+    },
+
+    // Text inside the nutrition button.
+    buttonText: {
+        color: '#4D7A20',
+        textAlign: 'center',
+        fontWeight: '900',
+        fontSize: 17,
+    },
+
+
+    // ==========================================
+    // BOTTOM ACTION AREA
+    // ==========================================
+
+    // Holds the workout and nutrition buttons
+    // at the bottom of the screen.
+    actions: {
+        paddingTop: 10,
+        paddingBottom: 12,
+    },
 });
+
+    
+
+   
