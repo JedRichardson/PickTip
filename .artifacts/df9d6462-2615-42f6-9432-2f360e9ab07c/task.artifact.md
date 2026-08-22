@@ -1,0 +1,6 @@
+- `[x]` Unify API Layer in `picktipApi.ts`
+- `[x]` Remove redundant `Ninjas.ts`
+- `[ ]` Integrate `useAppSounds` into `workout.tsx`
+- `[ ]` Connect "Workout Complete" triggers (Audio + Confetti)
+- `[ ]` Clean up `workoutsession.tsx` and redundant styles
+- `[ ]` Final verification of "Unison" flow

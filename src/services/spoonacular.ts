@@ -1,10 +1,13 @@
-const API_KEY = 'd57e0c0d4cc04530bc651135d558ef93';
-const BASE_URL = 'https://api.spoonacular.com/recipes';
+import { SPOONACULAR_API_KEY, SPOONACULAR_BASE_URL } from '../api/picktipApi';
+
+const API_KEY = SPOONACULAR_API_KEY;
+const BASE_URL = SPOONACULAR_BASE_URL;
 
 export interface SpoonacularRecipe {
     id: number;
     title: string;
     image: string;
+    summary?: string;
     calories?: number;
     protein?: string;
     fat?: string;
@@ -59,8 +62,6 @@ export const fetchRecommendations = async (params: {
 
         const data = await response.json();
 
-        console.log("Spoonacular Response:", data);
-
         if (!data?.results || !Array.isArray(data.results)) {
             console.error(
                 "Unexpected Spoonacular response:",
@@ -89,6 +90,7 @@ export const fetchRecommendations = async (params: {
                 id: r.id,
                 title: r.title,
                 image: r.image,
+                summary: r.summary,
                 calories,
                 protein: protein != null ? `${protein}g` : undefined,
                 fat: fat != null ? `${fat}g` : undefined,
@@ -101,5 +103,17 @@ export const fetchRecommendations = async (params: {
         console.error("Spoonacular Fetch Error:", error);
 
         return [];
+    }
+};
+
+export const getRecipeDetails = async (id: number) => {
+    const url = `${BASE_URL}/${id}/information?apiKey=${API_KEY}&includeNutrition=true`;
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Failed to fetch recipe details');
+        return await response.json();
+    } catch (error) {
+        console.error('Spoonacular Details Error:', error);
+        return null;
     }
 };
