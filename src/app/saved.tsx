@@ -77,7 +77,7 @@ export default function SavedScreen() {
 
             <TouchableOpacity
                 style={styles.viewDetailsButton}
-                onPress={() => router.push(`/workout?category=${item.category}`)}
+                onPress={() => router.push(`/workoutsession?category=${item.category}`)}
             >
                 <Text style={styles.viewDetailsText}>Start Workout</Text>
             </TouchableOpacity>

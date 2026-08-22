@@ -1,34 +1,46 @@
-# Implementation Plan - PickTip Pro Suite
+# Implementation Plan - Post-Merge Synchronization & Cleanup
 
-Complete overhaul of the user experience by adding interactivity, visual analytics, and scaling tools.
+Reconcile the changes from the classmate's branch with the existing Pro features to ensure a cohesive and functional main branch.
+
+## User Review Required
+
+> [!IMPORTANT]
+> The merge introduced a separate `workoutsession.tsx` and updated `workout.tsx` with its own timer logic. I will unify these into a single, high-quality "Active Workout" experience that includes the classmate's new **Celebration Sounds** and **Confetti Animations**.
+>
+> I also noticed that the `getExercises` API was duplicated in `src/services/Ninjas.ts`. I will unify this back into `src/api/picktipApi.ts` while keeping the improved error handling.
 
 ## Proposed Changes
 
-### 1. Active Workout Mode (Interactivity)
+### 1. Audio & Visual Enhancements (Unison)
+
 #### [MODIFY] [workout.tsx](file:///C:/Users/neonw/AndroidStudioProjects/PickTip-Tristan/src/app/workout.tsx)
-- Add timer state (`seconds`, `isActive`).
-- Implement `useEffect` for the countdown/count-up logic.
-- Add "Start Workout" overlay/buttons.
-- Calculate final calories based on actual time spent vs. target time.
+- Integrate `useAppSounds` to play "Tap" sounds on timer start/pause.
+- Update the completion flow to use `playCompleteSound()` for the celebratory audio.
+- Ensure navigation to `nutrition.tsx` passes the `workoutComplete=true` flag to trigger the confetti.
 
-### 2. Visual Nutrition Analytics (Insights)
-#### [MODIFY] [dashboard.tsx](file:///C:/Users/neonw/AndroidStudioProjects/PickTip-Tristan/src/app/dashboard.tsx)
-- Implement a custom "Macro Balance Bar" showing the percentage ratio of Protein, Carbs, and Fat.
-- Add a "Streak Heatmap" section showing consistency over the last 7 days.
+#### [MODIFY] [nutrition.tsx](file:///C:/Users/neonw/AndroidStudioProjects/PickTip-Tristan/src/app/nutrition.tsx)
+- The classmate's version already has confetti logic. I will ensure it works seamlessly with the existing real-time recipe loading.
 
-### 3. Recipe Scaling & Smart Shopping (Utility)
-#### [MODIFY] [recipe/[id].tsx](file:///C:/Users/neonw/AndroidStudioProjects/PickTip-Tristan/src/app/recipe/[id].tsx)
-- Add a `targetServings` state with +/- buttons.
-- Dynamically scale ingredient quantities and macro totals.
-- Update "Add to Shopping List" to export the scaled quantities.
+### 2. Code Cleanup & De-duplication
 
-### 4. Consistency Engine (Logic)
-#### [MODIFY] [MealLogContext.tsx](file:///C:/Users/neonw/AndroidStudioProjects/PickTip-Tristan/src/context/MealLogContext.tsx)
-- Add logic to calculate current daily streak.
-- Track "Success Days" (days where at least one meal/workout was logged).
+#### [MODIFY] [picktipApi.ts](file:///C:/Users/neonw/AndroidStudioProjects/PickTip-Tristan/src/api/picktipApi.ts)
+- Combine the logic from the classmate's `Ninjas.ts` (detailed error logging) with our existing key management.
+
+#### [DELETE] [Ninjas.ts](file:///C:/Users/neonw/AndroidStudioProjects/PickTip-Tristan/src/services/Ninjas.ts)
+- Remove the redundant service file.
+
+#### [DELETE] [workoutsession.tsx](file:///C:/Users/neonw/AndroidStudioProjects/PickTip-Tristan/src/app/workoutsession.tsx)
+- Since our `workout.tsx` now handles the timer and active state in a more integrated way, this duplicate file is no longer needed.
+
+### 3. Polish
+
+#### [MODIFY] [bottom_nav.tsx](file:///C:/Users/neonw/AndroidStudioProjects/PickTip-Tristan/src/components/navigation/bottom_nav.tsx)
+- Ensure the "Saved" tab is correctly labeled and using the heart icon consistent with the rest of the app.
 
 ## Verification Plan
-1. **Timer**: Start a workout, wait 10 seconds, pause, and finish. Verify the log shows the duration.
-2. **Scaling**: Change servings from 2 to 4. Verify ingredients double. Add to shopping list and check the list.
-3. **Analytics**: Log a high-fat meal and verify the Macro Balance bar shifts visually.
-4. **Streak**: Log a meal today and verify the streak count is active on the dashboard.
+
+### Manual Verification
+1.  **Audio**: Start a workout and verify the "Tap" sound plays. Finish and verify the "Victory/Crowd" celebration plays.
+2.  **Visuals**: Verify confetti appears on the Nutrition screen after finishing a workout.
+3.  **Data**: Save a workout using the heart icon and verify it appears in the "Saved" tab.
+4.  **API**: Ensure recipes and exercises still load correctly using the unified API layer.

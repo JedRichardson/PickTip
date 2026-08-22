@@ -11,7 +11,7 @@ export default function BottomNav() {
 
     const isHome = pathname === '/';
     const isCategory = pathname.startsWith('/category');
-    const isWorkout = pathname.startsWith('/workout');
+    const isWorkout = pathname.startsWith('/workoutsession');
     const isNutrition = pathname.startsWith('/nutrition');
     const isSaved = pathname.startsWith('/saved');
 
