@@ -14,6 +14,8 @@ import { UserProvider } from '../context/UserContext';
 
 import { WorkoutLogProvider } from '../context/WorkoutLogContext';
 
+import { SavedWorkoutProvider } from '../context/SavedWorkoutContext';
+
 
 // ==========================================
 // ADDED:
@@ -43,67 +45,71 @@ export default function RootLayout() {
 
         <UserProvider>
 
-
-            <WorkoutLogProvider>
-
-
-                <MealLogProvider>
+            <SavedWorkoutProvider>
 
 
-                    <SavedNutritionProvider>
+                <WorkoutLogProvider>
 
 
-                        {/* ==========================================
-                            ADDED:
-                            GLOBAL APP SOUNDS
-                        ========================================== */}
-                        {/* Keeps PickTip sound players alive across
-                            screen navigation instead of creating
-                            and destroying them on each page. */}
-                        <AppSoundsProvider>
+                    <MealLogProvider>
 
 
-                            <View style={styles.container}>
+                        <SavedNutritionProvider>
 
 
-                                {/* ==========================================
-                                    MAIN SCREEN CONTENT
-                                ========================================== */}
-                                <View style={styles.content}>
+                            {/* ==========================================
+                                ADDED:
+                                GLOBAL APP SOUNDS
+                            ========================================== */}
+                            {/* Keeps PickTip sound players alive across
+                                screen navigation instead of creating
+                                and destroying them on each page. */}
+                            <AppSoundsProvider>
 
 
-                                    <Stack
+                                <View style={styles.container}>
 
-                                        screenOptions={{
-                                            headerShown: false,
-                                        }}
 
-                                    />
+                                    {/* ==========================================
+                                        MAIN SCREEN CONTENT
+                                    ========================================== */}
+                                    <View style={styles.content}>
+
+
+                                        <Stack
+
+                                            screenOptions={{
+                                                headerShown: false,
+                                            }}
+
+                                        />
+
+
+                                    </View>
+
+
+
+                                    {/* ==========================================
+                                        BOTTOM NAVIGATION
+                                    ========================================== */}
+                                    <BottomNav />
 
 
                                 </View>
 
 
-
-                                {/* ==========================================
-                                    BOTTOM NAVIGATION
-                                ========================================== */}
-                                <BottomNav />
+                            </AppSoundsProvider>
 
 
-                            </View>
+                        </SavedNutritionProvider>
 
 
-                        </AppSoundsProvider>
+                    </MealLogProvider>
 
 
-                    </SavedNutritionProvider>
+                </WorkoutLogProvider>
 
-
-                </MealLogProvider>
-
-
-            </WorkoutLogProvider>
+            </SavedWorkoutProvider>
 
 
         </UserProvider>
