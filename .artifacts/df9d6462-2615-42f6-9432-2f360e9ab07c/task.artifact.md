@@ -1,6 +1,4 @@
-- `[x]` Unify API Layer in `picktipApi.ts`
-- `[x]` Remove redundant `Ninjas.ts`
-- `[ ]` Integrate `useAppSounds` into `workout.tsx`
-- `[ ]` Connect "Workout Complete" triggers (Audio + Confetti)
-- `[ ]` Clean up `workoutsession.tsx` and redundant styles
-- `[ ]` Final verification of "Unison" flow
+- `[x]` Implement "Showcase Data" logic in `SettingsScreen`
+- `[x]` Add "Daily Tip" card to `NutritionDashboard`
+- `[x]` Add live calorie ticker to `WorkoutSessionScreen`
+- `[x]` Final UI check for Showcase Readiness

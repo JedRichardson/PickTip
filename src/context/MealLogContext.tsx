@@ -38,6 +38,7 @@ interface MealLogContextType {
     };
     logWater: (amount: number) => Promise<void>;
     refreshLogs: () => Promise<void>;
+    loadDemoData: () => Promise<void>;
 }
 
 const MealLogContext = createContext<MealLogContextType | undefined>(undefined);
@@ -192,6 +193,36 @@ export const MealLogProvider = ({ children }: { children: ReactNode }) => {
         const updated = plannedMeals.filter(log => log.logId !== logId);
         setPlannedMeals(updated);
         await savePlanned(updated);
+    };
+
+    const loadDemoData = async () => {
+        const demoMeals: LoggedMeal[] = [];
+        const demoWater: {timestamp: number, amount: number}[] = [];
+
+        for (let i = 0; i < 7; i++) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            const ts = date.getTime();
+
+            demoMeals.push({
+                logId: `demo-m-${i}`,
+                foodId: 'demo',
+                name: 'Showcase Balanced Meal',
+                calories: 600 + Math.random() * 200,
+                protein: 30 + Math.random() * 10,
+                carbs: 50 + Math.random() * 20,
+                fat: 20 + Math.random() * 5,
+                timestamp: ts,
+                quantity: 1
+            });
+
+            demoWater.push({ timestamp: ts, amount: 2000 + Math.random() * 1000 });
+        }
+
+        setMealLogs(demoMeals);
+        setWaterLogs(demoWater);
+        await saveLogs(demoMeals);
+        await saveWater(demoWater);
     };
 
     const getDailyTotals = () => {

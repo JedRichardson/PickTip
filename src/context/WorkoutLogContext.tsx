@@ -15,6 +15,7 @@ interface WorkoutLogContextType {
     logWorkout: (workout: Omit<LoggedWorkout, 'id' | 'timestamp'>) => Promise<void>;
     removeWorkout: (id: string) => Promise<void>;
     dailyTotalCalories: number;
+    loadDemoData: () => Promise<void>;
 }
 
 const WorkoutLogContext = createContext<WorkoutLogContextType | undefined>(undefined);
@@ -53,6 +54,27 @@ export const WorkoutLogProvider = ({ children }: { children: ReactNode }) => {
         const updated = workouts.filter(w => w.id !== id);
         setWorkouts(updated);
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    };
+
+    const loadDemoData = async () => {
+        const demoWorkouts: LoggedWorkout[] = [];
+        const names = ['Morning Run', 'Full Body Power', 'Core Blast', 'Leg Day'];
+
+        for (let i = 0; i < 7; i++) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            demoWorkouts.push({
+                id: `demo-w-${i}`,
+                name: names[i % names.length],
+                duration: '30:00',
+                calories: 300 + Math.random() * 200,
+                intensity: 'High',
+                timestamp: date.getTime()
+            });
+        }
+
+        setWorkouts(demoWorkouts);
+        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(demoWorkouts));
     };
 
     const getDailyCalories = () => {

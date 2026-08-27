@@ -109,6 +109,14 @@ export default function WorkoutSessionScreen() {
         setTimerActive(!timerActive);
     };
 
+    const getLiveCalories = () => {
+        if (!workout) return 0;
+        const minsSpent = seconds / 60;
+        const intensityMultiplier: Record<string, number> = { beginner: 5, intermediate: 8, expert: 12 };
+        const perMinCals = intensityMultiplier[workout.difficulty.toLowerCase()] || 7;
+        return Math.round(minsSpent * perMinCals);
+    };
+
     const handleFinishWorkout = async () => {
         if (workout) {
             const finalDuration = formatTime(seconds);
@@ -214,8 +222,18 @@ export default function WorkoutSessionScreen() {
                         </View>
 
                         <View style={styles.timerCard}>
-                            <Text style={styles.timerLabel}>SESSION TIME</Text>
-                            <Text style={styles.timerValue}>{formatTime(seconds)}</Text>
+                            <View style={styles.timerStatsRow}>
+                                <View style={styles.timerStatItem}>
+                                    <Text style={styles.timerLabel}>SESSION TIME</Text>
+                                    <Text style={styles.timerValue}>{formatTime(seconds)}</Text>
+                                </View>
+                                <View style={styles.timerDivider} />
+                                <View style={styles.timerStatItem}>
+                                    <Text style={styles.timerLabel}>EST. BURN</Text>
+                                    <Text style={styles.timerValue}>{getLiveCalories()}</Text>
+                                </View>
+                            </View>
+
                             <TouchableOpacity
                                 style={[styles.timerButton, timerActive && styles.timerButtonActive]}
                                 onPress={toggleTimer}
@@ -283,8 +301,11 @@ const styles = StyleSheet.create({
     animationWrapper: { height: 200, backgroundColor: '#F8F9FA', borderRadius: 22, marginBottom: 18, justifyContent: 'center', alignItems: 'center', overflow: 'hidden' },
     lottie: { width: '100%', height: '100%' },
     timerCard: { alignItems: 'center', backgroundColor: '#F0F4E8', padding: 20, borderRadius: 24, marginBottom: 18 },
+    timerStatsRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-around', width: '100%', marginBottom: 12 },
+    timerStatItem: { alignItems: 'center', flex: 1 },
+    timerDivider: { width: 1, height: 40, backgroundColor: '#DDD' },
     timerLabel: { fontSize: 12, color: '#777', fontWeight: '800', letterSpacing: 1.5 },
-    timerValue: { fontSize: 48, fontWeight: '900', color: '#355817', marginVertical: 8, fontFamily: 'monospace' },
+    timerValue: { fontSize: 32, fontWeight: '900', color: '#355817', marginVertical: 4, fontFamily: 'monospace' },
     timerButton: { backgroundColor: '#4D7A20', paddingHorizontal: 24, paddingVertical: 14, borderRadius: 16, width: '100%', alignItems: 'center' },
     timerButtonActive: { backgroundColor: '#FFA000' },
     timerButtonText: { color: '#FFF', fontWeight: '900', fontSize: 14 },

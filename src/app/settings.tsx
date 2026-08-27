@@ -11,9 +11,13 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useUser } from '../context/UserContext';
+import { useMealLog } from '../context/MealLogContext';
+import { useWorkoutLog } from '../context/WorkoutLogContext';
 
 export default function SettingsScreen() {
     const { profile, updateProfile, updateGoals } = useUser();
+    const { loadDemoData: loadMealDemo } = useMealLog();
+    const { loadDemoData: loadWorkoutDemo } = useWorkoutLog();
 
     const [name, setName] = useState(profile.name);
     const [diet, setDiet] = useState(profile.dietaryPreference);
@@ -123,6 +127,21 @@ export default function SettingsScreen() {
                         </View>
                     </View>
                 </View>
+
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Showcase Tools</Text>
+                    <Text style={styles.label}>Prepare for demo by loading 7 days of activity</Text>
+                    <TouchableOpacity
+                        style={styles.demoButton}
+                        onPress={async () => {
+                            await loadMealDemo();
+                            await loadWorkoutDemo();
+                            Alert.alert('Demo Ready', '7 days of activity data loaded. Check your Dashboard!');
+                        }}
+                    >
+                        <Text style={styles.demoButtonText}>🚀 Load Showcase Data</Text>
+                    </TouchableOpacity>
+                </View>
             </ScrollView>
         </SafeAreaView>
     );
@@ -216,5 +235,17 @@ const styles = StyleSheet.create({
     },
     goalInputContainer: {
         flex: 0.48,
+    },
+    demoButton: {
+        backgroundColor: '#355817',
+        padding: 16,
+        borderRadius: 12,
+        alignItems: 'center',
+        marginTop: 8,
+    },
+    demoButtonText: {
+        color: '#fff',
+        fontWeight: '800',
+        fontSize: 16,
     }
 });
