@@ -1219,21 +1219,7 @@ export default function NutritionScreen() {
 
 
                                         <RecipeCard
-
                                             recipe={item}
-
-                                            onPress={() =>
-
-                                                Alert.alert(
-
-                                                    item.title,
-
-                                                    'Recipe details integration coming soon!'
-
-                                                )
-
-                                            }
-
                                         />
 
 

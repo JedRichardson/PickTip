@@ -1,0 +1,4 @@
+- `[x]` Implement "Showcase Data" logic in `SettingsScreen`
+- `[x]` Add "Daily Tip" card to `NutritionDashboard`
+- `[x]` Add live calorie ticker to `WorkoutSessionScreen`
+- `[x]` Final UI check for Showcase Readiness
