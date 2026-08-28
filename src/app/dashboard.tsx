@@ -31,6 +31,17 @@ export default function NutritionDashboard() {
         logWater,
         streak
     } = useMealLog();
+
+    const tips = [
+        "Protein helps repair muscle tissue after a tough workout.",
+        "Drinking water before meals can aid in digestion.",
+        "Consistency is key! Try to log at least one activity every day.",
+        "Complex carbs like sweet potatoes provide long-lasting energy.",
+        "Don't skip the cool-down; it helps prevent post-workout soreness.",
+        "Sleep is just as important as the gym for recovery."
+    ];
+    const dailyTip = React.useMemo(() => tips[Math.floor(Math.random() * tips.length)], []);
+
     const { profile } = useUser();
     const { workouts, dailyTotalCalories, removeWorkout } = useWorkoutLog();
     const { ingredients } = useShoppingList();
@@ -110,6 +121,16 @@ export default function NutritionDashboard() {
                 </View>
 
                 <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+
+                    <View style={styles.tipCard}>
+                        <View style={styles.tipIcon}>
+                            <Text style={{fontSize: 20}}>💡</Text>
+                        </View>
+                        <View style={styles.tipContent}>
+                            <Text style={styles.tipLabel}>TIP OF THE DAY</Text>
+                            <Text style={styles.tipText}>{dailyTip}</Text>
+                        </View>
+                    </View>
 
                     <View style={styles.mainScoreCard}>
                         <View style={styles.scoreRow}>
@@ -228,6 +249,41 @@ const styles = StyleSheet.create({
     streakText: { color: '#FFF', fontWeight: '800', fontSize: 12 },
     title: { color: '#FFFFFF', fontSize: 32, fontWeight: '900' },
     scrollContent: { paddingHorizontal: 20, paddingBottom: 30 },
+    tipCard: {
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        borderRadius: 20,
+        padding: 16,
+        marginBottom: 18,
+        flexDirection: 'row',
+        alignItems: 'center',
+        borderLeftWidth: 6,
+        borderLeftColor: '#FFD700',
+    },
+    tipIcon: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: '#FFFBE6',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 12,
+    },
+    tipContent: {
+        flex: 1,
+    },
+    tipLabel: {
+        fontSize: 10,
+        fontWeight: '800',
+        color: '#888',
+        letterSpacing: 1,
+        marginBottom: 2,
+    },
+    tipText: {
+        fontSize: 14,
+        color: '#333',
+        fontWeight: '600',
+        lineHeight: 18,
+    },
     mainScoreCard: { backgroundColor: '#FFFFFF', borderRadius: 28, padding: 22, marginBottom: 18, elevation: 8 },
     scoreRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
     scoreItem: { flex: 1, alignItems: 'center' },

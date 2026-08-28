@@ -4,7 +4,7 @@ const API_URL = "https://api.api-ninjas.com/v1/exercises";
 const API_KEY = process.env.EXPO_PUBLIC_API_NINJAS_KEY || '5KATBLHf7SvLorRKxLy4T3Aa3JN8lb6UrEUmwG38';
 
 // Spoonacular API Configuration
-export const SPOONACULAR_API_KEY = process.env.EXPO_PUBLIC_SPOONACULAR_API_KEY || 'd57e0c0d4cc04530bc651135d558ef93';
+export const SPOONACULAR_API_KEY = process.env.EXPO_PUBLIC_SPOONACULAR_API_KEY || '2a32d4012603465f97c73a407c55ccef';
 export const SPOONACULAR_BASE_URL = 'https://api.spoonacular.com/recipes';
 
 export type Exercise = {
