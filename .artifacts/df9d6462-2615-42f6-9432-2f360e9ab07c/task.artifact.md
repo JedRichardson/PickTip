@@ -1,4 +1,10 @@
-- `[x]` Implement "Showcase Data" logic in `SettingsScreen`
-- `[x]` Add "Daily Tip" card to `NutritionDashboard`
-- `[x]` Add live calorie ticker to `WorkoutSessionScreen`
-- `[x]` Final UI check for Showcase Readiness
+- `[ ]` Setup Android Project Structure (Gradle, Manifest, Folders)
+- `[ ]` Define Kotlin Data Models (matching TypeScript schemas)
+- `[ ]` Implement Retrofit API Clients (Ninjas & Spoonacular)
+- `[ ]` Setup Room Database for local persistence
+- `[ ]` Create UI Theme (Colors, Gradients from existing project)
+- `[ ]` Build Dashboard (Charts, Heatmap, Tip of the Day)
+- `[ ]` Build Workout Session (Timer, Lottie, Sounds)
+- `[ ]` Build Recipe Details (Scaling, Ingredients)
+- `[ ]` Build Shopping List (Categorized)
+- `[ ]` Final testing and Showcase Data implementation
