@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -25,6 +26,8 @@ import com.picktip.ui.theme.PickTipGreen
 import com.picktip.ui.theme.PickTipLightGreen
 import com.picktip.ui.viewmodel.ShoppingListViewModel
 import com.picktip.ui.viewmodel.ViewModelFactory
+
+import com.picktip.ui.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -53,16 +56,29 @@ fun ShoppingListScreen(navController: NavController) {
                 TopAppBar(
                     title = { Text("Shopping List", color = Color.White, fontWeight = FontWeight.Black) },
                     navigationIcon = {
-                        IconButton(onClick = { navController.popBackStack() }) {
-                            Text("←", color = Color.White, fontSize = 20.sp)
+                        IconButton(
+                            onClick = { navController.popBackStack() },
+                            modifier = Modifier
+                                .padding(start = 12.dp)
+                                .size(40.dp)
+                                .background(Color.White, CircleShape)
+                        ) {
+                            Text("←", color = PickTipDarkGreen, fontSize = 20.sp, fontWeight = FontWeight.Black)
                         }
                     },
                     actions = {
-                        IconButton(onClick = { viewModel.clearChecked() }) {
-                            Text("🧹", fontSize = 20.sp)
+                        IconButton(
+                            onClick = { viewModel.clearChecked() },
+                            modifier = Modifier.size(40.dp).background(Color.White, CircleShape)
+                        ) {
+                            Text("🧹", fontSize = 18.sp)
                         }
-                        IconButton(onClick = { viewModel.clearList() }) {
-                            Text("🗑️", fontSize = 20.sp)
+                        Spacer(Modifier.width(8.dp))
+                        IconButton(
+                            onClick = { viewModel.clearList() },
+                            modifier = Modifier.padding(end = 12.dp).size(40.dp).background(Color.White, CircleShape)
+                        ) {
+                            Text("🗑️", fontSize = 18.sp)
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
@@ -70,8 +86,35 @@ fun ShoppingListScreen(navController: NavController) {
             }
         ) { padding ->
             if (ingredients.isEmpty()) {
-                Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                    Text("Your shopping list is empty", color = Color.White.copy(alpha = 0.7f), fontSize = 18.sp)
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding)
+                        .padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text("Your shopping list is empty", color = Color.White.copy(alpha = 0.9f), fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.height(8.dp))
+                    Text("Add ingredients from recipes or start a new workout session!", color = Color.White.copy(alpha = 0.7f), fontSize = 14.sp)
+                    Spacer(Modifier.height(24.dp))
+                    Button(
+                        onClick = { navController.navigate(Screen.Category.route) },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier.fillMaxWidth(0.8f)
+                    ) {
+                        Text("Start Workout Session 💪", color = PickTipDarkGreen, fontWeight = FontWeight.Bold)
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    OutlinedButton(
+                        onClick = { navController.navigate(Screen.Nutrition.createRoute("Medium")) },
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier.fillMaxWidth(0.8f)
+                    ) {
+                        Text("Explore Nutrition 🥑", color = Color.White, fontWeight = FontWeight.Bold)
+                    }
                 }
             } else {
                 LazyColumn(

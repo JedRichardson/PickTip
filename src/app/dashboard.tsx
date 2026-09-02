@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import {
     StyleSheet,
@@ -8,6 +8,7 @@ import {
     TouchableOpacity,
     Dimensions,
     Alert,
+    Modal,
 } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -47,7 +48,7 @@ export default function NutritionDashboard() {
 
 
     const { profile } = useUser();
-w
+    const [showMacroModal, setShowMacroModal] = useState(false);
 
     const {
         workouts,
@@ -381,13 +382,33 @@ w
 
                     </View>
 
+                    <View style={styles.quickActionsRow}>
+                        <TouchableOpacity style={styles.quickActionCard} onPress={() => router.push('/category')}>
+                            <Text style={styles.quickActionIcon}>💪</Text>
+                            <Text style={styles.quickActionText}>Workout</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.quickActionCard} onPress={() => router.push('/shopping-list')}>
+                            <Text style={styles.quickActionIcon}>🛒</Text>
+                            <Text style={styles.quickActionText}>Shopping</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.quickActionCard} onPress={() => router.push('/saved')}>
+                            <Text style={styles.quickActionIcon}>❤️</Text>
+                            <Text style={styles.quickActionText}>Collection</Text>
+                        </TouchableOpacity>
+                    </View>
 
 
-                    <View style={styles.summaryCard}>
 
-                        <Text style={styles.cardTitle}>
-                            Daily Progress
-                        </Text>
+                    <TouchableOpacity style={styles.summaryCard} onPress={() => setShowMacroModal(true)} activeOpacity={0.85}>
+
+                        <View style={styles.summaryHeader}>
+                            <Text style={styles.cardTitle}>
+                                Daily Progress
+                            </Text>
+                            <Text style={styles.tapAnalyticsHint}>
+                                Tap for chart 📊
+                            </Text>
+                        </View>
 
 
                         {renderProgressBar(
@@ -422,7 +443,7 @@ w
                         )}
 
 
-                    </View>
+                    </TouchableOpacity>
 
 
 
@@ -874,6 +895,77 @@ w
 
                 </ScrollView>
 
+                <Modal
+                    visible={showMacroModal}
+                    transparent
+                    animationType="fade"
+                    onRequestClose={() => setShowMacroModal(false)}
+                >
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.modalContent}>
+                            <Text style={styles.modalTitle}>Macro Gains & Analytics 📊</Text>
+                            <Text style={styles.modalSubtitle}>Detailed breakdown of daily macronutrient gains</Text>
+
+                            <View style={styles.tableHeaderRow}>
+                                <Text style={[styles.tableCol, styles.colMacro, styles.tableHeaderText]}>Macro</Text>
+                                <Text style={[styles.tableCol, styles.colNum, styles.tableHeaderText]}>Amount</Text>
+                                <Text style={[styles.tableCol, styles.colNum, styles.tableHeaderText]}>Energy</Text>
+                                <Text style={[styles.tableCol, styles.colNum, styles.tableHeaderText]}>Share</Text>
+                            </View>
+
+                            <View style={styles.tableRow}>
+                                <Text style={[styles.tableCol, styles.colMacro]}>🥩 Protein</Text>
+                                <Text style={[styles.tableCol, styles.colNum]}>{Math.round(dailyTotals.protein)}g</Text>
+                                <Text style={[styles.tableCol, styles.colNum]}>{Math.round(dailyTotals.protein * 4)} kcal</Text>
+                                <Text style={[styles.tableCol, styles.colNum, { color: '#2196F3', fontWeight: '800' }]}>
+                                    {dailyTotals.protein + dailyTotals.carbs + dailyTotals.fat > 0
+                                        ? Math.round((dailyTotals.protein / (dailyTotals.protein + dailyTotals.carbs + dailyTotals.fat)) * 100)
+                                        : 0}%
+                                </Text>
+                            </View>
+
+                            <View style={styles.tableRow}>
+                                <Text style={[styles.tableCol, styles.colMacro]}>🍞 Carbs</Text>
+                                <Text style={[styles.tableCol, styles.colNum]}>{Math.round(dailyTotals.carbs)}g</Text>
+                                <Text style={[styles.tableCol, styles.colNum]}>{Math.round(dailyTotals.carbs * 4)} kcal</Text>
+                                <Text style={[styles.tableCol, styles.colNum, { color: '#FF9800', fontWeight: '800' }]}>
+                                    {dailyTotals.protein + dailyTotals.carbs + dailyTotals.fat > 0
+                                        ? Math.round((dailyTotals.carbs / (dailyTotals.protein + dailyTotals.carbs + dailyTotals.fat)) * 100)
+                                        : 0}%
+                                </Text>
+                            </View>
+
+                            <View style={styles.tableRow}>
+                                <Text style={[styles.tableCol, styles.colMacro]}>🥑 Fat</Text>
+                                <Text style={[styles.tableCol, styles.colNum]}>{Math.round(dailyTotals.fat)}g</Text>
+                                <Text style={[styles.tableCol, styles.colNum]}>{Math.round(dailyTotals.fat * 9)} kcal</Text>
+                                <Text style={[styles.tableCol, styles.colNum, { color: '#E91E63', fontWeight: '800' }]}>
+                                    {dailyTotals.protein + dailyTotals.carbs + dailyTotals.fat > 0
+                                        ? Math.round((dailyTotals.fat / (dailyTotals.protein + dailyTotals.carbs + dailyTotals.fat)) * 100)
+                                        : 0}%
+                                </Text>
+                            </View>
+
+                            <View style={styles.tableDivider} />
+
+                            <View style={styles.tableRow}>
+                                <Text style={[styles.tableCol, styles.colMacro, { fontWeight: '900', color: '#355817' }]}>Total</Text>
+                                <Text style={[styles.tableCol, styles.colNum, { fontWeight: '900', color: '#355817' }]}>
+                                    {Math.round(dailyTotals.protein + dailyTotals.carbs + dailyTotals.fat)}g
+                                </Text>
+                                <Text style={[styles.tableCol, styles.colNum, { fontWeight: '900', color: '#355817' }]}>
+                                    {Math.round(dailyTotals.protein * 4 + dailyTotals.carbs * 4 + dailyTotals.fat * 9)} kcal
+                                </Text>
+                                <Text style={[styles.tableCol, styles.colNum, { fontWeight: '900', color: '#355817' }]}>100%</Text>
+                            </View>
+
+                            <TouchableOpacity style={styles.closeModalButton} onPress={() => setShowMacroModal(false)}>
+                                <Text style={styles.closeModalButtonText}>Close Analytics</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
+
 
             </SafeAreaView>
 
@@ -1018,6 +1110,130 @@ const styles = StyleSheet.create({
 
         alignItems: 'center',
 
+    },
+
+    quickActionsRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 18,
+        gap: 10,
+    },
+
+    quickActionCard: {
+        flex: 1,
+        backgroundColor: '#FFFFFF',
+        borderRadius: 18,
+        paddingVertical: 14,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 4,
+    },
+
+    quickActionIcon: {
+        fontSize: 22,
+        marginBottom: 4,
+    },
+
+    summaryHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 12,
+    },
+
+    tapAnalyticsHint: {
+        fontSize: 12,
+        fontWeight: '800',
+        color: '#4D7A20',
+    },
+
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 20,
+    },
+
+    modalContent: {
+        width: '100%',
+        backgroundColor: '#FFFFFF',
+        borderRadius: 24,
+        padding: 22,
+        elevation: 10,
+    },
+
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: '900',
+        color: '#355817',
+        marginBottom: 4,
+    },
+
+    modalSubtitle: {
+        fontSize: 12,
+        color: '#777',
+        marginBottom: 18,
+    },
+
+    tableHeaderRow: {
+        flexDirection: 'row',
+        backgroundColor: '#F5F5F5',
+        paddingVertical: 8,
+        paddingHorizontal: 10,
+        borderRadius: 8,
+        marginBottom: 6,
+    },
+
+    tableHeaderText: {
+        fontWeight: '900',
+        fontSize: 12,
+        color: '#333',
+    },
+
+    tableRow: {
+        flexDirection: 'row',
+        paddingVertical: 8,
+        paddingHorizontal: 10,
+        alignItems: 'center',
+    },
+
+    tableCol: {
+        fontSize: 13,
+        color: '#444',
+    },
+
+    colMacro: {
+        flex: 1.3,
+        fontWeight: '700',
+    },
+
+    colNum: {
+        flex: 1,
+        textAlign: 'right',
+    },
+
+    tableDivider: {
+        height: 1,
+        backgroundColor: '#EEEEEE',
+        marginVertical: 10,
+    },
+
+    closeModalButton: {
+        backgroundColor: '#355817',
+        paddingVertical: 14,
+        borderRadius: 16,
+        alignItems: 'center',
+        marginTop: 18,
+    },
+
+    closeModalButtonText: {
+        color: '#FFFFFF',
+        fontWeight: '800',
+        fontSize: 15,
     },
 
 

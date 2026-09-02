@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -51,8 +52,14 @@ fun CategoryScreen(navController: NavController) {
                 TopAppBar(
                     title = { Text("What are we training?", color = Color.White, fontWeight = FontWeight.Black) },
                     navigationIcon = {
-                        IconButton(onClick = { navController.popBackStack() }) {
-                            Text("←", color = Color.White, fontSize = 20.sp)
+                        IconButton(
+                            onClick = { navController.popBackStack() },
+                            modifier = Modifier
+                                .padding(start = 12.dp)
+                                .size(40.dp)
+                                .background(Color.White, CircleShape)
+                        ) {
+                            Text("←", color = PickTipDarkGreen, fontSize = 20.sp, fontWeight = FontWeight.Black)
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
