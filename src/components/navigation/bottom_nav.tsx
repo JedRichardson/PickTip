@@ -11,9 +11,8 @@ export default function BottomNav() {
 
     const isHome = pathname === '/';
     const isCategory = pathname.startsWith('/category');
-    const isWorkout = pathname.startsWith('/workoutsession');
+    const isWorkout = pathname.startsWith('/workout');
     const isNutrition = pathname.startsWith('/nutrition');
-    const isSaved = pathname.startsWith('/saved');
 
     const isPickActive = isCategory || isWorkout || isNutrition;
 
@@ -33,14 +32,6 @@ export default function BottomNav() {
             >
                 <Text style={isPickActive ? styles.activeIcon : styles.icon}>💪</Text>
                 <Text style={isPickActive ? styles.activeText : styles.text}>Pick</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-                style={styles.navItem}
-                onPress={() => router.push('/saved')}
-            >
-                <Text style={isSaved ? styles.activeIcon : styles.icon}>❤️</Text>
-                <Text style={isSaved ? styles.activeText : styles.text}>Saved</Text>
             </TouchableOpacity>
         </View>
     );

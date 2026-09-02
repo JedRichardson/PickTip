@@ -1,44 +1,28 @@
-# Implementation Plan - Kotlin Native Migration 🚀
+# Implementation Plan - Showcase Essentials 🚀
 
-Migrate the entire PickTip feature set from React Native (TypeScript) to Native Android (Kotlin & Jetpack Compose). This will resolve environment-related testing issues by providing a standard Android project that runs directly in Android Studio.
+High-impact, low-risk additions to make PickTip shine during the testing showcase.
 
 ## Proposed Changes
 
-### 1. Project Infrastructure (Kotlin Setup)
-- **Gradle Initialization**: Create `build.gradle`, `settings.gradle`, and `app/build.gradle`.
-- **Dependencies**:
-    - **UI**: Jetpack Compose, Material 3, Navigation Compose.
-    - **Network**: Retrofit & Moshi (for API Ninjas and Spoonacular).
-    - **Local Storage**: Room Persistence Library (replacing AsyncStorage).
-    - **Media**: Coil (Images), Lottie (Animations), ExoPlayer (Audio).
-    - **Architecture**: ViewModel & LiveData/StateFlow.
+### 1. Showcase "Demo Mode" (Settings)
+#### [MODIFY] [settings.tsx](file:///C:/Users/neonw/AndroidStudioProjects/PickTip-Tristan/src/app/settings.tsx)
+- Add a "Load Showcase Data" button.
+- **Functionality**: Instantly populates the last 7 days with fake meal logs, water intake, and workouts.
+- **Benefit**: Ensures the Dashboard heatmap, macro charts, and streaks are fully visible and impressive for judges/testers.
 
-### 2. Data & Logic Layer (Unison)
-#### [NEW] Data Models (`com.picktip.data.models`)
-- Recreate `Exercise`, `Recipe`, `LoggedMeal`, `LoggedWorkout`, `Ingredient`, and `UserProfile` classes in Kotlin.
-#### [NEW] API Services (`com.picktip.data.api`)
-- Implement `WorkoutApiService` (API Ninjas) and `SpoonacularApiService` with the centralized keys.
-#### [NEW] Local Database (`com.picktip.data.local`)
-- Create Room entities and DAOs for Meals, Workouts, and the Shopping List.
+### 2. Daily Motivation Hub (Dashboard)
+#### [MODIFY] [dashboard.tsx](file:///C:/Users/neonw/AndroidStudioProjects/PickTip-Tristan/src/app/dashboard.tsx)
+- Add a "Tip of the Day" card at the top.
+- **Functionality**: Displays a random piece of expert advice (e.g., "Protein helps muscle repair!").
+- **Benefit**: Adds immediate visual interest and shows off the app's "educational" side.
 
-### 3. UI Re-implementation (Jetpack Compose)
-#### [NEW] Main Screens (`com.picktip.ui.screens`)
-- **Dashboard**: Features the Streak Heatmap (custom canvas), Macro Balance Bar, and Smart Suggestions.
-- **WorkoutSession**: Active timer, Lottie animation, and completion celebration.
-- **RecipeDetails**: Dynamic scaling logic and "Add to Shopping List" functionality.
-- **SavedCollection**: Tabbed view for favorite meals and workouts.
-- **Settings**: Profile configuration and the "🚀 Load Showcase Data" button.
-
-### 4. Audio & Animations
-- Port the Lottie animations and layered celebration sounds (Tap, Victory, Crowd) to the native Android equivalents.
-
-## Why this fixes testing issues
-- **Native Execution**: No dependency on Expo Go or Node.js versions on your local machine.
-- **Android Studio Native**: You can use the standard Android Studio "Run" button and debugger.
-- **Single AVD Support**: Works natively with any standard Android Virtual Device.
+### 3. Live Calorie Burner (Workout)
+#### [MODIFY] [workoutsession.tsx](file:///C:/Users/neonw/AndroidStudioProjects/PickTip-Tristan/src/app/workoutsession.tsx)
+- Add a real-time calorie counter next to the timer.
+- **Functionality**: The calorie number will tick up every second based on workout intensity.
+- **Benefit**: Makes the "Active Session" feel alive and technologically advanced during the demo.
 
 ## Verification Plan
-1. **API Integration**: Verify workouts and recipes load correctly via Retrofit.
-2. **Persistence**: Save a meal, restart the app, and ensure it's still in the history.
-3. **Core Loop**: "Pick Workout" -> "Timer" -> "Confetti" -> "Nutrition" should flow seamlessly.
-4. **Showcase Ready**: Tap "Load Showcase Data" and verify the dashboard is fully populated.
+1. **Demo Data**: Go to Settings, tap "Load Showcase Data," return to Dashboard. Verify the heatmap has 7 circles and the charts are full.
+2. **Motivation**: Refresh Dashboard or navigate away/back and see a new tip.
+3. **Live Burn**: Start a workout and watch the calorie number increase alongside the timer.
