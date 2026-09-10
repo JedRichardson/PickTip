@@ -27,6 +27,8 @@ interface MealLogContextType {
     };
     logWater: (amount: number) => Promise<void>;
     refreshLogs: () => Promise<void>;
+    clearAllLogs: () => Promise<void>;
+    loadDemoData: () => Promise<void>;
 }
 
 const MealLogContext = createContext<MealLogContextType | undefined>(undefined);
@@ -83,7 +85,7 @@ export const MealLogProvider = ({ children }: { children: ReactNode }) => {
 
     const logMeal = async (food: Food, quantity: number = 1) => {
         const newLog: LoggedMeal = {
-            logId: Date.now().toString(),
+            logId: Date.now().toString() + Math.random().toString(36).substring(2, 4),
             foodId: food.id,
             name: food.name,
             calories: food.calories * quantity,
@@ -110,6 +112,62 @@ export const MealLogProvider = ({ children }: { children: ReactNode }) => {
         const updatedLogs = mealLogs.filter(log => log.logId !== logId);
         setMealLogs(updatedLogs);
         await saveLogs(updatedLogs);
+    };
+
+    const clearAllLogs = async () => {
+        setMealLogs([]);
+        setWaterLogs([]);
+        await saveLogs([]);
+        await saveWater([]);
+    };
+
+    const loadDemoData = async () => {
+        const demoMeals: LoggedMeal[] = [
+            {
+                logId: 'demo-1',
+                foodId: 'f1',
+                name: 'Grilled Chicken & Avocado Bowl',
+                calories: 520,
+                protein: 48,
+                carbs: 35,
+                fat: 18,
+                timestamp: Date.now(),
+                quantity: 1,
+            },
+            {
+                logId: 'demo-2',
+                foodId: 'f2',
+                name: 'Greek Yogurt & Berry Oats',
+                calories: 380,
+                protein: 28,
+                carbs: 46,
+                fat: 8,
+                timestamp: Date.now(),
+                quantity: 1,
+            },
+            {
+                logId: 'demo-3',
+                foodId: 'f3',
+                name: 'Atlantic Salmon & Quinoa',
+                calories: 580,
+                protein: 42,
+                carbs: 40,
+                fat: 22,
+                timestamp: Date.now(),
+                quantity: 1,
+            }
+        ];
+
+        const demoWater = [
+            { timestamp: Date.now(), amount: 500 },
+            { timestamp: Date.now(), amount: 500 },
+            { timestamp: Date.now(), amount: 250 },
+        ];
+
+        setMealLogs(demoMeals);
+        setWaterLogs(demoWater);
+        await saveLogs(demoMeals);
+        await saveWater(demoWater);
     };
 
     const getDailyTotals = () => {
@@ -139,7 +197,9 @@ export const MealLogProvider = ({ children }: { children: ReactNode }) => {
                 removeLog,
                 logWater,
                 dailyTotals: getDailyTotals(),
-                refreshLogs: loadLogs
+                refreshLogs: loadLogs,
+                clearAllLogs,
+                loadDemoData,
             }}
         >
             {children}

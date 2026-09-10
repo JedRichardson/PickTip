@@ -8,6 +8,8 @@ import {
 
 import { SavedNutritionProvider } from '../context/SavedNutritionContext';
 
+import { SavedWorkoutProvider } from '../context/SavedWorkoutContext';
+
 import { MealLogProvider } from '../context/MealLogContext';
 
 import { UserProvider } from '../context/UserContext';
@@ -53,6 +55,8 @@ export default function RootLayout() {
 
 
                     <SavedNutritionProvider>
+
+                        <SavedWorkoutProvider>
 
                         <ShoppingListProvider>
 
@@ -100,6 +104,8 @@ export default function RootLayout() {
                         </AppSoundsProvider>
 
                         </ShoppingListProvider>
+
+                        </SavedWorkoutProvider>
 
 
                     </SavedNutritionProvider>

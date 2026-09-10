@@ -522,9 +522,24 @@ export default function NutritionScreen() {
 
         Alert.alert(
 
-            'Success',
+            'Meal Logged! 🍴',
 
-            `${item.name} has been logged to your dashboard!`
+            `${item.name} has been added to your daily tracker.\n\nWhere would you like to go next?`,
+
+            [
+                {
+                    text: 'Back to Workout Choices 🏋️',
+                    onPress: () => router.push('/category')
+                },
+                {
+                    text: 'View My Dashboard 📊',
+                    onPress: () => router.push('/dashboard')
+                },
+                {
+                    text: 'Main Screen 🏠',
+                    onPress: () => router.push('/')
+                }
+            ]
 
         );
 

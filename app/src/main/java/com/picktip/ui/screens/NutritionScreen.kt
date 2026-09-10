@@ -2,9 +2,7 @@ package com.picktip.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -38,7 +36,7 @@ fun NutritionScreen(navController: NavController, intensity: String) {
     val userProfile by app.userPrefs.userProfile.collectAsState(initial = null)
     
     val viewModel: RecipeViewModel = viewModel(
-        factory = ViewModelFactory(app)
+        factory = ViewModelFactory(app),
     )
 
     val suggestedRecipes by viewModel.suggestedRecipes.collectAsState()
@@ -51,8 +49,8 @@ fun NutritionScreen(navController: NavController, intensity: String) {
         userProfile?.let {
             viewModel.fetchSuggestions(
                 diet = it.dietaryPreference,
-                minProtein = if (intensity == "expert" || intensity == "high") 35 else 20,
-                maxCalories = if (intensity == "expert" || intensity == "high") 1200 else 700,
+                minProtein = if ((intensity == "expert") || (intensity == "high")) 35 else 20,
+                maxCalories = if ((intensity == "expert") || (intensity == "high")) 1200 else 700,
                 type = "main course"
             )
         }

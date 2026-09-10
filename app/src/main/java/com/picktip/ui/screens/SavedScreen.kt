@@ -72,9 +72,9 @@ fun SavedScreen(navController: NavController) {
                     containerColor = Color.Transparent,
                     contentColor = Color.White,
                     indicator = { tabPositions ->
-                        TabRowDefaults.Indicator(
+                        TabRowDefaults.SecondaryIndicator(
                             Modifier.tabIndicatorOffset(tabPositions[selectedTab]),
-                            color = Color.White
+                            color = Color.White,
                         )
                     }
                 ) {

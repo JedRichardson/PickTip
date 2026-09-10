@@ -39,12 +39,12 @@ fun DashboardScreen(navController: NavController) {
     val context = LocalContext.current
     val app = context.applicationContext as PickTipApplication
     val viewModel: MealLogViewModel = viewModel(
-        factory = ViewModelFactory(app)
+        factory = ViewModelFactory(app),
     )
 
     val dailyTotals by viewModel.dailyTotals.collectAsState()
     val mealLogs by viewModel.mealLogs.collectAsState()
-    var showMacroDialog by remember { mutableStateOf(false) }
+    var showMacroDialog by remember { mutableStateOf(value = false) }
 
     Box(
         modifier = Modifier
@@ -175,7 +175,7 @@ fun ScoreCard(calories: Int) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text("REMAINING KCAL", fontSize = 12.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
-            Text("$calories", fontSize = 48.sp, fontWeight = FontWeight.Black, color = PickTipDarkGreen)
+            Text(calories.toString(), fontSize = 48.sp, fontWeight = FontWeight.Black, color = PickTipDarkGreen)
         }
     }
 }
@@ -263,9 +263,9 @@ fun MacroAnalyticsDialog(
     val fatCals = totals.fat * 9
     val totalCals = proteinCals + carbsCals + fatCals
 
-    val pPct = if (totalGrams > 0) (totals.protein / totalGrams * 100).toInt() else 0
-    val cPct = if (totalGrams > 0) (totals.carbs / totalGrams * 100).toInt() else 0
-    val fPct = if (totalGrams > 0) (totals.fat / totalGrams * 100).toInt() else 0
+    val pPct = if (totalGrams > 0) ((totals.protein / totalGrams) * 100).toInt() else 0
+    val cPct = if (totalGrams > 0) ((totals.carbs / totalGrams) * 100).toInt() else 0
+    val fPct = if (totalGrams > 0) ((totals.fat / totalGrams) * 100).toInt() else 0
 
     AlertDialog(
         onDismissRequest = onDismiss,

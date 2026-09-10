@@ -14,6 +14,9 @@ import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { useUser } from '../context/UserContext';
+import { useMealLog } from '../context/MealLogContext';
+import { useWorkoutLog } from '../context/WorkoutLogContext';
+import { useShoppingList } from '../context/ShoppingListContext';
 
 
 // ==========================================
@@ -35,6 +38,10 @@ export default function SettingsScreen() {
         updateProfile,
         updateGoals
     } = useUser();
+
+    const { loadDemoData, clearAllLogs } = useMealLog();
+    const { loadDemoWorkouts, clearAllWorkouts } = useWorkoutLog();
+    const { addIngredients, clearList } = useShoppingList();
 
 
     const [
@@ -97,6 +104,25 @@ export default function SettingsScreen() {
     // Keeps the existing profile and nutrition
     // goal update behavior unchanged.
     // ==========================================
+    const handleLoadDemoData = async () => {
+        await loadDemoData();
+        await loadDemoWorkouts();
+        addIngredients([
+            { name: 'Organic Sweet Potatoes', original: '2 lbs Organic Sweet Potatoes', amount: 2, unit: 'lbs' },
+            { name: 'Grass-fed Whey Protein', original: '1 tub Grass-fed Whey Protein', amount: 1, unit: 'tub' },
+            { name: 'Fresh Baby Spinach', original: '1 bag Fresh Baby Spinach', amount: 1, unit: 'bag' },
+            { name: 'Hass Avocados', original: '3 count Hass Avocados', amount: 3, unit: 'count' },
+        ]);
+        Alert.alert('Showcase Mode Active 🚀', 'Pre-loaded 7 days of meals, active workouts, and shopping list items for presentation demo!');
+    };
+
+    const handleClearDemoData = async () => {
+        await clearAllLogs();
+        await clearAllWorkouts();
+        clearList();
+        Alert.alert('Data Cleared 🗑️', 'Reset all meal logs, workout logs, and shopping list items.');
+    };
+
     const handleSave = async () => {
 
 
@@ -501,10 +527,58 @@ export default function SettingsScreen() {
 
                             </View>
 
+                    {/* ==========================================
+                        SHOWCASE TOOLS
+                    ========================================== */}
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>Showcase Tools</Text>
+                        <Text style={styles.showcaseSubtitle}>Prepare app for demo presentation with pre-populated activity</Text>
+
+                        <TouchableOpacity style={styles.demoLoadButton} onPress={handleLoadDemoData}>
+                            <Text style={styles.demoLoadButtonText}>🚀 Load Showcase Data</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={styles.demoClearButton} onPress={handleClearDemoData}>
+                            <Text style={styles.demoClearButtonText}>🗑️ Clear All Showcase Data</Text>
+                        </TouchableOpacity>
+                    </View>
+
 
                         </View>
 
+                    {/* ==========================================
+                        SHOWCASE TOOLS
+                    ========================================== */}
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>Showcase Tools</Text>
+                        <Text style={styles.showcaseSubtitle}>Prepare app for demo presentation with pre-populated activity</Text>
 
+                        <TouchableOpacity style={styles.demoLoadButton} onPress={handleLoadDemoData}>
+                            <Text style={styles.demoLoadButtonText}>🚀 Load Showcase Data</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={styles.demoClearButton} onPress={handleClearDemoData}>
+                            <Text style={styles.demoClearButtonText}>🗑️ Clear All Showcase Data</Text>
+                        </TouchableOpacity>
+                    </View>
+
+
+                    </View>
+
+                    {/* ==========================================
+                        SHOWCASE TOOLS
+                    ========================================== */}
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>Showcase Tools</Text>
+                        <Text style={styles.showcaseSubtitle}>Prepare app for demo presentation with pre-populated activity</Text>
+
+                        <TouchableOpacity style={styles.demoLoadButton} onPress={handleLoadDemoData}>
+                            <Text style={styles.demoLoadButtonText}>🚀 Load Showcase Data</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={styles.demoClearButton} onPress={handleClearDemoData}>
+                            <Text style={styles.demoClearButtonText}>🗑️ Clear All Showcase Data</Text>
+                        </TouchableOpacity>
                     </View>
 
 
@@ -667,6 +741,46 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         color: '#4C4C4C',
         marginBottom: 8,
+    },
+
+    showcaseSubtitle: {
+        fontSize: 13,
+        color: '#666666',
+        marginBottom: 16,
+    },
+
+    demoLoadButton: {
+        backgroundColor: '#355817',
+        paddingVertical: 16,
+        borderRadius: 16,
+        alignItems: 'center',
+        marginBottom: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 8,
+        elevation: 4,
+    },
+
+    demoLoadButtonText: {
+        color: '#FFFFFF',
+        fontSize: 16,
+        fontWeight: '900',
+    },
+
+    demoClearButton: {
+        backgroundColor: '#FFF0F0',
+        borderWidth: 1,
+        borderColor: '#FFCDCD',
+        paddingVertical: 14,
+        borderRadius: 16,
+        alignItems: 'center',
+    },
+
+    demoClearButtonText: {
+        color: '#D32F2F',
+        fontSize: 14,
+        fontWeight: '800',
     },
 
 

@@ -16,7 +16,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.picktip.PickTipApplication
 import com.picktip.ui.theme.PickTipDarkGreen
-import com.picktip.ui.theme.PickTipGreen
 import com.picktip.ui.viewmodel.MealLogViewModel
 import com.picktip.ui.viewmodel.ViewModelFactory
 import com.picktip.ui.viewmodel.WorkoutViewModel
