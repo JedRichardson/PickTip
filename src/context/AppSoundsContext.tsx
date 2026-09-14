@@ -22,6 +22,10 @@ interface AppSoundsContextType {
 
     playCompleteSound: () => Promise<void>;
 
+    playProgressSound: () => Promise<void>;
+
+    stopProgressSound: () => void;
+
 }
 
 
@@ -58,6 +62,7 @@ export function AppSoundsProvider({
     // ==========================================
     // useMemo prevents new players from being
     // created every time the provider re-renders.
+    // ==========================================
     const players = useMemo(() => {
 
 
@@ -91,6 +96,18 @@ export function AppSoundsProvider({
             );
 
 
+        // ==========================================
+        // PROGRESS GROWTH SOUND
+        // ==========================================
+        // Positive rising feedback used while the
+        // Dashboard progress bars animate upward.
+        // ==========================================
+        const progressPlayer =
+            createAudioPlayer(
+                require('../../assets/sounds/progress.mp3')
+            );
+
+
         return {
 
             tapPlayer,
@@ -101,7 +118,9 @@ export function AppSoundsProvider({
 
             crowdPlayer,
 
-            victoryPlayer
+            victoryPlayer,
+
+            progressPlayer
 
         };
 
@@ -134,6 +153,8 @@ export function AppSoundsProvider({
             players.crowdPlayer.release();
 
             players.victoryPlayer.release();
+
+            players.progressPlayer.release();
 
 
         };
@@ -204,6 +225,41 @@ export function AppSoundsProvider({
 
 
     // ==========================================
+    // PLAY PROGRESS GROWTH SOUND
+    // ==========================================
+    // Starts when the Dashboard progress bars
+    // begin filling after new progress is made.
+    // ==========================================
+    const playProgressSound = async () => {
+
+
+        await players.progressPlayer.seekTo(0);
+
+        players.progressPlayer.play();
+
+
+    };
+
+
+
+    // ==========================================
+    // STOP PROGRESS GROWTH SOUND
+    // ==========================================
+    // Stops the rising progress feedback when
+    // the progress animation finishes or the
+    // user leaves the Dashboard.
+    // ==========================================
+    const stopProgressSound = () => {
+
+
+        players.progressPlayer.pause();
+
+
+    };
+
+
+
+    // ==========================================
     // PROVIDE APP SOUND FUNCTIONS
     // ==========================================
     return (
@@ -215,7 +271,11 @@ export function AppSoundsProvider({
 
                 playSuccessSound,
 
-                playCompleteSound
+                playCompleteSound,
+
+                playProgressSound,
+
+                stopProgressSound
 
             }}
         >

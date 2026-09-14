@@ -1,7 +1,8 @@
 import React, {
     useState,
     useMemo,
-    useEffect
+    useEffect,
+    useRef
 } from 'react';
 
 
@@ -14,6 +15,7 @@ import {
     TextInput,
     Alert,
     ScrollView,
+    Animated,
 } from 'react-native';
 
 
@@ -31,6 +33,13 @@ import {
 // PickTip gradient background.
 // ==========================================
 import { LinearGradient } from 'expo-linear-gradient';
+
+
+// ==========================================
+// ADDED:
+// Lottie confetti celebration.
+// ==========================================
+import LottieView from 'lottie-react-native';
 
 
 
@@ -51,6 +60,7 @@ import {
 
 
 import { RecipeCard } from '../components/recipe-card';
+import LoadingScreen from '../components/LoadingScreen';
 
 
 
@@ -61,23 +71,39 @@ export default function NutritionScreen() {
 
     const {
         intensity,
-        category
+        category,
+        workoutComplete,
+        fromWorkout
     } = useLocalSearchParams();
+
+
+
+
+    // ==========================================
+    // ADDED:
+    // WORKOUT ROUTE SOURCE
+    // ==========================================
+    // Nutrition should render immediately when
+    // opened from either workout screen while the
+    // Spoonacular recipes load in the background.
+    const cameFromWorkout =
+        Array.isArray(fromWorkout)
+            ? fromWorkout[0] === 'true'
+            : fromWorkout === 'true';
+
 
 
 
     // ==========================================
     // NORMALIZE WORKOUT INTENSITY
     // ==========================================
-    // API Ninjas returns workout difficulty as:
-    // beginner, intermediate, or expert.
+    // API Ninjas sends difficulty values such as
+    // beginner, intermediate, and expert.
     //
-    // PickTip nutrition uses:
-    // Low, Medium, or High.
+    // PickTip nutrition uses Low, Medium, and High.
     //
-    // Normalize the route value once so both the
-    // local food suggestions and Spoonacular use
-    // the same intensity throughout this screen.
+    // This creates one shared intensity value for
+    // both local food suggestions and Spoonacular.
     const intensityParam =
         Array.isArray(intensity)
             ? intensity[0]
@@ -86,42 +112,54 @@ export default function NutritionScreen() {
 
     const getNutritionIntensity = (
         workoutIntensity: string
-    ): 'Low' | 'Medium' | 'High' => {
+    ) => {
+
 
         const normalized =
             workoutIntensity
                 .trim()
                 .toLowerCase();
 
+
         if (
             normalized === 'beginner' ||
             normalized === 'low'
         ) {
+
             return 'Low';
+
         }
+
 
         if (
             normalized === 'intermediate' ||
             normalized === 'medium'
         ) {
+
             return 'Medium';
+
         }
+
 
         if (
             normalized === 'expert' ||
             normalized === 'high'
         ) {
+
             return 'High';
+
         }
 
-        // Unknown values should not accidentally
-        // receive beginner or expert nutrition.
+
         return 'Medium';
+
     };
 
 
     const nutritionIntensity =
-        getNutritionIntensity(intensityParam);
+        getNutritionIntensity(
+            intensityParam
+        );
 
 
 
@@ -139,8 +177,9 @@ export default function NutritionScreen() {
 
     const suggestions = useFoodSuggestions({
 
-        // Pass the normalized PickTip intensity so
-        // local meal suggestions match the workout.
+        // Use the normalized intensity so local
+        // PickTip foods match the API Ninjas
+        // workout that was actually completed.
         intensity: nutritionIntensity,
 
         category,
@@ -193,7 +232,42 @@ export default function NutritionScreen() {
         isLoadingRecipes,
         setIsLoadingRecipes
 
+    ] = useState(true);
+
+
+
+
+    // ==========================================
+    // ADDED:
+    // Workout completion confetti state.
+    // ==========================================
+    // The celebration only appears when Nutrition
+    // was opened from Complete Workout.
+    const [
+        showConfetti,
+        setShowConfetti
     ] = useState(false);
+
+
+    // Prevents the confetti from replaying if the
+    // Nutrition screen reloads recipes or filters.
+    const hasPlayedConfetti =
+        useRef(false);
+
+
+    // Controls the shared fade in / fade out.
+    const confettiOpacity =
+        useRef(new Animated.Value(0)).current;
+
+
+    // Controls the left-side slide animation.
+    const leftConfettiTranslate =
+        useRef(new Animated.Value(-40)).current;
+
+
+    // Controls the right-side slide animation.
+    const rightConfettiTranslate =
+        useRef(new Animated.Value(40)).current;
 
 
 
@@ -228,6 +302,160 @@ export default function NutritionScreen() {
 
 
 
+    // ==========================================
+    // ADDED:
+    // WORKOUT COMPLETION CONFETTI
+    // ==========================================
+    // Runs once as soon as Nutrition opens when
+    // the user arrives by pressing Complete Workout.
+    //
+    // The animation fades and slides in from both
+    // sides, stays visible during the celebration,
+    // then fades back out near the end of the
+    // workout completion audio.
+    useEffect(() => {
+
+
+        const workoutWasCompleted =
+            Array.isArray(workoutComplete)
+                ? workoutComplete[0] === 'true'
+                : workoutComplete === 'true';
+
+
+        if (
+            !workoutWasCompleted ||
+            hasPlayedConfetti.current
+        ) {
+
+            return;
+
+        }
+
+
+        hasPlayedConfetti.current = true;
+
+        setShowConfetti(true);
+
+
+        // Reset the animation values before playing.
+        confettiOpacity.setValue(0);
+
+        leftConfettiTranslate.setValue(-40);
+
+        rightConfettiTranslate.setValue(40);
+
+
+        const celebrationAnimation =
+            Animated.sequence([
+
+
+                // ==========================================
+                // FADE / SLIDE IN
+                // ==========================================
+                Animated.parallel([
+
+                    Animated.timing(
+                        confettiOpacity,
+                        {
+                            toValue: 1,
+                            duration: 350,
+                            useNativeDriver: true,
+                        }
+                    ),
+
+                    Animated.timing(
+                        leftConfettiTranslate,
+                        {
+                            toValue: 0,
+                            duration: 350,
+                            useNativeDriver: true,
+                        }
+                    ),
+
+                    Animated.timing(
+                        rightConfettiTranslate,
+                        {
+                            toValue: 0,
+                            duration: 350,
+                            useNativeDriver: true,
+                        }
+                    ),
+
+                ]),
+
+
+                // Keep the celebration visible while the
+                // completion sounds are playing.
+                Animated.delay(2650),
+
+
+                // ==========================================
+                // FADE / SLIDE OUT
+                // ==========================================
+                Animated.parallel([
+
+                    Animated.timing(
+                        confettiOpacity,
+                        {
+                            toValue: 0,
+                            duration: 700,
+                            useNativeDriver: true,
+                        }
+                    ),
+
+                    Animated.timing(
+                        leftConfettiTranslate,
+                        {
+                            toValue: -24,
+                            duration: 700,
+                            useNativeDriver: true,
+                        }
+                    ),
+
+                    Animated.timing(
+                        rightConfettiTranslate,
+                        {
+                            toValue: 24,
+                            duration: 700,
+                            useNativeDriver: true,
+                        }
+                    ),
+
+                ]),
+
+            ]);
+
+
+        celebrationAnimation.start(
+            ({ finished }) => {
+
+                if (finished) {
+
+                    setShowConfetti(false);
+
+                }
+
+            }
+        );
+
+
+        return () => {
+
+            celebrationAnimation.stop();
+
+        };
+
+
+    }, [
+        workoutComplete,
+        confettiOpacity,
+        leftConfettiTranslate,
+        rightConfettiTranslate
+    ]);
+
+
+
+
 
     const loadGlobalRecipes = async () => {
 
@@ -238,64 +466,97 @@ export default function NutritionScreen() {
         // ==========================================
         // WORKOUT-BASED NUTRITION TARGETS
         // ==========================================
-        // The API workout difficulty has already
+        // These targets are derived from the API
+        // Ninjas workout difficulty after it has
         // been normalized to Low / Medium / High.
         let minProtein = 15;
+
         let maxCalories = 500;
 
 
         if (nutritionIntensity === 'High') {
 
             minProtein = 30;
+
             maxCalories = 800;
 
         }
-        else if (nutritionIntensity === 'Medium') {
+        else if (
+            nutritionIntensity === 'Medium'
+        ) {
 
             minProtein = 20;
+
             maxCalories = 600;
+
+        }
+        else {
+
+            minProtein = 15;
+
+            maxCalories = 500;
 
         }
 
 
         try {
 
-            const recipes = await fetchRecommendations({
 
-                diet:
-                    profile.dietaryPreference === 'None'
-                        ? undefined
-                        : profile.dietaryPreference,
+            // ==========================================
+            // SPOONACULAR RECOMMENDATIONS
+            // ==========================================
+            // Spoonacular now receives nutrition
+            // targets based directly on the workout
+            // difficulty returned by API Ninjas.
+            const recipes =
+                await fetchRecommendations({
 
-                minProtein,
+                    diet:
+                        profile.dietaryPreference === 'None'
+                            ? undefined
+                            : profile.dietaryPreference,
 
-                maxCalories,
+                    minProtein,
 
-                type: selectedMealType?.toLowerCase(),
+                    maxCalories,
 
-                number: 10
+                    type:
+                        selectedMealType
+                            ?.toLowerCase(),
 
-            });
+                    number: 10
+
+                });
 
 
             setGlobalRecipes(recipes);
 
+
         }
         catch (error) {
 
-            // Keep local hand-picked suggestions
-            // available if Spoonacular cannot load.
+
+            // ==========================================
+            // API FALLBACK
+            // ==========================================
+            // Keep the local hand-picked workout
+            // suggestions available even if the
+            // Spoonacular request cannot complete.
             console.warn(
                 'Spoonacular recommendations unavailable:',
                 error
             );
 
+
             setGlobalRecipes([]);
+
 
         }
         finally {
 
+
             setIsLoadingRecipes(false);
+
 
         }
 
@@ -653,6 +914,33 @@ export default function NutritionScreen() {
 
 
     };
+
+    // ==========================================
+    // NUTRITION LOADING BEHAVIOR
+    // ==========================================
+    // Keep the reusable loading screen when
+    // Nutrition is opened independently.
+    //
+    // When Nutrition is opened from workout.tsx
+    // or workoutsession.tsx, render Nutrition
+    // immediately while Spoonacular continues
+    // loading recipes in the background.
+    // ==========================================
+    if (
+        isLoadingRecipes &&
+        !cameFromWorkout
+    ) {
+
+        return (
+
+            <LoadingScreen
+                message="Picking your food recommendations..."
+            />
+
+        );
+
+    }
+
     return (
 
         // ==========================================
@@ -680,6 +968,103 @@ export default function NutritionScreen() {
             style={styles.gradient}
 
         >
+
+
+            {/* ==========================================
+                ADDED:
+                WORKOUT COMPLETION CONFETTI
+            ========================================== */}
+            {/* Confetti appears only after Complete Workout.
+                The overlay does not block Nutrition controls. */}
+            {showConfetti && (
+
+                <View
+                    pointerEvents="none"
+                    style={styles.confettiOverlay}
+                >
+
+
+                    {/* Left-side confetti burst */}
+                    <Animated.View
+                        style={[
+                            styles.confettiSide,
+                            styles.confettiLeft,
+                            {
+                                opacity:
+                                    confettiOpacity,
+
+                                transform: [
+                                    {
+                                        translateX:
+                                            leftConfettiTranslate
+                                    }
+                                ]
+                            }
+                        ]}
+                    >
+
+                        <LottieView
+
+                            source={
+                                require('../../assets/animations/confetti.json')
+                            }
+
+                            autoPlay
+
+                            loop={false}
+
+                            style={
+                                styles.confettiAnimation
+                            }
+
+                        />
+
+                    </Animated.View>
+
+
+
+                    {/* Right-side confetti burst */}
+                    <Animated.View
+                        style={[
+                            styles.confettiSide,
+                            styles.confettiRight,
+                            {
+                                opacity:
+                                    confettiOpacity,
+
+                                transform: [
+                                    {
+                                        translateX:
+                                            rightConfettiTranslate
+                                    }
+                                ]
+                            }
+                        ]}
+                    >
+
+                        <LottieView
+
+                            source={
+                                require('../../assets/animations/confetti.json')
+                            }
+
+                            autoPlay
+
+                            loop={false}
+
+                            style={[
+                                styles.confettiAnimation,
+                                styles.confettiAnimationRight
+                            ]}
+
+                        />
+
+                    </Animated.View>
+
+
+                </View>
+
+            )}
 
 
             <SafeAreaView style={styles.container}>
@@ -742,7 +1127,7 @@ export default function NutritionScreen() {
 
 
                     <Text style={styles.subtitle}>
-                        Based on {intensity} intensity workout
+                        Based on {nutritionIntensity} intensity workout
                     </Text>
 
 
@@ -915,65 +1300,103 @@ export default function NutritionScreen() {
 
                     ListHeaderComponent={
 
-                        <View style={styles.globalSection}>
 
-                            {/* ==========================================
-                                GLOBAL SPOONACULAR RECIPES
-                                ========================================== */}
-                            {/* The external recipe section is optional.
-                                A Spoonacular authentication/quota failure
-                                must never hide PickTip's local suggestions. */}
-                            {globalRecipes.length > 0 ? (
-                                <>
-                                    <Text style={styles.sectionTitle}>
-                                        Global Recipe Discoveries
-                                    </Text>
+                        globalRecipes.length > 0 ? (
 
-                                    <Text style={styles.sectionSubtitle}>
-                                        Powered by Spoonacular
-                                    </Text>
 
-                                    <FlatList
-                                        horizontal
-                                        data={globalRecipes}
-                                        renderItem={({ item }) => (
-                                            <RecipeCard
-                                                recipe={item}
-                                                onPress={() =>
-                                                    Alert.alert(
-                                                        item.title,
-                                                        'Recipe details integration coming soon!'
-                                                    )
-                                                }
-                                            />
-                                        )}
-                                        keyExtractor={item =>
-                                            item.id.toString()
-                                        }
-                                        showsHorizontalScrollIndicator={false}
-                                        contentContainerStyle={
-                                            styles.horizontalList
-                                        }
-                                    />
 
-                                    <View style={styles.divider} />
-                                </>
-                            ) : null}
+                            <View style={styles.globalSection}>
 
-                            {/* ==========================================
-                                PICKTIP HAND-PICKED SUGGESTIONS
-                                ========================================== */}
-                            {/* This section is local PickTip data and must
-                                always render independently of Spoonacular. */}
-                            <Text style={styles.sectionTitle}>
-                                Hand-picked Suggestions
-                            </Text>
 
-                            <Text style={styles.sectionSubtitle}>
-                                Matched to your {nutritionIntensity} intensity workout
-                            </Text>
+                                <Text style={styles.sectionTitle}>
+                                    Global Recipe Discoveries
+                                </Text>
 
-                        </View>
+
+
+                                <Text style={styles.sectionSubtitle}>
+                                    Powered by Spoonacular
+                                </Text>
+
+
+
+
+
+
+                                <FlatList
+
+
+                                    horizontal
+
+
+                                    data={globalRecipes}
+
+
+
+                                    renderItem={({ item }) => (
+
+
+                                        <RecipeCard
+
+                                            recipe={item}
+
+                                            onPress={() =>
+
+                                                Alert.alert(
+
+                                                    item.title,
+
+                                                    'Recipe details integration coming soon!'
+
+                                                )
+
+                                            }
+
+                                        />
+
+
+                                    )}
+
+
+
+                                    keyExtractor={item =>
+                                        item.id.toString()
+                                    }
+
+
+
+                                    showsHorizontalScrollIndicator={false}
+
+
+                                    contentContainerStyle={
+                                        styles.horizontalList
+                                    }
+
+
+                                />
+
+
+
+
+
+                                <View style={styles.divider} />
+
+
+
+
+
+                                <Text style={styles.sectionTitle}>
+                                    Hand-picked Suggestions
+                                </Text>
+
+
+
+                            </View>
+
+
+
+                        ) : null
+
 
                     }
 
@@ -1085,6 +1508,59 @@ const styles = StyleSheet.create({
     // ==========================================
     gradient: {
         flex: 1,
+    },
+
+
+
+    // ==========================================
+    // ADDED:
+    // Workout completion confetti overlay.
+    // ==========================================
+    confettiOverlay: {
+        ...StyleSheet.absoluteFill,
+        zIndex: 100,
+        elevation: 100,
+    },
+
+
+    // Shared positioning for both celebration
+    // bursts along the sides of the screen.
+    confettiSide: {
+        position: 'absolute',
+        top: 30,
+        width: 260,
+        height: 430,
+    },
+
+
+    // Keeps most of the left burst near the edge
+    // so the center Nutrition content stays clear.
+    confettiLeft: {
+        left: -78,
+    },
+
+
+    // Mirrors the placement on the right side.
+    confettiRight: {
+        right: -78,
+    },
+
+
+    // Main Lottie sizing for the celebration.
+    confettiAnimation: {
+        width: '100%',
+        height: '100%',
+    },
+
+
+    // Reuses the same JSON file while mirroring
+    // the right-side burst toward the app content.
+    confettiAnimationRight: {
+        transform: [
+            {
+                scaleX: -1,
+            }
+        ],
     },
 
 

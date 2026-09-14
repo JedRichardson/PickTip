@@ -1,4 +1,7 @@
-import React from 'react';
+import React, {
+    useCallback,
+    useRef
+} from 'react';
 
 import {
     StyleSheet,
@@ -8,11 +11,15 @@ import {
     TouchableOpacity,
     Dimensions,
     Alert,
+    Animated,
 } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { router } from 'expo-router';
+import {
+    router,
+    useFocusEffect
+} from 'expo-router';
 
 import { LinearGradient } from 'expo-linear-gradient';
 // ==========================================
@@ -28,9 +35,27 @@ import { useWorkoutLog } from '../context/WorkoutLogContext';
 
 import { FoodSuggestionCard } from '../components/food-suggestion-card';
 
+import { useAppSounds } from '../hooks/useAppSounds';
+
 
 
 const { width } = Dimensions.get('window');
+
+
+
+// ==========================================
+// DASHBOARD PROGRESS VIEW MEMORY
+// ==========================================
+// These values stay alive while the JavaScript
+// bundle is running, even if Dashboard unmounts.
+//
+// They let the bars animate every visit while
+// only playing the progress sound after a NEW
+// meal or workout has been logged since the
+// previous Dashboard view.
+// ==========================================
+let lastSeenMealCount: number | null = null;
+let lastSeenWorkoutCount: number | null = null;
 
 
 
@@ -47,7 +72,7 @@ export default function NutritionDashboard() {
 
 
     const { profile } = useUser();
-w
+
 
     const {
         workouts,
@@ -60,11 +85,149 @@ w
 
 
 
+    // ==========================================
+    // DASHBOARD PROGRESS ANIMATION
+    // ==========================================
+    // One shared animation value drives every
+    // progress bar so Calories, Protein, Carbs,
+    // Fat, and Hydration all grow together.
+    //
+    // 0 = empty visual bar
+    // 1 = current real progress value
+    // ==========================================
+    const progressAnimation =
+        useRef(new Animated.Value(0)).current;
+
+
+
+    // ==========================================
+    // DASHBOARD PROGRESS SOUND
+    // ==========================================
+    // The sound begins only when NEW meal/workout
+    // progress is detected and stops when the
+    // growth animation finishes.
+    // ==========================================
+    const {
+        playProgressSound,
+        stopProgressSound
+    } = useAppSounds();
+
+
+
     const WATER_GOAL = 2500; // ml
 
     const CALORIE_BUDGET = profile.goals.calories + dailyTotalCalories;
 
     const REMAINING = CALORIE_BUDGET - dailyTotals.calories;
+
+
+
+    // ==========================================
+    // ANIMATE PROGRESS WHEN DASHBOARD IS VIEWED
+    // ==========================================
+    // Every Dashboard visit: bars grow 0 -> real
+    // values.
+    //
+    // Sound behavior:
+    // - First Dashboard visit establishes a baseline.
+    // - A NEW meal or workout makes the next visit
+    //   play progress.wav while the bars are growing.
+    // - Revisiting without new meal/workout progress
+    //   still animates the bars, but stays silent.
+    // ==========================================
+    useFocusEffect(
+        useCallback(() => {
+
+
+            const currentMealCount = mealLogs.length;
+            const currentWorkoutCount = workouts.length;
+
+
+            const hasPreviousDashboardView =
+                lastSeenMealCount !== null &&
+                lastSeenWorkoutCount !== null;
+
+
+            const hasNewMeal =
+                hasPreviousDashboardView &&
+                currentMealCount > (lastSeenMealCount ?? 0);
+
+
+            const hasNewWorkout =
+                hasPreviousDashboardView &&
+                currentWorkoutCount > (lastSeenWorkoutCount ?? 0);
+
+
+            const shouldPlayProgressSound =
+                hasNewMeal || hasNewWorkout;
+
+
+            // Remember what Dashboard has now seen.
+            lastSeenMealCount = currentMealCount;
+            lastSeenWorkoutCount = currentWorkoutCount;
+
+
+            // Always restart the visual growth from 0.
+            progressAnimation.stopAnimation();
+            progressAnimation.setValue(0);
+
+
+            if (shouldPlayProgressSound) {
+
+                void playProgressSound();
+
+            }
+
+
+            Animated.timing(
+                progressAnimation,
+                {
+                    toValue: 1,
+                    duration: 1200,
+                    useNativeDriver: false,
+                }
+            ).start(({ finished }) => {
+
+
+                if (
+                    finished &&
+                    shouldPlayProgressSound
+                ) {
+
+                    stopProgressSound();
+
+                }
+
+
+            });
+
+
+            return () => {
+
+
+                progressAnimation.stopAnimation();
+
+                // If the user leaves before the bar
+                // finishes, do not let progress.wav
+                // continue playing on another screen.
+                if (shouldPlayProgressSound) {
+
+                    stopProgressSound();
+
+                }
+
+
+            };
+
+
+        }, [
+            mealLogs.length,
+            workouts.length,
+            progressAnimation,
+            playProgressSound,
+            stopProgressSound
+        ])
+    );
 
 
 
@@ -101,10 +264,23 @@ w
     ) => {
 
 
-        const percentage = Math.min(
-            (value / goal) * 100,
-            100
-        );
+        const percentage =
+            goal > 0
+                ? Math.min(
+                    (value / goal) * 100,
+                    100
+                )
+                : 0;
+
+
+        const animatedWidth =
+            progressAnimation.interpolate({
+                inputRange: [0, 1],
+                outputRange: [
+                    '0%',
+                    `${percentage}%`
+                ],
+            });
 
 
         return (
@@ -133,13 +309,13 @@ w
                 <View style={styles.progressBarBg}>
 
 
-                    <View
+                    <Animated.View
 
                         style={[
                             styles.progressBarFill,
 
                             {
-                                width: `${percentage}%`,
+                                width: animatedWidth,
                                 backgroundColor: color,
                             },
 
@@ -453,16 +629,22 @@ w
                         <View style={styles.waterProgressBg}>
 
 
-                            <View
+                            <Animated.View
 
                                 style={[
                                     styles.waterProgressFill,
                                     {
                                         width:
-                                            `${Math.min(
-                                                (dailyTotals.water / WATER_GOAL) * 100,
-                                                100
-                                            )}%`
+                                            progressAnimation.interpolate({
+                                                inputRange: [0, 1],
+                                                outputRange: [
+                                                    '0%',
+                                                    `${Math.min(
+                                                        (dailyTotals.water / WATER_GOAL) * 100,
+                                                        100
+                                                    )}%`
+                                                ],
+                                            })
                                     }
                                 ]}
 

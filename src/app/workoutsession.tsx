@@ -35,6 +35,12 @@ import { PickTipGradient } from '@/constants/theme';
 // ==========================================
 import { useAppSounds } from '../hooks/useAppSounds';
 
+// ==========================================
+// WORKOUT DASHBOARD TRACKING
+// ==========================================
+import { useWorkoutLog } from '../context/WorkoutLogContext';
+import { markDashboardProgressPending } from '../utils/dashboardProgressFeedback';
+
 
 // ==========================================
 // WORKOUT SESSION SCREEN
@@ -64,6 +70,10 @@ export default function WorkoutSession() {
         playTapSound,
         playCompleteSound
     } = useAppSounds();
+
+
+    // Records the completed workout for Dashboard totals.
+    const { logWorkout } = useWorkoutLog();
 
 
     // ==========================================
@@ -275,6 +285,46 @@ export default function WorkoutSession() {
 
 
     // ==========================================
+    // ESTIMATE CALORIES BURNED
+    // ==========================================
+    // Uses the real session timer plus workout
+    // difficulty only for Dashboard tracking.
+    // This does not change the workout itself.
+    const calculateEstimatedCalories = () => {
+
+        const normalizedDifficulty =
+            workoutDifficulty
+                .trim()
+                .toLowerCase();
+
+        let caloriesPerMinute = 8;
+
+        if (
+            normalizedDifficulty === 'beginner' ||
+            normalizedDifficulty === 'low'
+        ) {
+            caloriesPerMinute = 5;
+        }
+        else if (
+            normalizedDifficulty === 'expert' ||
+            normalizedDifficulty === 'high'
+        ) {
+            caloriesPerMinute = 11;
+        }
+
+        const workoutMinutes = elapsedSeconds / 60;
+
+        return Math.max(
+            1,
+            Math.round(
+                workoutMinutes * caloriesPerMinute
+            )
+        );
+
+    };
+
+
+    // ==========================================
     // COMPLETE WORKOUT
     // ==========================================
     // Stops the current workout and sends the
@@ -302,22 +352,45 @@ export default function WorkoutSession() {
 
 
         // ==========================================
+        // RECORD WORKOUT FOR DASHBOARD
+        // ==========================================
+        // This runs in the background so it does NOT
+        // delay the transition to Nutrition.
+        void logWorkout({
+            name: workoutName || 'Workout',
+            duration: formatTime(elapsedSeconds),
+            calories: calculateEstimatedCalories(),
+            intensity: workoutDifficulty || 'Medium',
+        }).catch(error => {
+            console.error(
+                'Failed to log completed workout:',
+                error
+            );
+        });
+
+
+        // Mark the next Dashboard visit so its
+        // progress sound plays exactly once.
+        markDashboardProgressPending();
+
+
+        // ==========================================
         // PLAY WORKOUT COMPLETION CELEBRATION
         // ==========================================
-        // Start the completion sounds without
-        // delaying navigation to nutrition.
+        // Start the three completion sounds globally.
+        // Do NOT await them: they should continue while
+        // Nutrition opens and its confetti is visible.
         void playCompleteSound();
 
 
         // ==========================================
-        // NAVIGATE TO NUTRITION
+        // NAVIGATE TO NUTRITION IMMEDIATELY
         // ==========================================
-        // Move immediately to nutrition while the
-        // completion audio continues playing.
+        // workoutComplete=true triggers Nutrition's
+        // completion confetti.
         //
-        // workoutComplete=true tells the Nutrition
-        // screen to display the completion confetti
-        // animation only after a finished workout.
+        // fromWorkout=true prevents the workout flow
+        // from being replaced by the recipe loading screen.
         router.replace(
             `/nutrition?intensity=${encodeURIComponent(
                 workoutDifficulty

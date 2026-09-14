@@ -448,7 +448,7 @@ export default function WorkoutScreen() {
                         style={styles.startWorkoutButton}
                         onPress={() =>
                             router.push({
-                                pathname: '/workoutsession',
+                                pathname: '/workoutSession',
                                 params: {
                                     name: workout.name,
                                     muscle: workout.muscle,
