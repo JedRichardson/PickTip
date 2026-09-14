@@ -16,6 +16,14 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useUser } from '../context/UserContext';
 
 
+
+
+
+
+
+
+
+
 // ==========================================
 // ADDED:
 // Reusable PickTip App Gradient
@@ -24,6 +32,16 @@ import { useUser } from '../context/UserContext';
 // appears throughout the rest of the app.
 // ==========================================
 import { PickTipGradient } from '@/constants/theme';
+
+
+
+
+
+
+
+
+
+
 
 
 
