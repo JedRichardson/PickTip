@@ -1,4 +1,4 @@
-const API_KEY = 'd57e0c0d4cc04530bc651135d558ef93';
+const API_KEY = '5d50bc8b8fd74c7da1dc657ea58ab8ee';
 const BASE_URL = 'https://api.spoonacular.com/recipes';
 
 export interface SpoonacularRecipe {
@@ -51,7 +51,7 @@ export const fetchRecommendations = async (params: {
         const response = await fetch(url);
 
         if (!response.ok) {
-            console.error(
+            console.warn(
                 `Spoonacular HTTP Error: ${response.status}`
             );
             return [];

@@ -14,8 +14,7 @@ import {
     StyleSheet,
     Text,
     TouchableOpacity,
-    View,
-    Alert
+    View
 } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -35,7 +34,6 @@ import { PickTipGradient } from '@/constants/theme';
 // ADDED: Reusable PickTip App Sounds
 // ==========================================
 import { useAppSounds } from '../hooks/useAppSounds';
-import { useWorkoutLog } from '../context/WorkoutLogContext';
 
 
 // ==========================================
@@ -66,8 +64,6 @@ export default function WorkoutSession() {
         playTapSound,
         playCompleteSound
     } = useAppSounds();
-
-    const { logWorkout } = useWorkoutLog();
 
 
     // ==========================================
@@ -305,38 +301,29 @@ export default function WorkoutSession() {
         animationRef.current?.pause();
 
 
-        // Log workout to context
-        await logWorkout({
-            name: workoutName || 'Workout Session',
-            duration: formatTime(elapsedSeconds),
-            intensity: workoutDifficulty || 'Intermediate',
-            calories: Math.max(10, Math.round((elapsedSeconds / 60) * 8)),
-        });
-
-
-        // Start completion sound celebration
+        // ==========================================
+        // PLAY WORKOUT COMPLETION CELEBRATION
+        // ==========================================
+        // Start the completion sounds without
+        // delaying navigation to nutrition.
         void playCompleteSound();
 
 
-        Alert.alert(
-            'Workout Complete! 🏋️🎊',
-            `Great job! You completed ${workoutName || 'your session'} in ${formatTime(elapsedSeconds)}.\n\nWhat would you like to do next?`,
-            [
-                {
-                    text: 'Continue to Another Workout 🏋️',
-                    onPress: () => router.replace('/category')
-                },
-                {
-                    text: 'Fuel Up / Meal Choices 🥑',
-                    onPress: () => router.replace(
-                        `/nutrition?intensity=${encodeURIComponent(workoutDifficulty)}&category=${encodeURIComponent(workoutCategory)}&workoutComplete=true&fromWorkout=true`
-                    )
-                },
-                {
-                    text: 'Main Screen 🏠',
-                    onPress: () => router.replace('/')
-                }
-            ]
+        // ==========================================
+        // NAVIGATE TO NUTRITION
+        // ==========================================
+        // Move immediately to nutrition while the
+        // completion audio continues playing.
+        //
+        // workoutComplete=true tells the Nutrition
+        // screen to display the completion confetti
+        // animation only after a finished workout.
+        router.replace(
+            `/nutrition?intensity=${encodeURIComponent(
+                workoutDifficulty
+            )}&category=${encodeURIComponent(
+                workoutCategory
+            )}&workoutComplete=true&fromWorkout=true`
         );
 
     };

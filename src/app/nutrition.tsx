@@ -93,6 +93,76 @@ export default function NutritionScreen() {
 
 
 
+
+    // ==========================================
+    // NORMALIZE WORKOUT INTENSITY
+    // ==========================================
+    // API Ninjas sends difficulty values such as
+    // beginner, intermediate, and expert.
+    //
+    // PickTip nutrition uses Low, Medium, and High.
+    //
+    // This creates one shared intensity value for
+    // both local food suggestions and Spoonacular.
+    const intensityParam =
+        Array.isArray(intensity)
+            ? intensity[0]
+            : intensity ?? 'beginner';
+
+
+    const getNutritionIntensity = (
+        workoutIntensity: string
+    ) => {
+
+
+        const normalized =
+            workoutIntensity
+                .trim()
+                .toLowerCase();
+
+
+        if (
+            normalized === 'beginner' ||
+            normalized === 'low'
+        ) {
+
+            return 'Low';
+
+        }
+
+
+        if (
+            normalized === 'intermediate' ||
+            normalized === 'medium'
+        ) {
+
+            return 'Medium';
+
+        }
+
+
+        if (
+            normalized === 'expert' ||
+            normalized === 'high'
+        ) {
+
+            return 'High';
+
+        }
+
+
+        return 'Medium';
+
+    };
+
+
+    const nutritionIntensity =
+        getNutritionIntensity(
+            intensityParam
+        );
+
+
+
     const { profile } = useUser();
 
 
@@ -107,7 +177,10 @@ export default function NutritionScreen() {
 
     const suggestions = useFoodSuggestions({
 
-        intensity,
+        // Use the normalized intensity so local
+        // PickTip foods match the API Ninjas
+        // workout that was actually completed.
+        intensity: nutritionIntensity,
 
         category,
 
@@ -221,7 +294,7 @@ export default function NutritionScreen() {
         loadGlobalRecipes();
 
     }, [
-        intensity,
+        nutritionIntensity,
         selectedMealType,
         profile.dietaryPreference
     ]);
@@ -390,60 +463,105 @@ export default function NutritionScreen() {
         setIsLoadingRecipes(true);
 
 
+        // ==========================================
+        // WORKOUT-BASED NUTRITION TARGETS
+        // ==========================================
+        // These targets are derived from the API
+        // Ninjas workout difficulty after it has
+        // been normalized to Low / Medium / High.
+        let minProtein = 15;
 
-        let minProtein = 10;
-
-        let maxCalories = 800;
+        let maxCalories = 500;
 
 
-
-        if (intensity === 'High') {
+        if (nutritionIntensity === 'High') {
 
             minProtein = 30;
 
-            maxCalories = 1000;
+            maxCalories = 800;
 
+        }
+        else if (
+            nutritionIntensity === 'Medium'
+        ) {
+
+            minProtein = 20;
+
+            maxCalories = 600;
+
+        }
+        else {
+
+            minProtein = 15;
+
+            maxCalories = 500;
 
         }
 
-        else if (intensity === 'Low') {
 
-            minProtein = 5;
+        try {
 
-            maxCalories = 400;
+
+            // ==========================================
+            // SPOONACULAR RECOMMENDATIONS
+            // ==========================================
+            // Spoonacular now receives nutrition
+            // targets based directly on the workout
+            // difficulty returned by API Ninjas.
+            const recipes =
+                await fetchRecommendations({
+
+                    diet:
+                        profile.dietaryPreference === 'None'
+                            ? undefined
+                            : profile.dietaryPreference,
+
+                    minProtein,
+
+                    maxCalories,
+
+                    type:
+                        selectedMealType
+                            ?.toLowerCase(),
+
+                    number: 10
+
+                });
+
+
+            setGlobalRecipes(recipes);
+
 
         }
+        catch (error) {
 
 
+            // ==========================================
+            // API FALLBACK
+            // ==========================================
+            // Keep the local hand-picked workout
+            // suggestions available even if the
+            // Spoonacular request cannot complete.
+            console.warn(
+                'Spoonacular recommendations unavailable:',
+                error
+            );
 
 
-        const recipes = await fetchRecommendations({
-
-            diet: profile.dietaryPreference,
-
-            minProtein,
-
-            maxCalories,
-
-            type: selectedMealType?.toLowerCase(),
-
-            number: 10
-
-        });
+            setGlobalRecipes([]);
 
 
+        }
+        finally {
 
 
-        setGlobalRecipes(recipes);
+            setIsLoadingRecipes(false);
 
 
-
-        setIsLoadingRecipes(false);
+        }
 
 
     };
-
-
 
 
 
@@ -1024,7 +1142,7 @@ export default function NutritionScreen() {
 
 
                     <Text style={styles.subtitle}>
-                        Based on {intensity} intensity workout
+                        Based on {nutritionIntensity} intensity workout
                     </Text>
 
 
