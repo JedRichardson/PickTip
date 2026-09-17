@@ -28,6 +28,7 @@ import com.picktip.ui.viewmodel.RecipeViewModel
 import com.picktip.ui.viewmodel.ShoppingListViewModel
 import com.picktip.ui.viewmodel.ViewModelFactory
 import java.util.UUID
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -105,7 +106,7 @@ fun RecipeDetailsScreen(navController: NavController, recipeId: Int) {
                 ) {
                     InfoBox(recipe!!.readyInMinutes?.toString() ?: "--", "Mins")
                     InfoBox(servings.toString(), "Servings")
-                    InfoBox(Math.round((recipe!!.nutrition?.nutrients?.find { it.name == "Calories" }?.amount ?: 0.0) * (servings.toDouble() / (recipe!!.servings ?: 1))).toString(), "Kcal")
+                    InfoBox(((recipe!!.nutrition?.nutrients?.find { it.name == "Calories" }?.amount ?: 0.0) * (servings.toDouble() / (recipe!!.servings ?: 1))).roundToInt().toString(), "Kcal")
                 }
 
                 Spacer(Modifier.height(24.dp))
