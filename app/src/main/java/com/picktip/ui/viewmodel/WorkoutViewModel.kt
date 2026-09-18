@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.*
 
-@Suppress("unused", "CanBeParameter")
+@Suppress("unused")
 class WorkoutViewModel(
     private val workoutDao: WorkoutDao,
     private val savedWorkoutDao: SavedWorkoutDao,
@@ -84,6 +84,21 @@ class WorkoutViewModel(
         }
     }
 
+    fun toggleSaveWorkout(workout: SavedWorkout) {
+        viewModelScope.launch {
+            val exists = savedWorkouts.value.any { it.id == workout.id }
+            if (exists) {
+                savedWorkoutDao.removeWorkout(workout)
+            } else {
+                savedWorkoutDao.saveWorkout(workout)
+            }
+        }
+    }
+
+    fun isWorkoutSaved(id: String): Flow<Boolean> {
+        return savedWorkouts.map { list -> list.any { it.id == id } }
+    }
+
     private fun getFallbackExercises(muscle: String): List<Exercise> {
         val list = listOf(
             Exercise(
@@ -117,6 +132,46 @@ class WorkoutViewModel(
                 equipment = "EZ-Bar",
                 difficulty = "expert",
                 instructions = "Rest upper arms flat on preacher pad and curl heavy EZ-Bar with strict form."
+            ),
+            Exercise(
+                name = "Heavy Barbell Bench Press",
+                type = "strength",
+                muscle = "chest",
+                equipment = "Barbell",
+                difficulty = "expert",
+                instructions = "Unrack heavy barbell, lower smoothly to sternum, and press vertically to lockout."
+            ),
+            Exercise(
+                name = "Heavy Incline Dumbbell Press",
+                type = "strength",
+                muscle = "chest",
+                equipment = "Dumbbells",
+                difficulty = "expert",
+                instructions = "Set bench to 30 degrees incline. Press dumbbells vertically, squeezing upper chest."
+            ),
+            Exercise(
+                name = "Heavy Barbell Bent-Over Rows",
+                type = "strength",
+                muscle = "lats",
+                equipment = "Barbell",
+                difficulty = "expert",
+                instructions = "Hinge forward at hips with flat back and pull barbell to lower abdomen, squeezing lats."
+            ),
+            Exercise(
+                name = "Weighted Pull-Ups",
+                type = "strength",
+                muscle = "lats",
+                equipment = "Dip Belt",
+                difficulty = "expert",
+                instructions = "Attach plate to dip belt, grab pull-up bar overhead, and pull chest to bar."
+            ),
+            Exercise(
+                name = "Overhead Barbell Military Press",
+                type = "strength",
+                muscle = "traps",
+                equipment = "Barbell",
+                difficulty = "expert",
+                instructions = "Press heavy barbell vertically from clavicles to full lockout overhead."
             ),
             Exercise(
                 name = "Standing Ab Wheel Rollouts",

@@ -23,6 +23,7 @@ import androidx.navigation.NavController
 import com.airbnb.lottie.compose.*
 import com.picktip.PickTipApplication
 import com.picktip.data.models.LoggedWorkout
+import com.picktip.data.models.SavedWorkout
 import com.picktip.ui.navigation.Screen
 import com.picktip.ui.theme.PickTipDarkGreen
 import com.picktip.ui.theme.PickTipGreen
@@ -104,7 +105,33 @@ fun WorkoutSessionScreen(navController: NavController) {
                         colors = CardDefaults.cardColors(containerColor = Color.White),
                     ) {
                         Column(modifier = Modifier.padding(26.dp)) {
-                            Text(workout!!.name, fontSize = 26.sp, fontWeight = FontWeight.Black, color = PickTipDarkGreen)
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Text(workout!!.name, fontSize = 24.sp, fontWeight = FontWeight.Black, color = PickTipDarkGreen, modifier = Modifier.weight(1f))
+                                val isSavedState by viewModel.isWorkoutSaved(workout!!.name.lowercase(Locale.getDefault()).replace(" ", "-")).collectAsState(initial = false)
+                                IconButton(
+                                    onClick = {
+                                        viewModel.toggleSaveWorkout(
+                                            SavedWorkout(
+                                                id = workout!!.name.lowercase(Locale.getDefault()).replace(" ", "-"),
+                                                name = workout!!.name,
+                                                type = workout!!.type ?: "Strength",
+                                                muscle = workout!!.muscle ?: "Full Body",
+                                                equipment = workout!!.equipment ?: "Bodyweight",
+                                                difficulty = workout!!.difficulty,
+                                                instructions = workout!!.instructions,
+                                                category = "fullbody",
+                                            )
+                                        )
+                                    },
+                                    modifier = Modifier.size(42.dp).background(Color(0xFFEEF7E8), CircleShape),
+                                ) {
+                                    Text(if (isSavedState) "❤️" else "🤍", fontSize = 20.sp)
+                                }
+                            }
                             
                             Spacer(Modifier.height(16.dp))
                             

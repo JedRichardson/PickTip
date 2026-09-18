@@ -34,6 +34,8 @@ import { PickTipGradient } from '@/constants/theme';
 // ADDED: Reusable PickTip App Sounds
 // ==========================================
 import { useAppSounds } from '../hooks/useAppSounds';
+import { useWorkoutLog } from '../context/WorkoutLogContext';
+import { useSavedWorkout } from '../context/SavedWorkoutContext';
 
 
 // ==========================================
@@ -64,6 +66,9 @@ export default function WorkoutSession() {
         playTapSound,
         playCompleteSound
     } = useAppSounds();
+
+    const { logWorkout } = useWorkoutLog();
+    const { saveWorkout, removeWorkout, isSaved } = useSavedWorkout();
 
 
     // ==========================================
@@ -330,6 +335,29 @@ export default function WorkoutSession() {
 
 
 
+    const workoutId = (workoutName || 'workout').toLowerCase().replace(/\s+/g, '-');
+    const saved = isSaved(workoutId);
+
+    const toggleSaveWorkout = () => {
+        void playTapSound();
+        if (saved) {
+            removeWorkout(workoutId);
+            Alert.alert('Removed', `${workoutName || 'Workout'} removed from My Collection.`);
+        } else {
+            saveWorkout({
+                id: workoutId,
+                name: workoutName || 'Workout Session',
+                type: workoutType || 'Strength',
+                muscle: workoutMuscle || 'Full Body',
+                equipment: workoutEquipment || 'Bodyweight',
+                difficulty: workoutDifficulty || 'Intermediate',
+                instructions: workoutInstructions || 'Perform movement with proper form.',
+                category: workoutCategory || 'fullbody',
+            });
+            Alert.alert('Saved! ❤️', `${workoutName || 'Workout'} added to My Collection!`);
+        }
+    };
+
     // ==========================================
     // WORKOUT SESSION SCREEN
     // ==========================================
@@ -411,23 +439,22 @@ export default function WorkoutSession() {
 
 
                     {/* ==========================================
-                        WORKOUT TITLE
+                        WORKOUT TITLE & SAVE HEART BUTTON
                     ========================================== */}
-                    <Text style={styles.title}>
+                    <View style={styles.titleRow}>
+                        <View style={styles.titleTextGroup}>
+                            <Text style={styles.title}>
+                                {workoutName || 'Your Workout'}
+                            </Text>
+                            <Text style={styles.subtitle}>
+                                {workoutDifficulty ? `${workoutDifficulty} Difficulty` : 'Workout in Progress'}
+                            </Text>
+                        </View>
 
-                        {workoutName ||
-                            'Your Workout'}
-
-                    </Text>
-
-
-                    <Text style={styles.subtitle}>
-
-                        {workoutDifficulty
-                            ? `${workoutDifficulty} Difficulty`
-                            : 'Workout in Progress'}
-
-                    </Text>
+                        <TouchableOpacity style={styles.saveHeartButton} onPress={toggleSaveWorkout}>
+                            <Text style={styles.saveHeartIcon}>{saved ? '❤️' : '🤍'}</Text>
+                        </TouchableOpacity>
+                    </View>
 
 
 
@@ -870,9 +897,39 @@ const styles = StyleSheet.create({
     // ==========================================
     // WORKOUT TITLE
     // ==========================================
+    titleRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+
+    titleTextGroup: {
+        flex: 1,
+        marginRight: 12,
+    },
+
+    saveHeartButton: {
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        backgroundColor: '#FFFFFF',
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 8,
+        elevation: 4,
+    },
+
+    saveHeartIcon: {
+        fontSize: 22,
+    },
+
     title: {
         color: '#FFFFFF',
-        fontSize: 32,
+        fontSize: 28,
         fontWeight: '900',
         textTransform: 'capitalize',
     },
@@ -881,10 +938,9 @@ const styles = StyleSheet.create({
     subtitle: {
         color: '#FFFFFF',
         opacity: 0.85,
-        fontSize: 16,
+        fontSize: 15,
         fontWeight: '600',
-        marginTop: 6,
-        marginBottom: 20,
+        marginTop: 4,
         textTransform: 'capitalize',
     },
 
