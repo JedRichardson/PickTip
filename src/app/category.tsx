@@ -85,7 +85,12 @@ export default function CategoryScreen() {
                             style={styles.card}
 
                             onPress={() =>
-                                router.push(`/workout?category=${category.id}`)
+                                router.push({
+                                    pathname: '/workout',
+                                    params: {
+                                        category: category.id,
+                                    },
+                                })
                             }
 
                             activeOpacity={0.85}
