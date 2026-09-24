@@ -88,6 +88,7 @@ export default function WorkoutScreen() {
     // ==========================================
     const { category } = useLocalSearchParams<{
         category?: string | string[];
+        pickForMe?: string | string[];
     }>();
 
 

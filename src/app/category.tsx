@@ -25,6 +25,28 @@ import { categories } from '../data/categories';
 
 
 export default function CategoryScreen() {
+
+    // ==========================================
+    // PICK FOR ME
+    // ==========================================
+    // Randomly chooses one of the existing workout
+    // categories, then lets the normal Workout screen
+    // pick an API Ninjas exercise from that category.
+    const handlePickForMe = () => {
+        const randomCategory =
+            categories[
+                Math.floor(Math.random() * categories.length)
+            ];
+
+        router.push({
+            pathname: '/workout',
+            params: {
+                category: randomCategory.id,
+                pickForMe: 'true',
+            },
+        });
+    };
+
     return (
 
         // ==========================================
@@ -70,6 +92,21 @@ export default function CategoryScreen() {
 
 
 
+
+
+                    {/* ==========================================
+                        PICK FOR ME
+                        Randomly chooses a category and workout.
+                    ========================================== */}
+                    <TouchableOpacity
+                        style={styles.pickForMeButton}
+                        onPress={handlePickForMe}
+                        activeOpacity={0.85}
+                    >
+                        <Text style={styles.pickForMeButtonText}>
+                            Pick For Me
+                        </Text>
+                    </TouchableOpacity>
 
 
                     {categories.map(category => (
@@ -223,6 +260,29 @@ const styles = StyleSheet.create({
 
     },
 
+
+
+    pickForMeButton: {
+        backgroundColor: '#355817',
+        borderRadius: 24,
+        padding: 20,
+        marginBottom: 18,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 6,
+        },
+        shadowOpacity: 0.18,
+        shadowRadius: 10,
+        elevation: 7,
+    },
+
+    pickForMeButtonText: {
+        color: '#FFFFFF',
+        fontSize: 19,
+        fontWeight: '900',
+    },
 
 
     card: {
