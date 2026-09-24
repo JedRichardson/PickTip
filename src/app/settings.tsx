@@ -16,16 +16,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useUser } from '../context/UserContext';
 import { useMealLog } from '../context/MealLogContext';
 import { useWorkoutLog } from '../context/WorkoutLogContext';
-import { useShoppingList } from '../context/ShoppingListContext';
-
-
-
-
-
-
-
-
-
 
 // ==========================================
 // ADDED:
@@ -35,18 +25,6 @@ import { useShoppingList } from '../context/ShoppingListContext';
 // appears throughout the rest of the app.
 // ==========================================
 import { PickTipGradient } from '@/constants/theme';
-
-
-
-
-
-
-
-
-
-
-
-
 
 export default function SettingsScreen() {
 
@@ -59,8 +37,6 @@ export default function SettingsScreen() {
 
     const { loadDemoData, clearAllLogs } = useMealLog();
     const { loadDemoWorkouts, clearAllWorkouts } = useWorkoutLog();
-    const { addIngredients, clearList } = useShoppingList();
-
 
     const [
         name,
@@ -125,20 +101,21 @@ export default function SettingsScreen() {
     const handleLoadDemoData = async () => {
         await loadDemoData();
         await loadDemoWorkouts();
-        addIngredients([
-            { name: 'Organic Sweet Potatoes', original: '2 lbs Organic Sweet Potatoes', amount: 2, unit: 'lbs' },
-            { name: 'Grass-fed Whey Protein', original: '1 tub Grass-fed Whey Protein', amount: 1, unit: 'tub' },
-            { name: 'Fresh Baby Spinach', original: '1 bag Fresh Baby Spinach', amount: 1, unit: 'bag' },
-            { name: 'Hass Avocados', original: '3 count Hass Avocados', amount: 3, unit: 'count' },
-        ]);
-        Alert.alert('Showcase Mode Active 🚀', 'Pre-loaded 7 days of meals, active workouts, and shopping list items for presentation demo!');
+
+        Alert.alert(
+            'Showcase Mode Active 🚀',
+            'Pre-loaded 7 days of meals and active workouts for presentation demo!'
+        );
     };
 
     const handleClearDemoData = async () => {
         await clearAllLogs();
         await clearAllWorkouts();
-        clearList();
-        Alert.alert('Data Cleared 🗑️', 'Reset all meal logs, workout logs, and shopping list items.');
+
+        Alert.alert(
+            'Data Cleared 🗑️',
+            'Reset all meal logs and workout logs.'
+        );
     };
 
     const handleSave = async () => {

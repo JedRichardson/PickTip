@@ -11,13 +11,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Food } from '../data/nutrition';
 import { useSavedNutrition } from '../context/SavedNutritionContext';
-import { useSavedWorkout, SavedWorkout } from '../context/SavedWorkoutContext';
 import { PickTipGradient } from '@/constants/theme';
 
 export default function SavedCollectionScreen() {
-    const [activeTab, setActiveTab] = useState<'meals' | 'workouts'>('meals');
-    const { savedFoods, removeFood } = useSavedNutrition();
-    const { savedWorkouts, removeWorkout } = useSavedWorkout();
+   const { savedFoods, removeFood } = useSavedNutrition();
 
     const renderFoodItem = ({ item }: { item: Food }) => (
         <View style={styles.card}>
@@ -49,35 +46,6 @@ export default function SavedCollectionScreen() {
         </View>
     );
 
-    const renderWorkoutItem = ({ item }: { item: SavedWorkout }) => (
-        <View style={styles.card}>
-            <View style={styles.cardHeader}>
-                <Text style={styles.foodName}>{item.name}</Text>
-                <TouchableOpacity onPress={() => removeWorkout(item.id)} style={styles.removeButton}>
-                    <Text style={styles.removeButtonText}>Remove</Text>
-                </TouchableOpacity>
-            </View>
-
-            <View style={styles.workoutInfo}>
-                <View style={[styles.badge, styles.intensityBadge]}>
-                    <Text style={styles.badgeText}>{item.difficulty}</Text>
-                </View>
-                <View style={[styles.badge, styles.durationBadge]}>
-                    <Text style={styles.badgeText}>{item.muscle}</Text>
-                </View>
-            </View>
-
-            <Text style={styles.description} numberOfLines={2}>{item.instructions}</Text>
-
-            <TouchableOpacity
-                style={styles.startWorkoutBtn}
-                onPress={() => router.push(`/workoutsession?category=${item.category || 'fullbody'}`)}
-            >
-                <Text style={styles.startWorkoutBtnText}>Start Workout Session 💪</Text>
-            </TouchableOpacity>
-        </View>
-    );
-
     return (
         <LinearGradient
             colors={PickTipGradient}
@@ -91,36 +59,20 @@ export default function SavedCollectionScreen() {
                     <Text style={styles.title}>My Collection</Text>
                     <Text style={styles.subtitle}>Your favorite meals and workout sessions</Text>
                 </View>
-
-                <View style={styles.tabContainer}>
-                    <TouchableOpacity
-                        style={[styles.tab, activeTab === 'meals' && styles.activeTab]}
-                        onPress={() => setActiveTab('meals')}
-                    >
-                        <Text style={[styles.tabText, activeTab === 'meals' && styles.activeTabText]}>Meals ({savedFoods.length})</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[styles.tab, activeTab === 'workouts' && styles.activeTab]}
-                        onPress={() => setActiveTab('workouts')}
-                    >
-                        <Text style={[styles.tabText, activeTab === 'workouts' && styles.activeTabText]}>Workouts ({savedWorkouts.length})</Text>
-                    </TouchableOpacity>
-                </View>
-
                 <FlatList
-                    data={activeTab === 'meals' ? (savedFoods as any) : (savedWorkouts as any)}
-                    renderItem={activeTab === 'meals' ? (renderFoodItem as any) : (renderWorkoutItem as any)}
+                    data={savedFoods}
+                    renderItem={renderFoodItem}
                     keyExtractor={item => item.id}
                     contentContainerStyle={styles.listContent}
                     ListEmptyComponent={
                         <View style={styles.emptyContainer}>
-                            <Text style={styles.emptyText}>No saved {activeTab} yet.</Text>
+                            <Text style={styles.emptyText}>No saved meals yet.</Text>
                             <TouchableOpacity
                                 style={styles.browseButton}
-                                onPress={() => router.push(activeTab === 'meals' ? '/nutrition' : '/category')}
+                                onPress={() => router.push('/nutrition')}
                             >
                                 <Text style={styles.browseButtonText}>
-                                    {activeTab === 'meals' ? 'Explore Recipes 🥑' : 'Explore Workouts 💪'}
+                                    Explore Recipes 🥑
                                 </Text>
                             </TouchableOpacity>
                         </View>
@@ -156,9 +108,7 @@ const styles = StyleSheet.create({
         marginBottom: 18,
     },
     tab: { flex: 1, paddingVertical: 12, alignItems: 'center', borderRadius: 16 },
-    activeTab: { backgroundColor: '#FFFFFF' },
     tabText: { color: '#FFFFFF', fontWeight: '700', fontSize: 15 },
-    activeTabText: { color: '#355817' },
     listContent: { paddingHorizontal: 20, paddingBottom: 30 },
     card: {
         backgroundColor: '#FFFFFF',
