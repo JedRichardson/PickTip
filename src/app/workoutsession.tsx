@@ -35,7 +35,6 @@ import { PickTipGradient } from '@/constants/theme';
 // ==========================================
 import { useAppSounds } from '../hooks/useAppSounds';
 import { useWorkoutLog } from '../context/WorkoutLogContext';
-import { useSavedWorkout } from '../context/SavedWorkoutContext';
 
 
 // ==========================================
@@ -68,7 +67,6 @@ export default function WorkoutSession() {
     } = useAppSounds();
 
     const { logWorkout } = useWorkoutLog();
-    const { saveWorkout, removeWorkout, isSaved } = useSavedWorkout();
 
 
     // ==========================================
@@ -333,31 +331,6 @@ export default function WorkoutSession() {
 
     };
 
-
-
-    const workoutId = (workoutName || 'workout').toLowerCase().replace(/\s+/g, '-');
-    const saved = isSaved(workoutId);
-
-    const toggleSaveWorkout = () => {
-        void playTapSound();
-        if (saved) {
-            removeWorkout(workoutId);
-            Alert.alert('Removed', `${workoutName || 'Workout'} removed from My Collection.`);
-        } else {
-            saveWorkout({
-                id: workoutId,
-                name: workoutName || 'Workout Session',
-                type: workoutType || 'Strength',
-                muscle: workoutMuscle || 'Full Body',
-                equipment: workoutEquipment || 'Bodyweight',
-                difficulty: workoutDifficulty || 'Intermediate',
-                instructions: workoutInstructions || 'Perform movement with proper form.',
-                category: workoutCategory || 'fullbody',
-            });
-            Alert.alert('Saved! ❤️', `${workoutName || 'Workout'} added to My Collection!`);
-        }
-    };
-
     // ==========================================
     // WORKOUT SESSION SCREEN
     // ==========================================
@@ -450,10 +423,6 @@ export default function WorkoutSession() {
                                 {workoutDifficulty ? `${workoutDifficulty} Difficulty` : 'Workout in Progress'}
                             </Text>
                         </View>
-
-                        <TouchableOpacity style={styles.saveHeartButton} onPress={toggleSaveWorkout}>
-                            <Text style={styles.saveHeartIcon}>{saved ? '❤️' : '🤍'}</Text>
-                        </TouchableOpacity>
                     </View>
 
 
