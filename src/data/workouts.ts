@@ -124,6 +124,156 @@ export const workouts: WorkoutOption[] = [
         instructions: 'Stand tall with dumbbells at sides. Supinate wrists as you curl up toward shoulders, squeezing biceps at top.'
     },
 
+    // --- CHEST DAY ---
+    {
+        id: '18',
+        category: 'chest',
+        name: 'Heavy Barbell Bench Press',
+        duration: '30 min',
+        intensity: 'Expert',
+        calories: '360',
+        description: 'Maximum chest strength and pectoral overload',
+        muscle: 'chest',
+        equipment: 'Barbell',
+        instructions: 'Unrack heavy barbell, lower smoothly to sternum, and press vertically to lockout keeping shoulder blades retracted.'
+    },
+    {
+        id: '19',
+        category: 'chest',
+        name: 'Heavy Incline Dumbbell Press',
+        duration: '25 min',
+        intensity: 'Expert',
+        calories: '320',
+        description: 'Upper chest hypertrophy and shoulder stability',
+        muscle: 'chest',
+        equipment: 'Dumbbells',
+        instructions: 'Set bench to 30 degrees incline. Press dumbbells vertically, squeezing upper chest at peak contraction.'
+    },
+    {
+        id: '20',
+        category: 'chest',
+        name: 'Cable Chest Flyes',
+        duration: '20 min',
+        intensity: 'Intermediate',
+        calories: '220',
+        description: 'Isolated pectoral stretch and peak contraction',
+        muscle: 'chest',
+        equipment: 'Cable Machine',
+        instructions: 'Bring cable handles together in a hugging arc across chest, holding peak contraction for 1 second.'
+    },
+    {
+        id: '21',
+        category: 'chest',
+        name: 'Push-Ups & Pec Stretch',
+        duration: '15 min',
+        intensity: 'Beginner',
+        calories: '140',
+        description: 'Beginner bodyweight chest conditioning',
+        muscle: 'chest',
+        equipment: 'Bodyweight',
+        instructions: 'Controlled bodyweight push-ups maintaining rigid plank form, followed by chest stretches.'
+    },
+
+    // --- BACK & PULL ---
+    {
+        id: '22',
+        category: 'back',
+        name: 'Heavy Barbell Bent-Over Rows',
+        duration: '30 min',
+        intensity: 'Expert',
+        calories: '350',
+        description: 'Lat thickness, upper back power, and posture',
+        muscle: 'lats',
+        equipment: 'Barbell',
+        instructions: 'Hinge forward at hips with flat back. Pull barbell to lower abdomen, squeezing lat muscles forcefully at top.'
+    },
+    {
+        id: '23',
+        category: 'back',
+        name: 'Weighted Pull-Ups',
+        duration: '25 min',
+        intensity: 'Expert',
+        calories: '330',
+        description: 'Upper back width and bodyweight relative strength',
+        muscle: 'lats',
+        equipment: 'Dip Belt / Weight',
+        instructions: 'Attach plate to dip belt. Grab pull-up bar overhead with overhand grip and pull chest up to touch bar.'
+    },
+    {
+        id: '24',
+        category: 'back',
+        name: 'Lat Pulldowns & Cable Rows',
+        duration: '20 min',
+        intensity: 'Intermediate',
+        calories: '230',
+        description: 'Symmetrical lat and rhomboid activation',
+        muscle: 'lats',
+        equipment: 'Cable Machine',
+        instructions: 'Pull wide lat bar down to upper chest keeping torso tall and driving elbows down and back.'
+    },
+    {
+        id: '25',
+        category: 'back',
+        name: 'Inverted Rows & Back Extensions',
+        duration: '15 min',
+        intensity: 'Beginner',
+        calories: '150',
+        description: 'Light upper back endurance and spinal health',
+        muscle: 'lats',
+        equipment: 'Bodyweight',
+        instructions: 'Hang beneath low bar, pull chest to bar with body extended, then perform controlled hyper-extensions.'
+    },
+
+    // --- SHOULDERS ---
+    {
+        id: '26',
+        category: 'shoulders',
+        name: 'Overhead Barbell Military Press',
+        duration: '30 min',
+        intensity: 'Expert',
+        calories: '340',
+        description: 'Heavy shoulder power and overhead stability',
+        muscle: 'traps',
+        equipment: 'Barbell',
+        instructions: 'Press heavy barbell vertically from clavicles to full lockout overhead keeping core tight.'
+    },
+    {
+        id: '27',
+        category: 'shoulders',
+        name: 'Heavy Dumbbell Shoulder Press',
+        duration: '25 min',
+        intensity: 'Expert',
+        calories: '300',
+        description: 'Anterior and lateral deltoid overload',
+        muscle: 'traps',
+        equipment: 'Dumbbells',
+        instructions: 'Sit tall on bench. Press heavy dumbbells overhead from ear level, squeezing shoulders at peak.'
+    },
+    {
+        id: '28',
+        category: 'shoulders',
+        name: 'Dumbbell Lateral & Front Raises',
+        duration: '20 min',
+        intensity: 'Intermediate',
+        calories: '200',
+        description: 'Side deltoid isolation and shoulder width',
+        muscle: 'traps',
+        equipment: 'Dumbbells',
+        instructions: 'Raise dumbbells out to sides until parallel with shoulders, controlling the weight on descent.'
+    },
+    {
+        id: '29',
+        category: 'shoulders',
+        name: 'Light Shoulder Press & Arm Circles',
+        duration: '15 min',
+        intensity: 'Beginner',
+        calories: '130',
+        description: 'Shoulder joint mobility and light activation',
+        muscle: 'traps',
+        equipment: 'Bodyweight / Light Dumbbells',
+        instructions: 'Controlled light pressing overhead followed by dynamic arm circles for rotators.'
+    },
+
     // --- CORE & ABS ---
     {
         id: '10',

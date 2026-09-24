@@ -52,7 +52,7 @@ fun WorkoutSessionScreen(navController: NavController) {
 
     LaunchedEffect(timerActive) {
         while (timerActive) {
-            delay(1000L)
+            delay(1000)
             seconds++
         }
     }
@@ -70,7 +70,7 @@ fun WorkoutSessionScreen(navController: NavController) {
             .background(
                 Brush.verticalGradient(
                     colors = listOf(PickTipLightGreen, PickTipGreen, PickTipDarkGreen),
-                )
+                ),
             )
     ) {
         Scaffold(

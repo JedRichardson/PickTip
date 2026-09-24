@@ -17,7 +17,7 @@ class WorkoutViewModel(
     private val workoutDao: WorkoutDao,
     private val savedWorkoutDao: SavedWorkoutDao,
     private val workoutApi: WorkoutApiService,
-    private val apiKey: String
+    private val apiKey: String,
 ) : ViewModel() {
 
     val workoutLogs: StateFlow<List<LoggedWorkout>> = workoutDao.getAllWorkouts()
@@ -34,7 +34,7 @@ class WorkoutViewModel(
     private val _exercises = MutableStateFlow<List<Exercise>>(emptyList())
     val exercises: StateFlow<List<Exercise>> = _exercises
 
-    private val _isLoading = MutableStateFlow(false)
+    private val _isLoading = MutableStateFlow(value = false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
     private val _error = MutableStateFlow<String?>(null)
@@ -45,15 +45,17 @@ class WorkoutViewModel(
             _isLoading.value = true
             _error.value = null
             _exercises.value = emptyList()
+            val local = getFallbackExercises(muscle)
             try {
                 val result = workoutApi.getExercises(muscle, apiKey)
                 if (result.isNotEmpty()) {
-                    _exercises.value = result
+                    val combined = (local + result).distinctBy { it.name.lowercase(Locale.getDefault()) }
+                    _exercises.value = combined
                 } else {
-                    _exercises.value = getFallbackExercises(muscle)
+                    _exercises.value = local
                 }
             } catch (_: Exception) {
-                _exercises.value = getFallbackExercises(muscle)
+                _exercises.value = local
             } finally {
                 _isLoading.value = false
             }
@@ -69,15 +71,13 @@ class WorkoutViewModel(
             _isLoading.value = true
             _error.value = null
             _currentWorkout.value = null
+            val local = getFallbackExercises(muscle)
             try {
                 val exercisesList = workoutApi.getExercises(muscle, apiKey)
-                if (exercisesList.isNotEmpty()) {
-                    _currentWorkout.value = exercisesList.random()
-                } else {
-                    _currentWorkout.value = getFallbackExercises(muscle).random()
-                }
+                val combined = (local + exercisesList).distinctBy { it.name.lowercase(Locale.getDefault()) }
+                _currentWorkout.value = combined.random()
             } catch (_: Exception) {
-                _currentWorkout.value = getFallbackExercises(muscle).random()
+                _currentWorkout.value = local.random()
             } finally {
                 _isLoading.value = false
             }
@@ -101,13 +101,14 @@ class WorkoutViewModel(
 
     private fun getFallbackExercises(muscle: String): List<Exercise> {
         val list = listOf(
+            // LOWER BODY ("quadriceps")
             Exercise(
                 name = "Heavy Barbell Squats (5x5)",
                 type = "strength",
                 muscle = "quadriceps",
                 equipment = "Barbell",
                 difficulty = "expert",
-                instructions = "Perform 5 sets of 5 reps with heavy barbell weight, breaking parallel at bottom."
+                instructions = "Perform 5 sets of 5 reps with heavy barbell weight, breaking parallel at bottom.",
             ),
             Exercise(
                 name = "Single-Leg Pistol Squats",
@@ -118,9 +119,27 @@ class WorkoutViewModel(
                 instructions = "Unilateral squat on standing leg with opposite leg extended parallel to floor."
             ),
             Exercise(
+                name = "Walking Dumbbell Lunges",
+                type = "strength",
+                muscle = "quadriceps",
+                equipment = "Dumbbells",
+                difficulty = "intermediate",
+                instructions = "Step forward into a deep lunge keeping front knee over ankle."
+            ),
+            Exercise(
+                name = "Bodyweight Squats & Calf Raises",
+                type = "strength",
+                muscle = "quadriceps",
+                equipment = "Bodyweight",
+                difficulty = "beginner",
+                instructions = "Perform controlled bodyweight squats followed by rising onto toes at the top."
+            ),
+
+            // UPPER BODY / ARMS ("biceps" / "triceps")
+            Exercise(
                 name = "Weighted Parallel Bar Dips",
                 type = "strength",
-                muscle = "triceps",
+                muscle = "biceps",
                 equipment = "Dip Belt",
                 difficulty = "expert",
                 instructions = "Lower body on parallel bars with weighted belt to 90 degrees and press forcefully to lockout."
@@ -133,6 +152,24 @@ class WorkoutViewModel(
                 difficulty = "expert",
                 instructions = "Rest upper arms flat on preacher pad and curl heavy EZ-Bar with strict form."
             ),
+            Exercise(
+                name = "Diamond Push-Ups to Failure",
+                type = "strength",
+                muscle = "biceps",
+                equipment = "Bodyweight",
+                difficulty = "intermediate",
+                instructions = "Place hands together in a diamond shape under chest and press to lockout."
+            ),
+            Exercise(
+                name = "Standing Dumbbell Bicep Curls",
+                type = "strength",
+                muscle = "biceps",
+                equipment = "Dumbbells",
+                difficulty = "beginner",
+                instructions = "Stand tall with dumbbells at sides. Supinate wrists as you curl up toward shoulders."
+            ),
+
+            // CHEST DAY ("chest")
             Exercise(
                 name = "Heavy Barbell Bench Press",
                 type = "strength",
@@ -150,6 +187,24 @@ class WorkoutViewModel(
                 instructions = "Set bench to 30 degrees incline. Press dumbbells vertically, squeezing upper chest."
             ),
             Exercise(
+                name = "Cable Chest Flyes",
+                type = "strength",
+                muscle = "chest",
+                equipment = "Cable Machine",
+                difficulty = "intermediate",
+                instructions = "Bring cable handles together in a hugging arc across chest, holding peak contraction."
+            ),
+            Exercise(
+                name = "Push-Ups & Pec Stretch",
+                type = "strength",
+                muscle = "chest",
+                equipment = "Bodyweight",
+                difficulty = "beginner",
+                instructions = "Controlled bodyweight push-ups maintaining rigid plank form, followed by chest stretches."
+            ),
+
+            // BACK & PULL ("lats")
+            Exercise(
                 name = "Heavy Barbell Bent-Over Rows",
                 type = "strength",
                 muscle = "lats",
@@ -166,6 +221,24 @@ class WorkoutViewModel(
                 instructions = "Attach plate to dip belt, grab pull-up bar overhead, and pull chest to bar."
             ),
             Exercise(
+                name = "Lat Pulldowns & Cable Rows",
+                type = "strength",
+                muscle = "lats",
+                equipment = "Cable Machine",
+                difficulty = "intermediate",
+                instructions = "Pull wide bar down to upper chest keeping torso upright and engaging lats."
+            ),
+            Exercise(
+                name = "Inverted Rows & Back Extensions",
+                type = "strength",
+                muscle = "lats",
+                equipment = "Bodyweight",
+                difficulty = "beginner",
+                instructions = "Hang beneath low bar and pull chest to bar with straight body alignment."
+            ),
+
+            // SHOULDERS ("traps")
+            Exercise(
                 name = "Overhead Barbell Military Press",
                 type = "strength",
                 muscle = "traps",
@@ -174,6 +247,32 @@ class WorkoutViewModel(
                 instructions = "Press heavy barbell vertically from clavicles to full lockout overhead."
             ),
             Exercise(
+                name = "Heavy Dumbbell Shoulder Press",
+                type = "strength",
+                muscle = "traps",
+                equipment = "Dumbbells",
+                difficulty = "expert",
+                instructions = "Press heavy dumbbells overhead from ear level, squeezing shoulders at top."
+            ),
+            Exercise(
+                name = "Dumbbell Lateral & Front Raises",
+                type = "strength",
+                muscle = "traps",
+                equipment = "Dumbbells",
+                difficulty = "intermediate",
+                instructions = "Raise dumbbells out to sides until parallel with shoulders, controlling eccentric movement."
+            ),
+            Exercise(
+                name = "Light Shoulder Press & Arm Circles",
+                type = "strength",
+                muscle = "traps",
+                equipment = "Bodyweight / Light Weights",
+                difficulty = "beginner",
+                instructions = "Controlled light pressing overhead followed by warm-up arm circles for shoulder mobility."
+            ),
+
+            // CORE & ABS ("abdominals")
+            Exercise(
                 name = "Standing Ab Wheel Rollouts",
                 type = "strength",
                 muscle = "abdominals",
@@ -181,6 +280,32 @@ class WorkoutViewModel(
                 difficulty = "expert",
                 instructions = "Roll ab wheel forward from standing position until parallel with floor and retract."
             ),
+            Exercise(
+                name = "Hanging Toes-to-Bar Raises",
+                type = "strength",
+                muscle = "abdominals",
+                equipment = "Pull-Up Bar",
+                difficulty = "expert",
+                instructions = "Hang from bar. Without swinging, drive toes straight up to touch the bar, then lower."
+            ),
+            Exercise(
+                name = "Plank to Elbow Push-Ups",
+                type = "strength",
+                muscle = "abdominals",
+                equipment = "Bodyweight",
+                difficulty = "intermediate",
+                instructions = "Transition from forearm plank to high plank alternating leading hands while keeping core tight."
+            ),
+            Exercise(
+                name = "Gentle Crunches & Bicycle Kicks",
+                type = "strength",
+                muscle = "abdominals",
+                equipment = "Bodyweight",
+                difficulty = "beginner",
+                instructions = "Perform controlled crunches followed by slow bicycle kicks driving opposite elbow toward knee."
+            ),
+
+            // FULL BODY ("fullbody")
             Exercise(
                 name = "Barbell Clean & Overhead Press",
                 type = "strength",
@@ -198,20 +323,20 @@ class WorkoutViewModel(
                 instructions = "Perform burpee on dumbbells, jump up, and snatch dumbbells overhead in one continuous motion."
             ),
             Exercise(
-                name = "Walking Dumbbell Lunges",
+                name = "Kettlebell Swings & Thrusters",
                 type = "strength",
-                muscle = "quadriceps",
-                equipment = "Dumbbells",
+                muscle = "fullbody",
+                equipment = "Kettlebell",
                 difficulty = "intermediate",
-                instructions = "Step forward into a deep lunge keeping front knee over ankle."
+                instructions = "Hinge hips for explosive swings, followed by deep front squats pressing overhead."
             ),
             Exercise(
-                name = "Bodyweight Squats & Calf Raises",
+                name = "Jumping Jacks & Bodyweight Circuit",
                 type = "strength",
-                muscle = "quadriceps",
+                muscle = "fullbody",
                 equipment = "Bodyweight",
                 difficulty = "beginner",
-                instructions = "Perform controlled bodyweight squats followed by rising onto toes at the top."
+                instructions = "Alternate between jumping jacks, high knees, and light bodyweight squats."
             )
         )
         val filtered = list.filter { it.muscle.equals(muscle, ignoreCase = true) }
@@ -245,7 +370,7 @@ class WorkoutViewModel(
                     duration = "30:00",
                     calories = 300 + random.nextInt(200),
                     intensity = "High",
-                    timestamp = ts
+                    timestamp = ts,
                 )
                 workoutDao.insertWorkout(workout)
             }

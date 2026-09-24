@@ -31,7 +31,7 @@ val categories = listOf(
     Category("back", "Back & Pull", "🧗"),
     Category("shoulders", "Shoulders", "🏋️"),
     Category("core", "Core & Abs", "🧘"),
-    Category("fullbody", "Full Body", "🔥")
+    Category("fullbody", "Full Body", "🔥"),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,7 +42,7 @@ fun CategoryScreen(navController: NavController) {
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(PickTipLightGreen, PickTipGreen, PickTipDarkGreen)
+                    colors = listOf(PickTipLightGreen, PickTipGreen, PickTipDarkGreen),
                 )
             )
     ) {
@@ -57,12 +57,12 @@ fun CategoryScreen(navController: NavController) {
                             modifier = Modifier
                                 .padding(start = 12.dp)
                                 .size(40.dp)
-                                .background(Color.White, CircleShape)
+                                .background(Color.White, CircleShape),
                         ) {
                             Text("←", color = PickTipDarkGreen, fontSize = 20.sp, fontWeight = FontWeight.Black)
                         }
                     },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                 )
             }
         ) { padding ->
@@ -73,7 +73,7 @@ fun CategoryScreen(navController: NavController) {
                     .padding(padding),
                 contentPadding = PaddingValues(20.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 items(categories) { category ->
                     CategoryTile(category) {
@@ -92,12 +92,12 @@ fun CategoryTile(category: Category, onClick: () -> Unit) {
         onClick = onClick,
         modifier = Modifier.fillMaxWidth().height(160.dp),
         shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = Color.White),
     ) {
         Column(
             modifier = Modifier.fillMaxSize().padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
         ) {
             Text(category.icon, fontSize = 40.sp)
             Spacer(Modifier.height(12.dp))

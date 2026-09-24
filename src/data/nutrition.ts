@@ -24,7 +24,7 @@ export const foodItems: Food[] = [
         fat: 18,
         dietaryLabels: ['High Protein', 'Gluten-Free'],
         pairingIntensity: 'Expert',
-        pairingCategories: ['legs', 'fullbody', 'arms', 'chest'],
+        pairingCategories: ['legs', 'fullbody', 'arms', 'chest', 'back'],
         description: 'Heavy duty protein and complex carbs for intense muscle repair.',
         mealType: 'Dinner',
         servingSize: '1 bowl'
@@ -38,7 +38,7 @@ export const foodItems: Food[] = [
         fat: 16,
         dietaryLabels: ['High Protein', 'Lean Fuel'],
         pairingIntensity: 'Expert',
-        pairingCategories: ['legs', 'fullbody'],
+        pairingCategories: ['legs', 'fullbody', 'back', 'chest'],
         description: 'Lean grass-fed bison packed with iron, zinc, and muscle building protein.',
         mealType: 'Dinner',
         servingSize: '1 bowl'
@@ -52,7 +52,7 @@ export const foodItems: Food[] = [
         fat: 20,
         dietaryLabels: ['Keto-Friendly', 'Gluten-Free', 'Omega-3'],
         pairingIntensity: 'Expert',
-        pairingCategories: ['arms', 'fullbody', 'shoulders'],
+        pairingCategories: ['arms', 'fullbody', 'shoulders', 'chest'],
         description: 'Rich in anti-inflammatory omega-3 fatty acids for joint recovery.',
         mealType: 'Dinner',
         servingSize: '1 fillet + quinoa'
@@ -66,7 +66,7 @@ export const foodItems: Food[] = [
         fat: 4,
         dietaryLabels: ['High Protein', 'Quick Recovery'],
         pairingIntensity: 'Expert',
-        pairingCategories: ['arms', 'legs', 'fullbody', 'core'],
+        pairingCategories: ['arms', 'legs', 'fullbody', 'core', 'shoulders', 'back', 'chest'],
         description: 'Ultra-fast absorbing whey protein isolate for immediate post-workout synthesis.',
         mealType: 'Snack',
         servingSize: '2 scoops'
@@ -80,7 +80,7 @@ export const foodItems: Food[] = [
         fat: 12,
         dietaryLabels: ['High Protein'],
         pairingIntensity: 'High',
-        pairingCategories: ['arms', 'core', 'legs'],
+        pairingCategories: ['arms', 'core', 'legs', 'shoulders', 'chest'],
         description: 'Lean egg whites and turkey sausage wrap for clean morning fuel.',
         mealType: 'Breakfast',
         servingSize: '1 wrap'
@@ -94,7 +94,7 @@ export const foodItems: Food[] = [
         fat: 12,
         dietaryLabels: ['Gluten-Free', 'High Protein'],
         pairingIntensity: 'High',
-        pairingCategories: ['fullbody', 'arms'],
+        pairingCategories: ['fullbody', 'arms', 'back'],
         description: 'Fresh sushi-grade tuna with edamame and brown rice for clean energy.',
         mealType: 'Lunch',
         servingSize: '1 bowl'
@@ -110,7 +110,7 @@ export const foodItems: Food[] = [
         fat: 10,
         dietaryLabels: ['Gluten-Free', 'High Protein'],
         pairingIntensity: 'Intermediate',
-        pairingCategories: ['legs', 'fullbody', 'arms'],
+        pairingCategories: ['legs', 'fullbody', 'arms', 'chest', 'back'],
         description: 'Balanced lean protein with complete plant carbs for steady energy.',
         mealType: 'Lunch',
         servingSize: '1 plate'
@@ -138,7 +138,7 @@ export const foodItems: Food[] = [
         fat: 8,
         dietaryLabels: ['Gluten-Free', 'Lean Protein'],
         pairingIntensity: 'Intermediate',
-        pairingCategories: ['core', 'arms'],
+        pairingCategories: ['core', 'arms', 'back', 'chest'],
         description: 'Low-calorie high-protein shrimp served over fragrant wild rice.',
         mealType: 'Dinner',
         servingSize: '1 plate'
@@ -152,7 +152,7 @@ export const foodItems: Food[] = [
         fat: 12,
         dietaryLabels: ['High Protein'],
         pairingIntensity: 'Medium',
-        pairingCategories: ['arms', 'core'],
+        pairingCategories: ['arms', 'core', 'shoulders'],
         description: 'Sliced roast turkey breast with sharp cheddar in a whole wheat wrap.',
         mealType: 'Lunch',
         servingSize: '1 wrap'
@@ -166,7 +166,7 @@ export const foodItems: Food[] = [
         fat: 14,
         dietaryLabels: ['Vegan', 'Gluten-Free'],
         pairingIntensity: 'Medium',
-        pairingCategories: ['fullbody', 'core'],
+        pairingCategories: ['fullbody', 'core', 'back'],
         description: 'Crispy pan-fried tofu with broccoli and bell peppers in sesame sauce.',
         mealType: 'Dinner',
         servingSize: '1 bowl'
@@ -180,7 +180,7 @@ export const foodItems: Food[] = [
         fat: 6,
         dietaryLabels: ['Gluten-Free', 'Lean Fuel'],
         pairingIntensity: 'Medium',
-        pairingCategories: ['fullbody', 'legs'],
+        pairingCategories: ['fullbody', 'legs', 'chest'],
         description: 'Flaky white cod seasoned with lemon and fresh herbs.',
         mealType: 'Dinner',
         servingSize: '1 fillet'
@@ -196,7 +196,7 @@ export const foodItems: Food[] = [
         fat: 18,
         dietaryLabels: ['Vegetarian'],
         pairingIntensity: 'Beginner',
-        pairingCategories: ['core', 'legs'],
+        pairingCategories: ['core', 'legs', 'shoulders', 'back', 'chest'],
         description: 'Creamy avocado on sourdough topped with a farm-fresh poached egg.',
         mealType: 'Breakfast',
         servingSize: '2 slices'
@@ -210,7 +210,7 @@ export const foodItems: Food[] = [
         fat: 10,
         dietaryLabels: ['Vegan-Option', 'Heart Healthy'],
         pairingIntensity: 'Beginner',
-        pairingCategories: ['core', 'fullbody'],
+        pairingCategories: ['core', 'fullbody', 'chest', 'back'],
         description: 'Sustained complex carbohydrates to fuel your day gently.',
         mealType: 'Breakfast',
         servingSize: '1 bowl'
@@ -224,7 +224,7 @@ export const foodItems: Food[] = [
         fat: 9,
         dietaryLabels: ['Vegan'],
         pairingIntensity: 'Low',
-        pairingCategories: ['core', 'arms'],
+        pairingCategories: ['core', 'arms', 'shoulders'],
         description: 'Refreshing cucumber slices with garlic hummus in whole pita.',
         mealType: 'Lunch',
         servingSize: '1 pita'
@@ -238,7 +238,7 @@ export const foodItems: Food[] = [
         fat: 4,
         dietaryLabels: ['Quick Energy', 'Vegetarian'],
         pairingIntensity: 'Low',
-        pairingCategories: ['core', 'fullbody'],
+        pairingCategories: ['core', 'fullbody', 'legs', 'arms', 'chest', 'back', 'shoulders'],
         description: 'Nutrient-dense green smoothie with blueberries and banana.',
         mealType: 'Snack',
         servingSize: '1 glass'
@@ -252,7 +252,7 @@ export const foodItems: Food[] = [
         fat: 4,
         dietaryLabels: ['Vegetarian', 'High Protein'],
         pairingIntensity: 'Low',
-        pairingCategories: ['arms', 'core'],
+        pairingCategories: ['arms', 'core', 'shoulders', 'chest'],
         description: 'Slow-digesting casein protein snack with digestive pineapple enzymes.',
         mealType: 'Snack',
         servingSize: '1 cup'
@@ -266,7 +266,7 @@ export const foodItems: Food[] = [
         fat: 4,
         dietaryLabels: ['Vegan', 'Gut Healthy'],
         pairingIntensity: 'Low',
-        pairingCategories: ['core'],
+        pairingCategories: ['core', 'back'],
         description: 'Light, comforting miso broth rich in gut-friendly probiotics.',
         mealType: 'Snack',
         servingSize: '1 bowl'

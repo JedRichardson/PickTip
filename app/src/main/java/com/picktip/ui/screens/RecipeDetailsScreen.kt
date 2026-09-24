@@ -74,7 +74,7 @@ fun RecipeDetailsScreen(navController: NavController, recipeId: Int) {
                     model = recipe!!.image,
                     contentDescription = null,
                     modifier = Modifier.fillMaxWidth().height(300.dp),
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Crop,
                 )
                 IconButton(
                     onClick = { navController.popBackStack() },

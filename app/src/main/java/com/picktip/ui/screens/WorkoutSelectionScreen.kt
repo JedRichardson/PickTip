@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.picktip.PickTipApplication
+import com.picktip.data.models.Exercise
 import com.picktip.ui.navigation.Screen
 import com.picktip.ui.theme.PickTipDarkGreen
 import com.picktip.ui.theme.PickTipGreen
@@ -33,24 +34,28 @@ fun WorkoutSelectionScreen(navController: NavController, category: String) {
     val app = context.applicationContext as PickTipApplication
     val viewModel: WorkoutViewModel = viewModel(
         viewModelStoreOwner = context as ComponentActivity,
-        factory = ViewModelFactory(app)
+        factory = ViewModelFactory(app),
     )
 
     val exercises by viewModel.exercises.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
 
-    LaunchedEffect(category) {
-        val muscle = when(category) {
+    fun getCategoryMuscle(cat: String): String {
+        return when (cat) {
             "legs" -> "quadriceps"
             "arms" -> "biceps"
             "back" -> "lats"
             "chest" -> "chest"
             "shoulders" -> "traps"
             "core" -> "abdominals"
-            else -> "chest"
+            "fullbody" -> "fullbody"
+            else -> "quadriceps"
         }
-        viewModel.fetchExercises(muscle)
+    }
+
+    LaunchedEffect(category) {
+        viewModel.fetchExercises(getCategoryMuscle(category))
     }
 
     Box(
@@ -58,8 +63,8 @@ fun WorkoutSelectionScreen(navController: NavController, category: String) {
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(PickTipLightGreen, PickTipGreen, PickTipDarkGreen)
-                )
+                    colors = listOf(PickTipLightGreen, PickTipGreen, PickTipDarkGreen),
+                ),
             )
     ) {
         Scaffold(
@@ -72,7 +77,7 @@ fun WorkoutSelectionScreen(navController: NavController, category: String) {
                             Text("←", color = Color.White, fontSize = 20.sp)
                         }
                     },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                 )
             }
         ) { padding ->
@@ -84,16 +89,14 @@ fun WorkoutSelectionScreen(navController: NavController, category: String) {
                 Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text("⚠️", fontSize = 48.sp)
+                        Spacer(Modifier.height(8.dp))
                         Text(error!!, color = Color.White)
-                        Button(onClick = { 
-                             val muscle = when(category) {
-                                "legs" -> "quadriceps"
-                                "arms" -> "biceps"
-                                "core" -> "abdominals"
-                                else -> "chest"
-                            }
-                            viewModel.fetchExercises(muscle) 
-                        }) {
+                        Spacer(Modifier.height(16.dp))
+                        Button(
+                            onClick = {
+                                viewModel.fetchExercises(getCategoryMuscle(category))
+                            },
+                        ) {
                             Text("Retry")
                         }
                     }
@@ -102,7 +105,7 @@ fun WorkoutSelectionScreen(navController: NavController, category: String) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize().padding(padding),
                     contentPadding = PaddingValues(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     item {
                         Text("Pick a workout to begin", color = Color.White, fontSize = 16.sp)
@@ -122,12 +125,12 @@ fun WorkoutSelectionScreen(navController: NavController, category: String) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExerciseSelectionCard(exercise: com.picktip.data.models.Exercise, onClick: () -> Unit) {
+fun ExerciseSelectionCard(exercise: Exercise, onClick: () -> Unit) {
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = Color.White),
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {

@@ -28,7 +28,7 @@ class PickTipApplication : Application() {
         database = Room.databaseBuilder(
             this,
             AppDatabase::class.java,
-            "picktip-db"
+            "picktip-db",
         )
             .fallbackToDestructiveMigration()
             .build()

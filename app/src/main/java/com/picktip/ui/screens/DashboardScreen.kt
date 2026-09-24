@@ -51,8 +51,8 @@ fun DashboardScreen(navController: NavController) {
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(PickTipLightGreen, PickTipGreen, PickTipDarkGreen)
-                )
+                    colors = listOf(PickTipLightGreen, PickTipGreen, PickTipDarkGreen),
+                ),
             )
     ) {
         Scaffold(
@@ -113,8 +113,7 @@ fun DashboardScreen(navController: NavController) {
                 item {
                     MacroBalanceCard(
                         totals = dailyTotals,
-                        onClick = { showMacroDialog = true }
-                    )
+                    ) { showMacroDialog = true }
                 }
 
                 item {
@@ -157,8 +156,7 @@ fun DashboardScreen(navController: NavController) {
         if (showMacroDialog) {
             MacroAnalyticsDialog(
                 totals = dailyTotals,
-                onDismiss = { showMacroDialog = false }
-            )
+            ) { showMacroDialog = false }
         }
     }
 }

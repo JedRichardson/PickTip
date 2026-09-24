@@ -27,7 +27,7 @@ class RecipeViewModel(
     private val _recipeDetails = MutableStateFlow<Recipe?>(null)
     val recipeDetails: StateFlow<Recipe?> = _recipeDetails
 
-    private val _isLoading = MutableStateFlow(false)
+    private val _isLoading = MutableStateFlow(value = false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
     private val _error = MutableStateFlow<String?>(null)

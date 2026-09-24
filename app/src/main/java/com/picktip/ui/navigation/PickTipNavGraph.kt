@@ -28,7 +28,7 @@ sealed class Screen(val route: String) {
 fun PickTipNavGraph(navController: NavHostController) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Dashboard.route
+        startDestination = Screen.Dashboard.route,
     ) {
         composable(Screen.Dashboard.route) {
             DashboardScreen(navController)

@@ -51,7 +51,7 @@ fun NutritionScreen(navController: NavController, intensity: String) {
                 diet = it.dietaryPreference,
                 minProtein = if ((intensity == "expert") || (intensity == "high")) 35 else 20,
                 maxCalories = if ((intensity == "expert") || (intensity == "high")) 1200 else 700,
-                type = "main course"
+                type = "main course",
             )
         }
     }
@@ -61,8 +61,8 @@ fun NutritionScreen(navController: NavController, intensity: String) {
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(PickTipLightGreen, PickTipGreen, PickTipDarkGreen)
-                )
+                    colors = listOf(PickTipLightGreen, PickTipGreen, PickTipDarkGreen),
+                ),
             )
     ) {
         Scaffold(
@@ -88,16 +88,18 @@ fun NutritionScreen(navController: NavController, intensity: String) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text("⚠️", fontSize = 48.sp)
                         Text(error!!, color = Color.White)
-                        Button(onClick = { 
-                             userProfile?.let {
-                                viewModel.fetchSuggestions(
-                                    diet = it.dietaryPreference,
-                                    minProtein = 20,
-                                    maxCalories = 800,
-                                    type = "main course"
-                                )
-                            }
-                        }) { Text("Retry") }
+                        Button(
+                            onClick = { 
+                                userProfile?.let {
+                                    viewModel.fetchSuggestions(
+                                        diet = it.dietaryPreference,
+                                        minProtein = 20,
+                                        maxCalories = 800,
+                                        type = "main course",
+                                    )
+                                }
+                            },
+                        ) { Text("Retry") }
                     }
                 }
             } else {
@@ -107,7 +109,7 @@ fun NutritionScreen(navController: NavController, intensity: String) {
                         color = Color.White.copy(alpha = 0.9f),
                         modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
                         fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
                     )
 
                     MealSection("Post-Workout Mains", suggestedRecipes, navController, viewModel, isMain = true)
@@ -130,23 +132,23 @@ fun MealSection(title: String, recipes: List<com.picktip.data.models.Recipe>, na
                 color = Color.White,
                 fontWeight = FontWeight.Black,
                 fontSize = 20.sp,
-                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
             )
             LazyRow(
                 contentPadding = PaddingValues(horizontal = 24.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 items(recipes.size) { index ->
                     val recipe = recipes[index]
                     RecipeCard(
                         recipe = recipe,
-                        isBestChoice = isMain && index == 0,
+                        isBestChoice = (isMain && index == 0),
                         onClick = {
                             navController.navigate(Screen.RecipeDetails.createRoute(recipe.id))
                         },
                         onSaveClick = {
                             viewModel.toggleSaveRecipe(recipe)
-                        }
+                        },
                     )
                 }
             }
@@ -199,8 +201,7 @@ fun RecipeCard(
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(recipe.title, fontWeight = FontWeight.Bold, maxLines = 2, lineHeight = 20.sp, fontSize = 15.sp, color = PickTipDarkGreen)
                 Spacer(Modifier.height(8.dp))
-                val protein = recipe.nutrition?.nutrients?.find { it.name == "Protein" }
-                if (protein != null) {
+                recipe.nutrition?.nutrients?.find { it.name == "Protein" }?.let { protein ->
                     Text("${protein.amount.toInt()}g Protein", color = PickTipGreen, fontSize = 13.sp, fontWeight = FontWeight.Bold)
                 }
             }

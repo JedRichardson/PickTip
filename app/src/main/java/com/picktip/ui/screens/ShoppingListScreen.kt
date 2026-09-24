@@ -46,7 +46,7 @@ fun ShoppingListScreen(navController: NavController) {
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(PickTipLightGreen, PickTipGreen, PickTipDarkGreen)
+                    colors = listOf(PickTipLightGreen, PickTipGreen, PickTipDarkGreen),
                 )
             )
     ) {
@@ -133,7 +133,7 @@ fun ShoppingListScreen(navController: NavController) {
                             IngredientItem(
                                 ingredient = ingredient,
                                 onToggle = { viewModel.toggleIngredient(ingredient) },
-                                onDelete = { viewModel.removeIngredient(ingredient) }
+                                onDelete = { viewModel.removeIngredient(ingredient) },
                             )
                         }
                     }

@@ -23,8 +23,8 @@ class MealLogViewModel(private val mealDao: MealDao) : ViewModel() {
             set(Calendar.MILLISECOND, 0)
         }.timeInMillis
 
-        val todayLogs = logs.filter { it.timestamp >= today && !it.isPlanned }
-        val plannedLogs = logs.filter { it.timestamp >= today && it.isPlanned }
+        val todayLogs = logs.filter { (it.timestamp >= today) && (!it.isPlanned) }
+        val plannedLogs = logs.filter { (it.timestamp >= today) && (it.isPlanned) }
 
         var calories = 0.0
         var protein = 0.0
@@ -45,7 +45,7 @@ class MealLogViewModel(private val mealDao: MealDao) : ViewModel() {
             protein = protein,
             carbs = carbs,
             fat = fat,
-            projectedCalories = calories + plannedCalories
+            projectedCalories = calories + plannedCalories,
         )
     }.flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), DailyTotals())
